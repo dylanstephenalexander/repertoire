@@ -82,7 +82,8 @@ repertoire/
 │   │   │   ├── openings.py
 │   │   │   ├── feedback.py      # skill-aware explanations
 │   │   │   └── difficulty.py
-│   │   └── data/openings/       # JSON opening trees
+│   │   └── data/
+│   │       └── openings.tsv     # source of truth for opening theory (committed)
 │   └── tests/
 └── frontend/
     └── src/
@@ -100,15 +101,15 @@ repertoire/
 ## API Contract (approved)
 
 ```
-GET  /openings                        → [{ id, name, color }]
-GET  /openings/{id}/tree              → move tree (JSON)
+GET  /openings                                          → [{ id, name, color, variations: [{id, name}] }]
+GET  /openings/{opening_id}/variations/{variation_id}/tree → move tree
 
-POST /session/start                   → { opening_id, color, mode, elo?, skill_level }
+POST /session/start                   → { opening_id, variation_id, color, mode, elo?, skill_level }
                                       ← { session_id, fen, to_move }
 POST /session/{id}/move               → { uci_move }
                                       ← { result, feedback, eval_cp?, best_move?, fen }
 POST /session/{id}/opponent_move      ← { uci_move, fen }
-GET  /session/{id}/state              → { fen, score, move_history, mode }
+GET  /session/{id}/state              → { fen, score, move_history, mode, ... }
 
 POST /analysis/eval                   → { fen }
                                       ← { eval_cp, best_move, depth }
@@ -116,9 +117,13 @@ POST /analysis/eval                   → { fen }
 
 ## Data Models (approved)
 
+**Opening hierarchy**
+- `Opening { id, name, color, variations: [VariationSummary] }`
+- `VariationTree { id, opening_id, name, color, moves: dict }`
+
 **Session (in-memory)**
 ```python
-id, opening_id, color, mode, elo, skill_level,
+id, opening_id, variation_id, color, mode, elo, skill_level,
 current_fen, move_history, score, tree_cursor
 ```
 
@@ -130,10 +135,11 @@ centipawn_loss: int | None
 best_move: str | None     # UCI
 ```
 
-**Opening tree (JSON)**
-```json
-{ "id": "...", "name": "...", "color": "...", "moves": { "e2e4": { "c7c5": { ... } } } }
-```
+**Opening data**
+- Source: `backend/app/data/openings.tsv` — committed, columns: `opening_id, opening_name, opening_color, variation_id, variation_name, eco, pgn`
+- Parsed with python-chess at startup; UCI tries built in memory and `lru_cache`d
+- To refresh from upstream lichess: `python scripts/fetch_openings.py` (requires network)
+- JSON files are generated artifacts — gitignored, do not commit
 
 ## Key Design Decisions (approved)
 

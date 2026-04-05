@@ -1,3 +1,9 @@
+# Generated opening trees — source of truth is openings.tsv + fetch_openings.py
+backend/app/data/openings/*.json
+
+# Virtualenvs
+backend/.venv/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

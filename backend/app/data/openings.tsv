@@ -1,0 +1,612 @@
+opening_id	opening_name	opening_color	variation_id	variation_name	eco	pgn
+italian	Italian Game	white	giuoco_piano	Giuoco Piano	C50	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5
+italian	Italian Game	white	giuoco_piano	Giuoco Piano	C54	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. c3 Nf6 5. d4 exd4 6. cxd4 Bb4+ 7. Nc3 Nxe4 8. O-O Nxc3 9. bxc3 Bxc3 10. Ba3
+italian	Italian Game	white	giuoco_piano	Giuoco Piano	C54	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. c3 Nf6 5. d4 exd4 6. cxd4 Bb4+ 7. Nc3 Nxe4 8. O-O Nxc3 9. bxc3 Bxc3 10. Qb3 d5
+italian	Italian Game	white	giuoco_piano	Giuoco Piano	C54	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. c3 Nf6 5. d4 exd4 6. cxd4 Bb4+ 7. Kf1
+italian	Italian Game	white	giuoco_piano	Giuoco Piano	C54	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. c3 Nf6 5. d4 exd4 6. cxd4 Bb4+ 7. Nc3
+italian	Italian Game	white	giuoco_piano	Giuoco Piano	C54	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. O-O Bc5 5. d4 Bxd4 6. Nxd4 Nxd4 7. Bg5 d6 8. f4 Qe7 9. fxe5 dxe5 10. Nc3
+italian	Italian Game	white	giuoco_piano	Giuoco Piano	C54	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. c3 Nf6 5. d4 exd4 6. cxd4 Bb4+ 7. Bd2 Nxe4 8. Bxb4 Nxb4 9. Bxf7+ Kxf7 10. Qb3+ d5 11. Ne5+ Kf6 12. f3
+italian	Italian Game	white	giuoco_piano	Giuoco Piano	C54	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. O-O Bc5 5. d4 Bxd4 6. Nxd4 Nxd4 7. Bg5 h6 8. Bh4 g5 9. f4
+italian	Italian Game	white	giuoco_piano	Giuoco Piano	C54	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. c3 Nf6 5. d4 exd4 6. cxd4 Bb4+ 7. Nc3 Nxe4 8. O-O Bxc3 9. bxc3 d5 10. Ba3
+italian	Italian Game	white	giuoco_piano	Giuoco Piano	C54	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. c3 Nf6 5. d4 exd4 6. cxd4 Bb4+ 7. Nc3 Nxe4 8. O-O Bxc3 9. d5 Bf6 10. Re1 Ne7 11. Rxe4 d6 12. Bg5 Bxg5 13. Nxg5 O-O 14. Nxh7
+italian	Italian Game	white	giuoco_pianissimo	Giuoco Pianissimo	C50	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. d3
+italian	Italian Game	white	giuoco_pianissimo	Giuoco Pianissimo	C50	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. O-O Bc5 5. Nc3 d6 6. d3
+italian	Italian Game	white	giuoco_pianissimo	Giuoco Pianissimo	C50	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. d3 Nf6 5. Nc3 d6 6. Bg5
+italian	Italian Game	white	giuoco_pianissimo	Giuoco Pianissimo	C50	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. d3 f5 5. Ng5 f4
+italian	Italian Game	white	giuoco_pianissimo	Giuoco Pianissimo	C50	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. d3 Nf6 5. Nc3
+italian	Italian Game	white	giuoco_pianissimo	Giuoco Pianissimo	C50	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. d3 f5
+italian	Italian Game	white	giuoco_pianissimo	Giuoco Pianissimo	C50	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. d3 Bc5
+italian	Italian Game	white	two_knights	Two Knights Defense	C55	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6
+italian	Italian Game	white	two_knights	Two Knights Defense	C55	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. O-O Bc5 5. d4 Bxd4 6. Nxd4 Nxd4 7. Bg5 d6
+italian	Italian Game	white	two_knights	Two Knights Defense	C55	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Nc3 Nxe4 5. Nxe4 d5
+italian	Italian Game	white	two_knights	Two Knights Defense	C58	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Na5 6. Bb5+ c6 7. dxc6 bxc6 8. Be2
+italian	Italian Game	white	two_knights	Two Knights Defense	C55	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. d3
+italian	Italian Game	white	two_knights	Two Knights Defense	C55	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. d3 Be7
+italian	Italian Game	white	two_knights	Two Knights Defense	C56	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. d4 exd4 5. e5 d5 6. Bb5 Ne4 7. Nxd4 Bc5 8. Nxc6 Bxf2+ 9. Kf1 Qh4
+italian	Italian Game	white	two_knights	Two Knights Defense	C56	1. e4 e5 2. Nf3 Nc6 3. d4 exd4 4. Bc4 Nf6 5. O-O Bc5 6. e5
+italian	Italian Game	white	two_knights	Two Knights Defense	C56	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. d4 exd4 5. O-O Bc5 6. e5 d5 7. exf6 dxc4 8. Re1+ Be6 9. Ng5 Qd5 10. Nc3 Qf5 11. g4 Qg6 12. Nce4 Bb6 13. f4 O-O-O
+italian	Italian Game	white	two_knights	Two Knights Defense	C56	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. d4 exd4 5. O-O Bc5 6. e5 Ng4 7. c3
+italian	Italian Game	white	two_knights	Two Knights Defense	C56	1. e4 e5 2. Nf3 Nc6 3. d4 exd4 4. Bc4 Bc5 5. O-O Nf6 6. e5 d5 7. exf6 dxc4 8. Re1+ Be6 9. Ng5 g6
+italian	Italian Game	white	two_knights	Two Knights Defense	C56	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. d4 exd4 5. O-O Bc5 6. e5 d5 7. exf6 dxc4 8. Re1+ Be6 9. Ng5 Qd5 10. Nc3 Qf5 11. Nce4 Bf8
+italian	Italian Game	white	two_knights	Two Knights Defense	C56	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. d4
+italian	Italian Game	white	two_knights	Two Knights Defense	C56	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. d4 exd4 5. Ng5
+italian	Italian Game	white	two_knights	Two Knights Defense	C56	1. e4 e5 2. Nf3 Nc6 3. d4 exd4 4. Bc4 Nf6 5. O-O Nxe4 6. Re1 d5 7. Bxd5 Qxd5 8. Nc3 Qa5 9. Nxe4 Be6 10. Bg5 h6 11. Bh4 g5 12. Nf6+ Ke7 13. b4
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Nxd5 6. Nxf7 Kxf7 7. Qf3+ Ke6 8. Nc3 Nb4 9. Qe4 c6 10. a3 Na6 11. d4 Nc7
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Nxd5 6. Nxf7
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Nd4
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Nd4 6. c3 b5 7. Bf1 Nxd5 8. Ne4
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Nb4
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Nxd5 6. d4
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Nxd5 6. d4 Bb4+
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 Nxe4
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 Bc5
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 Bc5 5. Bxf7+
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 Bc5 5. Nxf7 Bxf2+ 6. Kxf2 Nxe4+ 7. Ke3
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 Bc5 5. Nxf7
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 Bc5 5. Bxf7+ Ke7 6. d4
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 b5
+italian	Italian Game	white	two_knights	Two Knights Defense	C57	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 b5 6. Bf1 h6 7. Nxf7
+italian	Italian Game	white	two_knights	Two Knights Defense	C58	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Na5 6. Bb5+ c6 7. dxc6 bxc6 8. Qf3 cxb5
+italian	Italian Game	white	two_knights	Two Knights Defense	C58	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Na5 6. Bb5+ c6 7. dxc6 bxc6 8. Qf3 Rb8
+italian	Italian Game	white	two_knights	Two Knights Defense	C58	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Na5 6. d3 h6 7. Nf3 e4 8. Qe2 Nxc4 9. dxc4 Be7
+italian	Italian Game	white	two_knights	Two Knights Defense	C58	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Na5 6. Bb5+ c6 7. dxc6 bxc6 8. Qf3 Qc7 9. Bd3
+italian	Italian Game	white	two_knights	Two Knights Defense	C58	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Na5
+italian	Italian Game	white	two_knights	Two Knights Defense	C58	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Na5 6. Bb5+
+italian	Italian Game	white	two_knights	Two Knights Defense	C58	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Na5 6. Bb5+ c6 7. dxc6 bxc6 8. Qf3
+italian	Italian Game	white	two_knights	Two Knights Defense	C58	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Na5 6. d3
+italian	Italian Game	white	two_knights	Two Knights Defense	C58	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Na5 6. d3 h6 7. Nf3 e4 8. Qe2 Nxc4 9. dxc4 Bc5 10. Nfd2
+italian	Italian Game	white	two_knights	Two Knights Defense	C59	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Na5 6. Bb5+ c6 7. dxc6 bxc6 8. Be2 h6 9. Nf3 e4 10. Ne5 Bd6 11. d4 Qc7 12. Bd2
+italian	Italian Game	white	two_knights	Two Knights Defense	C59	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Na5 6. Bb5+ c6 7. dxc6 bxc6 8. Be2 h6 9. Nf3 e4 10. Ne5 Qc7
+italian	Italian Game	white	two_knights	Two Knights Defense	C59	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Na5 6. Bb5+ c6 7. dxc6 bxc6 8. Be2 h6
+italian	Italian Game	white	two_knights	Two Knights Defense	C59	1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Na5 6. Bb5+ c6 7. dxc6 bxc6 8. Be2 h6 9. Nh3
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Bc5 6. d4 exd4 7. O-O d6 8. cxd4 Bb6 9. Nc3 Bg4
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. O-O d6
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bb6
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bb6 5. a4
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bb6 5. Bb2
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bb6 5. b5 Na5 6. Nxe5 Qg5 7. Qf3 Qxe5 8. Qxf7+ Kd8 9. Bb2
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bb6 5. b5 Na5 6. Nxe5 Qg5
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bb6 5. b5 Na5 6. Nxe5 Nh6
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bb6 5. b5 Na5 6. Nxe5 Nh6 7. d4 d6 8. Bxh6 dxe5 9. Bxg7 Rg8 10. Bxf7+ Kxf7 11. Bxe5 Qg5 12. Nd2
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bb6 5. a4 a6 6. Nc3
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bb6 5. b5 Na5 6. Nxe5 Qg5 7. Bxf7+ Ke7 8. Qh5
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Be7
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Be7 6. d4 Na5
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 b5
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Bc5 6. d4 exd4 7. O-O d6 8. cxd4 Bb6 9. Nc3 Bg4 10. Qa4
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Bc5 6. d4 exd4 7. O-O d6 8. cxd4 Bb6 9. Nc3 Bg4 10. Qa4 Bd7 11. Qb3 Na5 12. Bxf7+ Kf8 13. Qc2
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Bc5 6. d4 exd4 7. O-O d6 8. cxd4 Bb6 9. Nc3 Na5 10. Bg5
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Bc5 6. d4 exd4 7. cxd4 Bb4+ 8. Bd2
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 d5
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Bf8
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Bc5
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Bc5 6. d4 exd4 7. O-O d6 8. cxd4 Bb6
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 exd4 7. O-O d6 8. cxd4 Bb6 9. Nc3
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Bc5 6. d4 exd4 7. O-O d6 8. cxd4 Bb6 9. Nc3 Bg4 10. Qa4 Bd7 11. Qb3 Na5 12. Bxf7+ Kf8 13. Qc2 Kxf7
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Bc5 6. d4 exd4 7. O-O d6 8. cxd4 Bb6 9. d5 Na5 10. Bb2 Ne7
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Bc5 6. d4 exd4 7. O-O d6 8. cxd4 Bb6 9. Nc3 Na5 10. Bg5 f6 11. Be3
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Bd6
+italian	Italian Game	white	evans_gambit	Evans Gambit	C51	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Bc5 6. d4 exd4 7. O-O d6 8. cxd4 Bb6 9. d5 Na5 10. Bb2
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. O-O d6 7. d4 Bg4
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. O-O Nf6 7. d4 exd4
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 d6
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 exd4 7. O-O dxc3
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 exd4 7. O-O dxc3 8. Qb3 Qf6 9. e5 Qg6 10. Nxc3 Nge7 11. Ba3
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 exd4 7. O-O dxc3 8. Qb3 Qf6 9. e5 Qg6 10. Nxc3 Nge7 11. Rd1
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 exd4 7. O-O d3
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 exd4 7. O-O b5
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 Nf6
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. O-O d6 7. d4 Bb6
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 b5
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 d6 7. Qb3 Qd7 8. dxe5 dxe5 9. O-O Bb6 10. Ba3 Na5 11. Nxe5
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 exd4 7. O-O Nge7
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 exd4
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. O-O Nf6 7. d4 O-O 8. Nxe5
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. O-O d6 7. d4 Bd7
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. O-O
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 d6 7. Bg5
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 d6 7. Qb3
+italian	Italian Game	white	evans_gambit	Evans Gambit	C52	1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 exd4 7. O-O d6 8. Qb3
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C70	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C78	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C78	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O b5 6. Bb3 d6
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C70	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Bb4
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C70	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 b5
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C70	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Bc5
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C70	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nge7
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C70	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 g6
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C70	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 b5 5. Bb3 Bc5
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C70	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 b5 5. Bb3 Na5
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C70	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 b5 5. Bb3 Na5 6. Bxf7+
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C70	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 f5
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C70	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 f5 5. exf5
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C71	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 d6
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C71	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 d6 5. Nc3
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C71	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 d6 5. c4
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C72	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 d6 5. O-O
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C73	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 d6 5. Bxc6+ bxc6 6. d4
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C73	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 d6 5. Bxc6+ bxc6 6. d4 f6
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C74	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 d6 5. c3
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C74	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 d6 5. c3 f5 6. exf5 Bxf5 7. O-O
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C75	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 d6 5. c3 Bd7
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C75	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 d6 5. c3 Bd7 6. d4 Nge7
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C74	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 d6 5. c3 f5
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C76	1. e4 e5 2. Nf3 Nc6 3. Bb5 g6 4. c3 a6 5. Ba4 d6 6. d4 Bd7
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C77	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. d3
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C77	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. Bxc6
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C77	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. d3 d6 6. c4
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C77	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. c3
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C77	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. d4
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C77	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. Nc3
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C77	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. Qe2
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C78	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O b5 6. Bb3 Bb7
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C78	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Bc5
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C78	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O b5 6. Bb3 Be7 7. a4
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C79	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O d6
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C79	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O d6 6. Bxc6+ bxc6 7. d4 Nxe4
+ruy_lopez	Ruy López	white	morphy	Morphy Defense	C80	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Nxe4 6. Qe2
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C65	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C65	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C65	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. d3
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C65	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. d3 d6 5. Bxc6+
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C65	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. d3 d6 5. c4
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C65	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. d3 Bc5 5. Be3
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C65	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. d3 Ne7 5. Nxe5 c6
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C65	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. d3 Ne7
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C65	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Bc5
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C65	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Ng4
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C65	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. d4 exd4 5. O-O
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C66	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O d6 5. d4 Bd7 6. Nc3 Be7 7. Bg5
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C66	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O d6 5. d4 Bd7 6. Nc3 Be7 7. Bxc6
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C66	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O d6 5. d4 Bd7 6. Nc3 exd4
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C66	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O d6 5. d4 Bd7 6. Nc3 Be7
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C66	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O d6
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C66	1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 4. d4 Bd7 5. Nc3 Nf6 6. O-O Be7 7. Re1 O-O
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C67	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Nxe4 5. d4 Nd6 6. Bxc6 dxc6 7. dxe5 Nf5 8. Qxd8+ Kxd8 9. Nc3 Bd7
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C67	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Nxe4 5. d4 Be7 6. Qe2 Nd6 7. Bxc6 bxc6 8. dxe5 Nf5
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C67	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Nxe4 5. d4 Be7 6. dxe5
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C67	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Nxe4 5. d4 Be7 6. Qe2 Nd6 7. Bxc6 bxc6 8. dxe5 Nb7 9. b3
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C67	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Nxe4
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C67	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Nxe4 5. d4 Be7
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C67	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Nxe4 5. d4 Be7 6. Qe2 Nd6 7. Bxc6 bxc6 8. dxe5 Nb7 9. Nc3 O-O 10. Re1 Nc5 11. Nd4 Ne6 12. Be3 Nxd4 13. Bxd4 c5
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C67	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Nxe4 5. d4 a6
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C67	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Nxe4 5. d4 Be7 6. Qe2 d5
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C67	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Nxe4 5. d4 Be7 6. Qe2 Nd6 7. Bxc6 bxc6 8. dxe5 Nb7 9. Nd4
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C67	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Nxe4 5. d4 Be7 6. Qe2 Nd6 7. Bxc6 bxc6 8. dxe5 Nb7 9. c4
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C67	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Nxe4 5. d4 Nd6
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C67	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Nxe4 5. d4 Nd6 6. Bxc6 dxc6 7. dxe5 Nf5 8. Qxd8+ Kxd8
+ruy_lopez	Ruy López	white	berlin	Berlin Defense	C67	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Nxe4 5. d4 Nd6 6. Bxc6 dxc6 7. dxe5 Ne4
+ruy_lopez	Ruy López	white	closed	Closed	C66	1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O d6 5. d4 Nd7
+ruy_lopez	Ruy López	white	closed	Closed	C72	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 d6 5. O-O Bd7 6. c3 Nf6 7. d4 Be7 8. Nbd2 O-O 9. Re1 Be8
+ruy_lopez	Ruy López	white	closed	Closed	C84	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7
+ruy_lopez	Ruy López	white	closed	Closed	C88	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3
+ruy_lopez	Ruy López	white	closed	Closed	C88	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 O-O
+ruy_lopez	Ruy López	white	closed	Closed	C90	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O
+ruy_lopez	Ruy López	white	closed	Closed	C92	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3
+ruy_lopez	Ruy López	white	closed	Closed	C84	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. d4 exd4 7. e5 Ne4 8. c3
+ruy_lopez	Ruy López	white	closed	Closed	C84	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. d4
+ruy_lopez	Ruy López	white	closed	Closed	C84	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. d4 exd4 7. e5 Ne4 8. c3 dxc3
+ruy_lopez	Ruy López	white	closed	Closed	C84	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. d3
+ruy_lopez	Ruy López	white	closed	Closed	C84	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Nc3
+ruy_lopez	Ruy López	white	closed	Closed	C85	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Bxc6
+ruy_lopez	Ruy López	white	closed	Closed	C86	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Qe2
+ruy_lopez	Ruy López	white	closed	Closed	C86	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Qe2 b5 7. Bb3 O-O
+ruy_lopez	Ruy López	white	closed	Closed	C86	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. Qe2 Be7 6. O-O b5 7. Bb3 O-O 8. c3 d5 9. d3
+ruy_lopez	Ruy López	white	closed	Closed	C86	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Qe2 b5 7. Bb3 d6
+ruy_lopez	Ruy López	white	closed	Closed	C87	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 d6
+ruy_lopez	Ruy López	white	closed	Closed	C88	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 Na5 9. Bc2 c5 10. d4 Qc7 11. Nbd2 O-O 12. Nf1 Bg4 13. Ne3 Bxf3 14. Qxf3
+ruy_lopez	Ruy López	white	closed	Closed	C88	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 O-O 8. a4
+ruy_lopez	Ruy López	white	closed	Closed	C88	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 Na5 9. Bc2 c5 10. d4 Qc7 11. a4
+ruy_lopez	Ruy López	white	closed	Closed	C88	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 Na5 9. Bc2 c5 10. d4 Qc7 11. h3 Nc6 12. d5 Nb8 13. Nbd2 g5
+ruy_lopez	Ruy López	white	closed	Closed	C88	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. d4
+ruy_lopez	Ruy López	white	closed	Closed	C88	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 Bb7
+ruy_lopez	Ruy López	white	closed	Closed	C90	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. Bc2
+ruy_lopez	Ruy López	white	closed	Closed	C90	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 O-O 8. d3 d6 9. c3
+ruy_lopez	Ruy López	white	closed	Closed	C90	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. a3
+ruy_lopez	Ruy López	white	closed	Closed	C91	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. d4 Bg4
+ruy_lopez	Ruy López	white	closed	Closed	C91	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. d4
+ruy_lopez	Ruy López	white	closed	Closed	C91	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. d4 Bg4 10. a4
+ruy_lopez	Ruy López	white	closed	Closed	C92	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Bb7
+ruy_lopez	Ruy López	white	closed	Closed	C92	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Nd7
+ruy_lopez	Ruy López	white	closed	Closed	C92	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Be6
+ruy_lopez	Ruy López	white	closed	Closed	C92	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Bb7 10. d4 Re8 11. Nbd2 Bf8 12. a3 h6
+ruy_lopez	Ruy López	white	closed	Closed	C92	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Re8
+ruy_lopez	Ruy López	white	closed	Closed	C93	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 h6
+ruy_lopez	Ruy López	white	closed	Closed	C94	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Nb8
+ruy_lopez	Ruy López	white	closed	Closed	C95	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Nb8 10. d4 Nbd7 11. Nbd2 Bb7 12. Bc2 c5
+ruy_lopez	Ruy López	white	closed	Closed	C95	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Nb8 10. d4 Nbd7 11. Nh4
+ruy_lopez	Ruy López	white	closed	Closed	C94	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Nb8 10. d3
+ruy_lopez	Ruy López	white	closed	Closed	C95	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Nb8 10. d4
+ruy_lopez	Ruy López	white	closed	Closed	C95	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Nb8 10. d4 Nbd7
+ruy_lopez	Ruy López	white	closed	Closed	C96	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Na5 10. Bc2 c5 11. d4 Nc6
+ruy_lopez	Ruy López	white	closed	Closed	C96	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Na5 10. Bc2
+ruy_lopez	Ruy López	white	closed	Closed	C96	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Na5 10. Bc2 c5
+ruy_lopez	Ruy López	white	closed	Closed	C97	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Na5
+ruy_lopez	Ruy López	white	closed	Closed	C97	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Na5 10. Bc2 c5 11. d4 Qc7
+ruy_lopez	Ruy López	white	closed	Closed	C98	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Na5 10. Bc2 c5 11. d4 Qc7 12. Nbd2 Nc6
+ruy_lopez	Ruy López	white	closed	Closed	C98	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Na5 10. Bc2 c5 11. d4 Qc7 12. Nbd2 Nc6 13. dxc5
+ruy_lopez	Ruy López	white	closed	Closed	C96	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Na5 10. Bc2 d5
+ruy_lopez	Ruy López	white	closed	Closed	C96	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Na5 10. Bc2 c5 11. d4 Nd7
+ruy_lopez	Ruy López	white	closed	Closed	C96	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Na5 10. Bc2 c6 11. d4 Qc7
+ruy_lopez	Ruy López	white	closed	Closed	C97	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Na5 10. Bc2 c5 11. d4 Qc7 12. Nbd2 Bd7 13. Nf1 Rfe8 14. Ne3 g6
+ruy_lopez	Ruy López	white	closed	Closed	C99	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Na5 10. Bc2 c5 11. d4 Qc7 12. Nbd2 cxd4 13. cxd4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D02	1. d4 d5 2. Nf3 Bf5 3. c4 e6 4. Nc3 c6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D06	1. d4 d5 2. c4 c5 3. dxc5 d4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D06	1. d4 d5 2. c4 c5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D06	1. d4 d5 2. c4 c5 3. cxd5 Nf6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D06	1. d4 d5 2. c4 c5 3. cxd5 Nf6 4. e4 Nxe4 5. dxc5 Qa5+
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D06	1. d4 d5 2. c4 Bf5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D06	1. d4 d5 2. c4 Bf5 3. cxd5 Bxb1 4. Qa4+ c6 5. dxc6 Nxc6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D06	1. d4 d5 2. c4 Bf5 3. Nc3 e6 4. Nf3 Nc6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D06	1. d4 d5 2. c4 Bf5 3. Qb3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D06	1. d4 d5 2. c4 Bf5 3. Nc3 e6 4. Qb3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D06	1. d4 d5 2. c4 Nf6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D06	1. d4 d5 2. c4 Nf6 3. cxd5 c6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D06	1. d4 d5 2. c4 b5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D07	1. d4 d5 2. c4 Nc6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D07	1. d4 d5 2. c4 Nc6 3. Nc3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D07	1. d4 d5 2. c4 Nc6 3. Nc3 dxc4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D07	1. d4 d5 2. c4 Nc6 3. cxd5 Qxd5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D07	1. d4 d5 2. c4 Nc6 3. cxd5 Qxd5 4. e3 e5 5. Nc3 Bb4 6. Bd2 Bxc3 7. Bxc3 exd4 8. Ne2
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D07	1. d4 d5 2. c4 Nc6 3. Nc3 dxc4 4. Nf3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D07	1. d4 d5 2. c4 Nc6 3. Nf3 e5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D07	1. d4 d5 2. c4 Nc6 3. Nf3 Bg4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D07	1. d4 d5 2. c4 Nc6 3. Nf3 Bg4 4. Qa4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D07	1. d4 d5 2. c4 Nc6 3. Nc3 dxc4 4. Nf3 Nf6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D07	1. d4 d5 2. c4 Nc6 3. Nc3 e5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D08	1. d4 d5 2. c4 e5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D08	1. d4 d5 2. c4 e5 3. dxe5 d4 4. Nf3 Nc6 5. Nbd2 Qe7
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D08	1. d4 d5 2. c4 e5 3. dxe5 d4 4. Nf3 Nc6 5. Nbd2 f6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D08	1. d4 d5 2. c4 e5 3. dxe5 d4 4. Nf3 Nc6 5. Nbd2 Bg4 6. h3 Bxf3 7. Nxf3 Bb4+ 8. Bd2 Qe7
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D08	1. d4 d5 2. c4 e5 3. dxe5 d4 4. e3 Bb4+ 5. Bd2 dxe3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D08	1. d4 d5 2. c4 e5 3. dxe5 d4 4. Nf3 Nc6 5. Nbd2
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D08	1. d4 d5 2. c4 e5 3. dxe5 d4 4. Nf3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D08	1. d4 d5 2. c4 e5 3. dxe5 d4 4. e4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D08	1. d4 d5 2. c4 e5 3. dxe5 d4 4. Nf3 c5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D09	1. d4 d5 2. c4 e5 3. dxe5 d4 4. Nf3 Nc6 5. g3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D09	1. d4 d5 2. c4 e5 3. dxe5 d4 4. Nf3 Nc6 5. g3 Be6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D09	1. d4 d5 2. c4 e5 3. dxe5 d4 4. Nf3 Nc6 5. g3 Bf5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D09	1. d4 d5 2. c4 e5 3. dxe5 d4 4. Nf3 Nc6 5. g3 Bg4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D30	1. d4 d5 2. c4 e6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D52	1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. Nc3 e6 5. Bg5 Nbd7 6. e3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D53	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D53	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. Nf3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D30	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Bg5 h6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D30	1. d4 Nf6 2. Nf3 e6 3. c4 d5 4. Bg5 c6 5. Nbd2 Nbd7 6. e3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D30	1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. e3 e6 5. Nbd2 Nbd7 6. Bd3 c5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D30	1. d4 d5 2. c4 e6 3. Nf3 Nf6 4. e3 c6 5. Nbd2 g6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D30	1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. e3 e6 5. Nbd2 Ne4 6. Bd3 f5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D30	1. d4 d5 2. c4 e6 3. Nf3 c5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D30	1. d4 d5 2. c4 e6 3. Nf3 c5 4. cxd5 exd5 5. Bg5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D30	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Bg5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D30	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Bg5 Bb4+
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D31	1. d4 e6 2. c4 b6 3. Nc3 d5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D31	1. d4 d5 2. c4 e6 3. Nc3 Be7
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D31	1. d4 d5 2. c4 e6 3. Nc3 Be7 4. e4 dxe4 5. f3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D31	1. d4 d5 2. c4 e6 3. Nc3 a6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D31	1. d4 d5 2. c4 e6 3. Nc3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D31	1. d4 d5 2. c4 e6 3. Nc3 c6 4. Nf3 dxc4 5. a4 Bb4 6. e3 b5 7. Bd2 a5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D31	1. d4 d5 2. c4 e6 3. Nf3 c6 4. Nc3 dxc4 5. a4 Bb4 6. e3 b5 7. Bd2 Qb6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D31	1. d4 d5 2. c4 e6 3. Nc3 c6 4. Nf3 dxc4 5. e3 b5 6. a4 Bb4 7. Bd2 Qe7
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D32	1. d4 d5 2. c4 e6 3. Nc3 c5 4. cxd5 exd5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D34	1. d4 d5 2. c4 e6 3. Nf3 c5 4. cxd5 exd5 5. g3 Nc6 6. Bg2 Nf6 7. O-O Be7 8. Nc3 O-O 9. Bg5 Be6 10. Rc1 b6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D35	1. d4 Nf6 2. c4 e6 3. Nc3 d5 4. cxd5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D35	1. d4 Nf6 2. c4 e6 3. Nc3 d5 4. cxd5 exd5 5. Bg5 Be7 6. e3 h6 7. Bh4 Bg4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D35	1. d4 Nf6 2. c4 e6 3. Nc3 d5 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 Nbd7 8. Qc2 Re8 9. Nge2 Nf8 10. O-O-O
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D35	1. d4 Nf6 2. c4 e6 3. Nc3 d5 4. cxd5 exd5 5. Bg5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D35	1. d4 Nf6 2. c4 e6 3. Nc3 d5 4. cxd5 exd5 5. Bg5 c6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D35	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Nbd7 5. cxd5 exd5 6. Bf4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D35	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bf4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D37	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bf4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D37	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bf4 O-O 6. e3 c5 7. dxc5 Bxc5 8. Qc2 Nc6 9. Rd1 Qa5 10. a3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D37	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bf4 O-O 6. e3 c5 7. dxc5 Bxc5 8. Qc2 Nc6 9. a3 Qa5 10. O-O-O
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D35	1. d4 d5 2. c4 e6 3. Nc3 Nf6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D36	1. d4 Nf6 2. c4 e6 3. Nc3 d5 4. cxd5 exd5 5. Bg5 c6 6. Qc2
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D36	1. d4 Nf6 2. c4 e6 3. Nc3 d5 4. cxd5 exd5 5. Bg5 c6 6. Qc2 Be7 7. e3 Nbd7 8. Bd3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D36	1. d4 Nf6 2. c4 e6 3. Nc3 d5 4. cxd5 exd5 5. Bg5 c6 6. Qc2 Be7 7. e3 O-O 8. Bd3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D36	1. d4 Nf6 2. c4 e6 3. Nc3 d5 4. cxd5 exd5 5. Bg5 c6 6. Qc2 Be7 7. e3 O-O 8. Bd3 h6 9. Bh4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D37	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Nbd7
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D37	1. d4 d5 2. c4 e6 3. Nc3 Be7 4. Nf3 Nf6 5. Bf4 O-O 6. e3 b6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D37	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bf4 O-O 6. e3 c5 7. dxc5 Bxc5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D37	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Nf3 Be7 5. Bf4 O-O 6. e3 c6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D37	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bf4 O-O 6. e3 Nbd7
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D37	1. d4 Nf6 2. c4 e6 3. Nc3 d5 4. Nf3 Be7 5. Bf4 O-O 6. e3 Nbd7 7. c5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D37	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Nbd7 5. Bg5 h6 6. Bh4 dxc4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D37	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 O-O 6. Qc2
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D37	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D37	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 dxc4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D37	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 dxc4 5. e3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D38	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Bb4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D38	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Bb4 5. Qa4+
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D38	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Bb4 5. Bg5 Nbd7 6. e3 c5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D39	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Bb4 5. Bg5 dxc4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D40	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 c5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D41	1. c4 c5 2. Nf3 Nf6 3. Nc3 Nc6 4. g3 d5 5. d4 e6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D41	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 c5 5. cxd5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D40	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Nf3 c5 5. e3 Nc6 6. Bd3 Bd6 7. O-O O-O 8. Qe2 Qe7 9. dxc5 Bxc5 10. e4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D40	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Nf3 c5 5. Bg5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D41	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 c5 5. cxd5 Nxd5 6. e3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D40	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Nf3 c5 5. e3 Nc6 6. Bd3 Bd6 7. O-O O-O
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D41	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 c5 5. cxd5 cxd4 6. Qxd4 exd5 7. e4 dxe4 8. Qxd8+
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D41	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 c5 5. cxd5 Nxd5 6. e4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D41	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 c5 5. cxd5 Nxd5 6. e4 Nxc3 7. bxc3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D41	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Nf3 c5 5. cxd5 Nxd5 6. e4 Nxc3 7. bxc3 cxd4 8. cxd4 Bb4+ 9. Bd2 Bxd2+ 10. Qxd2 O-O 11. Bb5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D41	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 Nxd5 5. e4 Nxc3 6. bxc3 c5 7. Nf3 cxd4 8. cxd4 Bb4+ 9. Bd2 Qa5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D42	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 c5 5. cxd5 Nxd5 6. e3 Nc6 7. Bd3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D50	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 c5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D50	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D50	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 c5 5. cxd5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D50	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 c5 5. cxd5 Qb6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D50	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 c5 5. Nf3 cxd4 6. Qxd4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D50	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 c5 5. Nf3 cxd4 6. Nxd4 e5 7. Ndb5 a6 8. Qa4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D51	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Nbd7 5. Nf3 c6 6. e4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D51	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Nbd7 5. e3 c6 6. a3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D51	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Nbd7 5. e3 Bb4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D51	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Nbd7
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D51	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Nbd7 5. e3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D51	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Nbd7 5. e3 c6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D51	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Nbd7 5. Nf3 c6 6. Rc1 Qa5 7. Bd2
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D52	1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. Nc3 e6 5. Bg5 Nbd7 6. e3 Qa5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D52	1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. Nc3 e6 5. Bg5 Nbd7 6. e3 Qa5 7. cxd5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D52	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Nbd7 5. e3 c6 6. Nf3 Qa5 7. Nd2 Bb4 8. Qc2 O-O 9. Bh4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D52	1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. Nc3 e6 5. Bg5 Nbd7 6. e3 Qa5 7. Nd2 Bb4 8. Qc2
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D52	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Nbd7 5. e3 c6 6. Nf3 Qa5 7. Bxf6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D52	1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. Nc3 e6 5. Bg5 Nbd7 6. e3 Qa5 7. Nd2 dxc4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D52	1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. Nc3 e6 5. Bg5 Nbd7 6. e3 Qa5 7. cxd5 Nxd5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D53	1. d4 Nf6 2. c4 e6 3. Nc3 d5 4. Bg5 Be7 5. e3 Ne4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D56	1. d4 d5 2. c4 e6 3. Nc3 Be7 4. Nf3 Nf6 5. Bg5 h6 6. Bh4 O-O 7. e3 Ne4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D53	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. Bxf6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D53	1. d4 d5 2. c4 e6 3. Nc3 Be7 4. Nf3 Nf6 5. Bg5 h6 6. Bh4 O-O 7. Rc1 dxc4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D54	1. d4 Nf6 2. c4 e6 3. Nc3 d5 4. Bg5 Be7 5. e3 O-O 6. Rc1
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D55	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 O-O 6. e3 h6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D55	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 O-O 6. e3 h6 7. Bxf6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D55	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 h6 6. Bxf6 Bxf6 7. e3 O-O 8. Rc1 c6 9. Bd3 Nd7 10. O-O dxc4 11. Bxc4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D55	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 O-O 6. e3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D55	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 h6 6. Bh4 O-O 7. e3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D55	1. d4 Nf6 2. c4 e6 3. Nf3 b6 4. Nc3 d5 5. cxd5 exd5 6. Bg5 Be7 7. e3 O-O 8. Bd3 Bb7 9. Ne5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D56	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 h6 7. Bh4 Ne4 8. Bxe7 Qxe7 9. Qc2 Nf6 10. Bd3 dxc4 11. Bxc4 c5 12. O-O Nc6 13. Rfd1 Bd7
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D56	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 h6 6. Bh4 O-O 7. e3 Ne4 8. Bxe7 Qxe7 9. Qc2
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D57	1. d4 Nf6 2. c4 e6 3. Nc3 d5 4. Bg5 Be7 5. e3 h6 6. Bh4 O-O 7. Nf3 Ne4 8. Bxe7 Qxe7 9. cxd5 Nxc3 10. bxc3 exd5 11. Qb3 Qd6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D57	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 h6 7. Bh4 Ne4 8. Bxe7 Qxe7 9. cxd5 Nxc3 10. bxc3 exd5 11. Qb3 Rd8 12. c4 Be6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D57	1. d4 d5 2. c4 e6 3. Nc3 Be7 4. Nf3 Nf6 5. Bg5 h6 6. Bh4 O-O 7. e3 Ne4 8. Bxe7 Qxe7 9. cxd5 Nxc3 10. bxc3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D58	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 h6 6. Bh4 O-O 7. e3 b6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D59	1. d4 d5 2. c4 e6 3. Nc3 Be7 4. Nf3 Nf6 5. Bg5 h6 6. Bh4 O-O 7. e3 b6 8. cxd5 Nxd5 9. Bxe7 Qxe7 10. Nxd5 exd5 11. Rc1 Be6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D58	1. d4 d5 2. c4 e6 3. Nc3 Be7 4. Nf3 Nf6 5. Bg5 h6 6. Bh4 O-O 7. e3 b6 8. cxd5 exd5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D59	1. d4 d5 2. c4 e6 3. Nc3 Be7 4. Nf3 Nf6 5. Bg5 h6 6. Bh4 O-O 7. e3 b6 8. cxd5 Nxd5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D60	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D60	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Bd3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D60	1. d4 d5 2. Nf3 Nf6 3. c4 e6 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Qb3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D61	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Qc2
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D62	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Qc2 c5 8. cxd5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D63	1. Nf3 d5 2. d4 Nf6 3. c4 e6 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Rc1 b6 8. cxd5 exd5 9. Bb5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D63	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Rc1 a6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D63	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Rc1
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D63	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Rc1 c6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D67	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 Nbd7 7. Rc1 c6 8. Bd3 dxc4 9. Bxc4 Nd5 10. Bxe7 Qxe7 11. O-O
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D63	1. d4 Nf6 2. c4 e6 3. Nc3 d5 4. Bg5 Be7 5. e3 O-O 6. Nf3 Nbd7 7. Rc1 b6 8. cxd5 exd5 9. Bd3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D63	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Rc1 a6 8. cxd5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D64	1. d4 Nf6 2. c4 e6 3. Nc3 d5 4. Nf3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Rc1 c6 8. a3 a6 9. Qc2
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D64	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Rc1 c6 8. Qc2
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D64	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Rc1 c6 8. Qc2 a6
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D64	1. Nf3 d5 2. d4 Nf6 3. c4 e6 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Rc1 c6 8. Qc2 Ne4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D65	1. d4 d5 2. Nf3 Nf6 3. c4 e6 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Rc1 c6 8. Qc2 a6 9. cxd5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D66	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 Nbd7 7. Rc1 c6 8. Bd3
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D67	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 Nbd7 7. Rc1 c6 8. Bd3 dxc4 9. Bxc4 Nd5 10. Bxe7 Qxe7
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D66	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 c6 5. Nf3 Be7 6. e3 Nbd7 7. Rc1 O-O 8. Bd3 dxc4 9. Bxc4 b5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D67	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 Nbd7 7. Rc1 c6 8. Bd3 dxc4 9. Bxc4 Nd5 10. Bxe7 Qxe7 11. Ne4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D67	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 Nbd7 7. Rc1 c6 8. Bd3 dxc4 9. Bxc4 Nd5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D67	1. d4 d5 2. Nf3 Nf6 3. c4 e6 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Rc1 c6 8. Bd3 dxc4 9. Bxc4 Nd5 10. h4
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D68	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 Nbd7 7. Rc1 c6 8. Bd3 dxc4 9. Bxc4 Nd5 10. Bxe7 Qxe7 11. O-O Nxc3 12. Rxc3 e5
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D68	1. d4 d5 2. c4 e6 3. Nf3 Nf6 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Rc1 c6 8. Bd3 dxc4 9. Bxc4 Nd5 10. Bxe7 Qxe7 11. O-O Nxc3 12. Rxc3 e5 13. Qb1
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D68	1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. Nc3 Be7 5. Bg5 O-O 6. e3 Nbd7 7. Rc1 c6 8. Bd3 dxc4 9. Bxc4 Nd5 10. Bxe7 Qxe7 11. O-O Nxc3 12. Rxc3 e5 13. Qc2
+queens_gambit	Queen's Gambit	white	declined	Queen's Gambit Declined	D69	1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 Nbd7 7. Rc1 c6 8. Bd3 dxc4 9. Bxc4 Nd5 10. Bxe7 Qxe7 11. O-O Nxc3 12. Rxc3 e5 13. dxe5 Nxe5 14. Nxe5 Qxe5
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D23	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D24	1. d4 d5 2. c4 e6 3. Nf3 Nf6 4. Nc3 dxc4 5. e4
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4 3. Qa4+
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4 3. e4 Nf6
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4 3. e4 b5
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4 3. e4 e5
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4 3. e4 e5 4. Bxc4
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4 3. e4 Nc6
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4 3. e4 c5
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4 3. e4 c5 4. d5 b5
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4 3. e4 c5 4. d5 Nf6 5. Nc3 b5
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4 3. e3
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4 3. e3 e5 4. Bxc4 exd4 5. Qb3 Qe7 6. a3
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4 3. e3 e5 4. Bxc4 exd4 5. Qb3 Qe7 6. Nf3
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4 3. e3 e5 4. Bxc4 exd4 5. Qb3 Qe7 6. Kf1
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4 3. e3 e5 4. Bxc4 exd4 5. Qb3 Qe7 6. Nd2
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4 3. e4
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D20	1. d4 d5 2. c4 dxc4 3. e4 f5
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D21	1. d4 d5 2. c4 dxc4 3. Nf3 a6 4. e4
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D21	1. d4 d5 2. c4 dxc4 3. Nf3 Nd7
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D21	1. d4 d5 2. c4 dxc4 3. Nf3 c5
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D21	1. d4 d5 2. c4 dxc4 3. Nf3
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D25	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D21	1. d4 d5 2. c4 dxc4 3. Nf3 e6
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D21	1. d4 d5 2. c4 dxc4 3. Nf3 b5
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D22	1. d4 d5 2. c4 dxc4 3. Nf3 a6
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D22	1. d4 d5 2. c4 dxc4 3. Nf3 a6 4. e3 Bg4 5. Bxc4 e6 6. d5
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D22	1. d4 d5 2. c4 dxc4 3. Nf3 a6 4. e3 b5
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D23	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. Qa4+
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D24	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. Nc3 a6 5. e4
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D24	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. Nc3 c5 5. d5 e6 6. e4 exd5 7. e5
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D24	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. Nc3
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D25	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 Bg4
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D25	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 g6
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D25	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 Be6
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D26	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 e6 5. Bxc4 c5
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D26	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 e6 5. Bxc4 c5 6. O-O
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D26	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 e6 5. Bxc4 c5 6. O-O Nc6
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D26	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 e6 5. Bxc4 c5 6. O-O cxd4
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D26	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 e6 5. Bxc4 c5 6. Qe2 a6 7. dxc5 Bxc5 8. O-O Nc6 9. e4 b5 10. e5
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D26	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 e6
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D27	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 e6 5. Bxc4 c5 6. O-O a6
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D27	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 e6 5. Bxc4 c5 6. O-O a6 7. a4
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D27	1. d4 d5 2. c4 dxc4 3. e3 Nf6 4. Bxc4 e6 5. Nf3 c5 6. O-O a6 7. e4
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D27	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 e6 5. Bxc4 c5 6. O-O a6 7. dxc5 Bxc5
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D28	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 e6 5. Bxc4 c5 6. O-O a6 7. Qe2
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D28	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 e6 5. Bxc4 c5 6. O-O a6 7. Qe2 b5
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D28	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 e6 5. Bxc4 c5 6. O-O a6 7. Qe2 b5 8. Bb3 Nc6 9. Rd1 c4 10. Bc2 Nb4 11. Nc3 Nxc2 12. Qxc2 Bb7 13. d5 Qc7
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D29	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 e6 5. Bxc4 c5 6. O-O a6 7. Qe2 b5 8. Bb3 Bb7
+queens_gambit	Queen's Gambit	white	accepted	Queen's Gambit Accepted	D29	1. d4 d5 2. c4 dxc4 3. Nf3 Nf6 4. e3 e6 5. Bxc4 c5 6. O-O a6 7. Qe2 b5 8. Bb3 Bb7 9. Rd1 Nbd7 10. Nc3 Bd6
+queens_gambit	Queen's Gambit	white	semi_slav	Semi-Slav Defense	D31	1. d4 d5 2. c4 e6 3. Nc3 c6 4. Nf3 dxc4 5. a4 Bb4 6. e3 b5 7. Bd2 a5
+queens_gambit	Queen's Gambit	white	semi_slav	Semi-Slav Defense	D31	1. d4 d5 2. c4 e6 3. Nf3 c6 4. Nc3 dxc4 5. a4 Bb4 6. e3 b5 7. Bd2 Qb6
+queens_gambit	Queen's Gambit	white	semi_slav	Semi-Slav Defense	D31	1. d4 d5 2. c4 e6 3. Nc3 c6 4. Nf3 dxc4 5. e3 b5 6. a4 Bb4 7. Bd2 Qe7
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B84	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Be2 e6 7. O-O Nbd7
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B90	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B94	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bg5
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B95	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bg5 e6
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B96	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bg5 e6 7. f4
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B98	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bg5 e6 7. f4 Be7
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B90	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. h3
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B90	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. g4
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B90	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Be3
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B90	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Be3 Ng4
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B90	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Rg1
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B90	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bc4
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B91	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. g3
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B92	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Be2
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B92	1. e4 c5 2. Nf3 Nf6 3. Nc3 d6 4. d4 cxd4 5. Nxd4 a6 6. Be2 e5 7. Nb3 Be6 8. Be3
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B92	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Be2 e5 7. Nb3 Be7 8. O-O Be6
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B92	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Be2 e5 7. Nb3 Be7 8. O-O O-O
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B93	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. f4
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B94	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bg5 Nbd7 7. Bc4 Qa5 8. Qd2 e6 9. O-O-O b5 10. Bb3 Bb7 11. Rhe1 Nc5 12. e5
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B96	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bg5 e6 7. f4 Nc6
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B96	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bg5 e6 7. f4 b5
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B96	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bg5 e6 7. f4 b5 8. e5 dxe5 9. fxe5 Qc7 10. Qe2
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B97	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bg5 e6 7. f4 Qb6 8. Qd2 Qxb2 9. Rb1 Qa3
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B97	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bg5 e6 7. f4 Qb6
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B98	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bg5 e6 7. f4 Be7 8. Qf3 h6 9. Bh4 Qc7
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B98	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bg5 e6 7. f4 Be7 8. Qf3 h6 9. Bh4 g5
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B98	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bg5 e6 7. f4 Be7 8. Qf3 Qc7
+sicilian	Sicilian Defense	black	najdorf	Najdorf Variation	B99	1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bg5 e6 7. f4 Be7 8. Qf3 Qc7 9. O-O-O Nbd7
+french	French Defense	black	winawer	Winawer Variation	C15	1. e4 e6 2. d4 d5 3. Nc3 Bb4
+french	French Defense	black	winawer	Winawer Variation	C15	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. Ne2 dxe4 5. a3 Bxc3+
+french	French Defense	black	winawer	Winawer Variation	C15	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. Ne2 dxe4 5. a3 Be7 6. Nxe4 Nf6 7. N2g3 O-O 8. Be2 Nc6
+french	French Defense	black	winawer	Winawer Variation	C15	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. Ne2 dxe4 5. a3 Bxc3+ 6. Nxc3 Nc6
+french	French Defense	black	winawer	Winawer Variation	C15	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. Ne2
+french	French Defense	black	winawer	Winawer Variation	C15	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. exd5
+french	French Defense	black	winawer	Winawer Variation	C15	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. exd5 exd5 5. Bd3 Ne7 6. Qh5
+french	French Defense	black	winawer	Winawer Variation	C15	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. Bd2
+french	French Defense	black	winawer	Winawer Variation	C15	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. Bd2 dxe4 5. Qg4 Qxd4
+french	French Defense	black	winawer	Winawer Variation	C15	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. Bd2 dxe4 5. Qg4 Nf6 6. Qxg7 Rg8 7. Qh6
+french	French Defense	black	winawer	Winawer Variation	C15	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. Bd2 Ne7 5. Nb1
+french	French Defense	black	winawer	Winawer Variation	C15	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. Bd3 c5 5. exd5 Qxd5 6. Bd2
+french	French Defense	black	winawer	Winawer Variation	C15	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. a3 Bxc3+ 5. bxc3 dxe4 6. f3
+french	French Defense	black	winawer	Winawer Variation	C16	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5
+french	French Defense	black	winawer	Winawer Variation	C17	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5
+french	French Defense	black	winawer	Winawer Variation	C17	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3
+french	French Defense	black	winawer	Winawer Variation	C17	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 cxd4 6. axb4 dxc3 7. Nf3
+french	French Defense	black	winawer	Winawer Variation	C18	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3
+french	French Defense	black	winawer	Winawer Variation	C18	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7
+french	French Defense	black	winawer	Winawer Variation	C16	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 Qd7
+french	French Defense	black	winawer	Winawer Variation	C17	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. Qg4
+french	French Defense	black	winawer	Winawer Variation	C17	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. Bd2
+french	French Defense	black	winawer	Winawer Variation	C17	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. Bd2 Ne7 6. f4
+french	French Defense	black	winawer	Winawer Variation	C17	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 cxd4 6. axb4 dxc3
+french	French Defense	black	winawer	Winawer Variation	C17	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Ba5
+french	French Defense	black	winawer	Winawer Variation	C17	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Ba5 6. b4 cxd4
+french	French Defense	black	winawer	Winawer Variation	C18	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Bd3
+french	French Defense	black	winawer	Winawer Variation	C18	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Bd3 Qc7
+french	French Defense	black	winawer	Winawer Variation	C18	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. h4
+french	French Defense	black	winawer	Winawer Variation	C18	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. h4 Qc7
+french	French Defense	black	winawer	Winawer Variation	C18	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Qc7
+french	French Defense	black	winawer	Winawer Variation	C18	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Qg4 Kf8
+french	French Defense	black	winawer	Winawer Variation	C18	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Qg4 Qc7
+french	French Defense	black	winawer	Winawer Variation	C18	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Qg4 cxd4 8. Qxg7
+french	French Defense	black	winawer	Winawer Variation	C18	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Qg4 cxd4 8. Qxg7 Rg8 9. Qxh7 Nbc6
+french	French Defense	black	winawer	Winawer Variation	C18	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Qg4 Qc7 8. Bd3
+french	French Defense	black	winawer	Winawer Variation	C18	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Qg4 Qc7 8. Qxg7 Rg8 9. Qxh7 cxd4 10. Ne2
+french	French Defense	black	winawer	Winawer Variation	C18	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Qg4 Qc7 8. Qxg7 Rg8 9. Qxh7 cxd4 10. Kd1
+french	French Defense	black	winawer	Winawer Variation	C18	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Qa5
+french	French Defense	black	winawer	Winawer Variation	C18	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Qg4 O-O
+french	French Defense	black	winawer	Winawer Variation	C19	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 Ne7 5. a3 Bxc3+ 6. bxc3 c5 7. a4
+french	French Defense	black	winawer	Winawer Variation	C19	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 Ne7 5. a3 Bxc3+ 6. bxc3 c5 7. a4 Qc7
+french	French Defense	black	winawer	Winawer Variation	C19	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. a4 Nbc6 8. Nf3
+french	French Defense	black	winawer	Winawer Variation	C19	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. a4 Nbc6 8. Nf3 Qa5 9. Qd2
+french	French Defense	black	winawer	Winawer Variation	C19	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. a4 Nbc6 8. Nf3 Qa5 9. Qd2 Bd7
+french	French Defense	black	winawer	Winawer Variation	C19	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. a4 Nbc6 8. Nf3 Qa5 9. Bd2
+french	French Defense	black	winawer	Winawer Variation	C19	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. a4 Nbc6 8. Nf3 Qa5 9. Bd2 Bd7
+french	French Defense	black	winawer	Winawer Variation	C19	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. a4 Nbc6 8. Nf3 Qa5 9. Bd2 c4
+french	French Defense	black	winawer	Winawer Variation	C19	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Nf3
+french	French Defense	black	winawer	Winawer Variation	C19	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Nc6 7. Nf3 Nge7
+french	French Defense	black	winawer	Winawer Variation	C19	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Nf3 Qc7
+french	French Defense	black	winawer	Winawer Variation	C19	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Nf3 Qc7 8. h4
+french	French Defense	black	winawer	Winawer Variation	C19	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Bd3 Nbc6 8. Nf3
+french	French Defense	black	winawer	Winawer Variation	C19	1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Nc6 7. Nf3 Qa5 8. Bd2 Nge7
+french	French Defense	black	classical	Classical Variation	C11	1. e4 e6 2. d4 d5 3. Nc3 Nf6
+french	French Defense	black	classical	Classical Variation	C11	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5
+french	French Defense	black	classical	Classical Variation	C13	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 dxe4 5. Nxe4 Be7
+french	French Defense	black	classical	Classical Variation	C14	1. e4 e6 2. d4 d5 3. Nc3 a6 4. Nf3 Nf6 5. e5 Nfd7 6. Bg5
+french	French Defense	black	classical	Classical Variation	C14	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 Be7 5. e5 Nfd7 6. Bxe7 Qxe7
+french	French Defense	black	classical	Classical Variation	C11	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 dxe4
+french	French Defense	black	classical	Classical Variation	C11	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 dxe4 5. Nxe4 Be7 6. Bxf6 Bxf6 7. Nf3 O-O
+french	French Defense	black	classical	Classical Variation	C11	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 dxe4 5. Nxe4 Be7 6. Bxf6 gxf6
+french	French Defense	black	classical	Classical Variation	C11	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. exd5
+french	French Defense	black	classical	Classical Variation	C11	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. e5 Nfd7 5. Nce2
+french	French Defense	black	classical	Classical Variation	C11	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. e5
+french	French Defense	black	classical	Classical Variation	C14	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 Be7 5. e5 Nfd7 6. Bxe7 Qxe7 7. f4
+french	French Defense	black	classical	Classical Variation	C11	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bd3
+french	French Defense	black	classical	Classical Variation	C13	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 Be7 5. e5 Ng8 6. Be3 b6
+french	French Defense	black	classical	Classical Variation	C13	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 Be7
+french	French Defense	black	classical	Classical Variation	C13	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 Be7 5. Bxf6
+french	French Defense	black	classical	Classical Variation	C13	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 Be7 5. Bxf6 Bxf6 6. e5 Be7 7. Qg4
+french	French Defense	black	classical	Classical Variation	C13	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 Be7 5. e5 Ne4
+french	French Defense	black	classical	Classical Variation	C13	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 Be7 5. e5 Ng8
+french	French Defense	black	classical	Classical Variation	C14	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 Be7 5. e5 Nfd7 6. Bxe7 Qxe7 7. Nb5
+french	French Defense	black	classical	Classical Variation	C14	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 Be7 5. e5 Nfd7 6. Bxe7 Qxe7 7. Qg4
+french	French Defense	black	classical	Classical Variation	C14	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 Be7 5. e5 Nfd7 6. Bxe7 Qxe7 7. Qd2
+french	French Defense	black	classical	Classical Variation	C14	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 Be7 5. e5 Nfd7 6. Bxe7 Qxe7 7. f4 O-O 8. Nf3 c5 9. Qd2 Nc6 10. O-O-O c4
+french	French Defense	black	classical	Classical Variation	C14	1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 Be7 5. e5 Nfd7 6. Bxe7 Qxe7 7. Bd3
+french	French Defense	black	tarrasch	Tarrasch Variation	C03	1. e4 e6 2. d4 d5 3. Nd2
+french	French Defense	black	tarrasch	Tarrasch Variation	C03	1. e4 e6 2. d4 d5 3. Nd2 Nc6
+french	French Defense	black	tarrasch	Tarrasch Variation	C03	1. e4 e6 2. d4 d5 3. Nd2 Nc6 4. c3 dxe4 5. Nxe4 e5
+french	French Defense	black	tarrasch	Tarrasch Variation	C03	1. e4 e6 2. d4 d5 3. Nd2 f5
+french	French Defense	black	tarrasch	Tarrasch Variation	C03	1. e4 e6 2. d4 d5 3. Nd2 a6
+french	French Defense	black	tarrasch	Tarrasch Variation	C03	1. e4 e6 2. d4 d5 3. Nd2 Be7
+french	French Defense	black	tarrasch	Tarrasch Variation	C04	1. e4 e6 2. d4 d5 3. Nd2 Nc6 4. Ngf3 Nf6
+french	French Defense	black	tarrasch	Tarrasch Variation	C05	1. e4 e6 2. d4 d5 3. Nd2 Nf6 4. e5 Nfd7 5. Bd3 c5 6. c3 b6
+french	French Defense	black	tarrasch	Tarrasch Variation	C05	1. e4 e6 2. d4 d5 3. Nd2 Nf6
+french	French Defense	black	tarrasch	Tarrasch Variation	C05	1. e4 e6 2. d4 d5 3. Nd2 Nf6 4. e5 Nfd7 5. Bd3 c5 6. c3 Nc6
+french	French Defense	black	tarrasch	Tarrasch Variation	C05	1. e4 e6 2. d4 d5 3. Nd2 Nf6 4. e5 Nfd7 5. f4
+french	French Defense	black	tarrasch	Tarrasch Variation	C06	1. e4 e6 2. d4 d5 3. Nd2 Nf6 4. e5 Nfd7 5. Bd3 c5 6. c3 Nc6 7. Ne2 cxd4 8. cxd4
+french	French Defense	black	tarrasch	Tarrasch Variation	C06	1. e4 e6 2. d4 d5 3. Nd2 Nf6 4. e5 Nfd7 5. Bd3 c5 6. c3 Nc6 7. Ne2 cxd4 8. cxd4 Nb6
+french	French Defense	black	tarrasch	Tarrasch Variation	C07	1. e4 e6 2. d4 d5 3. Nd2 c5 4. exd5 Qxd5
+french	French Defense	black	tarrasch	Tarrasch Variation	C07	1. e4 e6 2. d4 d5 3. Nd2 c5 4. exd5 Qxd5 5. Ngf3 cxd4 6. Bc4 Qd6 7. O-O Nf6 8. Nb3 Nc6 9. Nbxd4 Nxd4 10. Nxd4 a6
+french	French Defense	black	tarrasch	Tarrasch Variation	C07	1. e4 e6 2. d4 d5 3. Nd2 c5 4. exd5 Qxd5 5. Ngf3 cxd4 6. Bc4 Qd8
+french	French Defense	black	tarrasch	Tarrasch Variation	C07	1. e4 e6 2. d4 d5 3. Nd2 c5
+french	French Defense	black	tarrasch	Tarrasch Variation	C08	1. e4 e6 2. d4 d5 3. Nd2 c5 4. exd5 exd5
+french	French Defense	black	tarrasch	Tarrasch Variation	C07	1. e4 e6 2. d4 d5 3. Nd2 c5 4. Ngf3
+french	French Defense	black	tarrasch	Tarrasch Variation	C07	1. e4 e6 2. d4 d5 3. Nd2 c5 4. exd5 Nf6
+french	French Defense	black	tarrasch	Tarrasch Variation	C07	1. e4 e6 2. d4 d5 3. Nd2 c5 4. c3
+french	French Defense	black	tarrasch	Tarrasch Variation	C08	1. e4 e6 2. d4 d5 3. Nd2 c5 4. exd5 exd5 5. Ngf3 c4
+french	French Defense	black	tarrasch	Tarrasch Variation	C09	1. e4 e6 2. d4 d5 3. Nd2 c5 4. exd5 exd5 5. Ngf3 Nc6
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. c3
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 Bd7
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 Bd7
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. b4
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Be3
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 Qb6 6. a3 Nh6
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 Qb6 6. a3
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 Qb6 6. Bd3
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 Qb6 6. Bd3 cxd4 7. O-O
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 Qb6 6. Bd3 cxd4 7. O-O Bd7 8. Re1
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 Qb6 6. Bd3 cxd4 7. cxd4 Bd7 8. O-O
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 Qb6 6. Bd3 cxd4 7. cxd4 Bd7 8. O-O Nxd4 9. Ng5
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. Qg4
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. Qg4 cxd4 5. Nf3
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. Nf3
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. Nf3 cxd4 5. Bd3
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. dxc5
+french	French Defense	black	advance	Advance Variation	C02	1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Qb6 5. Nf3 Bd7
