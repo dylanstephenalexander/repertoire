@@ -1,23 +1,42 @@
+import os
+
 import pytest
 
+from app.engine.stockfish import StockfishEngine
 from app.services import sessions as session_svc
+
+STOCKFISH_PATH = os.environ.get("STOCKFISH_PATH", "")
 
 
 class MockStockfishEngine:
     """Controllable stand-in for StockfishEngine in tests."""
 
-    def __init__(self, eval_before: int = 20, eval_after: int = 0, best_move: str = "e2e4"):
+    def __init__(
+        self,
+        eval_before: int = 20,
+        eval_after: int = 0,
+        lines_before: list[dict] | None = None,
+    ):
         self.eval_before = eval_before
         self.eval_after = eval_after
-        self._best_move = best_move
+        # Default to one plausible line if not specified
+        self.lines_before = lines_before or [
+            {"move_uci": "e2e4", "cp": eval_before},
+            {"move_uci": "d2d4", "cp": eval_before - 5},
+            {"move_uci": "g1f3", "cp": eval_before - 10},
+        ]
         self._call_count = 0
 
     def analyse(self, fen: str, moves=None) -> dict:
-        # First call = pre-move eval, second = post-move eval
+        # First call = pre-move position, second = post-move position
         if self._call_count % 2 == 0:
-            result = {"eval_cp": self.eval_before, "best_move": self._best_move}
+            result = {
+                "eval_cp": self.eval_before,
+                "best_move": self.lines_before[0]["move_uci"],
+                "lines": self.lines_before,
+            }
         else:
-            result = {"eval_cp": self.eval_after, "best_move": self._best_move}
+            result = {"eval_cp": self.eval_after, "best_move": None, "lines": []}
         self._call_count += 1
         return result
 
@@ -39,17 +58,25 @@ def isolate_sessions():
 
 @pytest.fixture()
 def engine_fine():
-    """Engine that reports a small cp loss (alternative territory)."""
-    return MockStockfishEngine(eval_before=20, eval_after=-5, best_move="e2e4")
+    return MockStockfishEngine(eval_before=20, eval_after=-5)
 
 
 @pytest.fixture()
 def engine_mistake():
-    """Engine that reports a large cp loss (mistake territory)."""
-    return MockStockfishEngine(eval_before=20, eval_after=60, best_move="e2e4")
+    return MockStockfishEngine(eval_before=20, eval_after=60)
 
 
 @pytest.fixture()
 def engine_blunder():
-    """Engine that reports a very large cp loss (blunder territory)."""
-    return MockStockfishEngine(eval_before=20, eval_after=200, best_move="e2e4")
+    return MockStockfishEngine(eval_before=20, eval_after=200)
+
+
+@pytest.fixture()
+def real_engine():
+    """Real Stockfish engine. Skipped if STOCKFISH_PATH is not set."""
+    if not STOCKFISH_PATH:
+        pytest.skip("STOCKFISH_PATH not set")
+    engine = StockfishEngine(path=STOCKFISH_PATH)
+    engine.start()
+    yield engine
+    engine.stop()

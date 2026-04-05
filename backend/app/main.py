@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.engine.stockfish import StockfishEngine
-from app.routers import openings, session
+from app.routers import analysis, openings, session
 from app.services.sessions import set_engine
 
 _engine: StockfishEngine | None = None
@@ -14,14 +14,16 @@ _engine: StockfishEngine | None = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global _engine
-    binary = Path(__file__).parent / "data" / "bin" / "stockfish"
-    if binary.exists():
-        _engine = StockfishEngine(path=str(binary))
+    import os
+    path = os.environ.get("STOCKFISH_PATH", "")
+    if not path:
+        # Fall back to bundled binary for non-dev deployments
+        bundled = Path(__file__).parent / "data" / "bin" / "stockfish"
+        path = str(bundled) if bundled.exists() else ""
+    if path:
+        _engine = StockfishEngine(path=path)
         _engine.start()
         set_engine(_engine)
-    else:
-        # No binary available — engine features will be degraded
-        pass
     yield
     if _engine:
         _engine.stop()
@@ -39,3 +41,4 @@ app.add_middleware(
 
 app.include_router(openings.router)
 app.include_router(session.router)
+app.include_router(analysis.router)

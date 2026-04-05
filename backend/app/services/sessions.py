@@ -4,7 +4,7 @@ from typing import Any
 import chess
 
 from app.engine.stockfish import StockfishEngine
-from app.models.feedback import Feedback, MoveResult
+from app.models.feedback import AnalysisLine, Feedback, MoveResult
 from app.models.session import OpponentMoveResponse, SessionStartResponse, SessionState
 from app.services.feedback import (
     ALTERNATIVE_THRESHOLD_CP,
@@ -106,34 +106,28 @@ def process_move(session_id: str, uci_move: str) -> MoveResult:
         feedback = Feedback(
             quality="mistake",
             explanation=f"{played_san} is off the main line.",
-            centipawn_loss=None,
-            best_move=_first_tree_move(session.tree_cursor),
         )
         _update_session(session, uci_move, new_fen, {})
         return MoveResult(result="mistake", feedback=feedback, fen=new_fen)
 
-    pre_move_eval = _engine.analyse(session.current_fen)
-    post_move_eval = _engine.analyse(new_fen)
+    pre_eval = _engine.analyse(session.current_fen)
+    post_eval = _engine.analyse(new_fen)
 
-    pre_cp = pre_move_eval["eval_cp"] or 0
-    post_cp = post_move_eval["eval_cp"] or 0
+    pre_cp = pre_eval["eval_cp"] or 0
+    post_cp = post_eval["eval_cp"] or 0
     cp_loss = max(0, pre_cp + post_cp)
 
-    best_uci = pre_move_eval["best_move"]
-    best_san: str | None = None
-    if best_uci:
-        b = chess.Board(session.current_fen)
-        try:
-            best_san = b.san(chess.Move.from_uci(best_uci))
-        except Exception:
-            best_san = best_uci
+    # Convert raw engine lines → AnalysisLine with SAN
+    pre_board = chess.Board(session.current_fen)
+    lines = _to_analysis_lines(pre_eval.get("lines", []), pre_board)
+
+    best_san = lines[0].move_san if lines else (pre_eval.get("best_move") or uci_move)
 
     mainline_uci = _first_tree_move(session.tree_cursor)
     mainline_san: str | None = None
     if mainline_uci:
-        b = chess.Board(session.current_fen)
         try:
-            mainline_san = b.san(chess.Move.from_uci(mainline_uci))
+            mainline_san = pre_board.san(chess.Move.from_uci(mainline_uci))
         except Exception:
             mainline_san = mainline_uci
 
@@ -141,27 +135,23 @@ def process_move(session_id: str, uci_move: str) -> MoveResult:
         feedback = build_alternative_feedback(
             session.skill_level,
             played_san,
-            mainline_san or (best_san or uci_move),
+            mainline_san or best_san,
             cp_loss,
+            lines=lines,
         )
         result = "alternative"
     else:
         feedback = build_mistake_feedback(
             session.skill_level,
             played_san,
-            best_san or uci_move,
+            best_san,
             cp_loss,
+            lines=lines,
         )
         result = feedback.quality
 
     _update_session(session, uci_move, new_fen, {})
-    return MoveResult(
-        result=result,
-        feedback=feedback,
-        fen=new_fen,
-        eval_cp=post_cp,
-        best_move=best_uci,
-    )
+    return MoveResult(result=result, feedback=feedback, fen=new_fen, eval_cp=post_cp)
 
 
 def get_opponent_move(session_id: str) -> OpponentMoveResponse:
@@ -180,6 +170,22 @@ def get_opponent_move(session_id: str) -> OpponentMoveResponse:
     next_cursor = session.tree_cursor.get(uci_move) or {}
     _update_session(session, uci_move, new_fen, next_cursor)
     return OpponentMoveResponse(uci_move=uci_move, fen=new_fen)
+
+
+def _to_analysis_lines(
+    raw_lines: list[dict], board: chess.Board
+) -> list[AnalysisLine]:
+    """Convert raw engine output to AnalysisLine objects with SAN notation."""
+    result = []
+    for raw in raw_lines:
+        uci = raw.get("move_uci", "")
+        cp = raw.get("cp", 0)
+        try:
+            san = board.san(chess.Move.from_uci(uci))
+        except Exception:
+            san = uci
+        result.append(AnalysisLine(move_uci=uci, move_san=san, cp=cp))
+    return result
 
 
 def _first_tree_move(cursor: dict[str, Any]) -> str | None:

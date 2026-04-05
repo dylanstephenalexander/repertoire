@@ -1,9 +1,6 @@
-from app.models.feedback import Feedback
+from app.models.feedback import AnalysisLine, Feedback
 
-# Centipawn loss threshold below which an off-tree move is "fine"
 ALTERNATIVE_THRESHOLD_CP = 25
-
-# Blunder starts here (roughly)
 BLUNDER_THRESHOLD_CP = 150
 
 
@@ -15,11 +12,19 @@ def _quality(cp_loss: int) -> str:
     return "mistake"
 
 
+def _format_lines(lines: list[AnalysisLine] | None, skill_level: str) -> str | None:
+    """Format top lines for inclusion in explanation text (advanced only)."""
+    if not lines or skill_level == "beginner":
+        return None
+    parts = [f"{l.move_san} ({'+' if l.cp >= 0 else ''}{l.cp / 100:.1f})" for l in lines[:3]]
+    return ", ".join(parts)
+
+
 def build_correct_feedback(skill_level: str, move_san: str) -> Feedback:
     explanations = {
-        "beginner": f"Great move! {move_san} follows the main line.",
+        "beginner":     f"Great move! {move_san} follows the main line.",
         "intermediate": f"{move_san} is the mainline move.",
-        "advanced": f"{move_san} — mainline.",
+        "advanced":     f"{move_san} — mainline.",
     }
     return Feedback(
         quality="correct",
@@ -32,25 +37,29 @@ def build_alternative_feedback(
     played_san: str,
     mainline_san: str,
     cp_loss: int,
+    lines: list[AnalysisLine] | None = None,
 ) -> Feedback:
+    lines_str = _format_lines(lines, skill_level)
     explanations = {
         "beginner": (
-            f"That works! The main line was {mainline_san}, but {played_san} is totally fine too."
+            f"That works! The main line was {mainline_san}, "
+            f"but {played_san} is totally fine too."
         ),
         "intermediate": (
             f"Off book, but solid. Mainline was {mainline_san}. "
             f"Centipawn loss: {cp_loss}."
+            + (f" Top moves: {lines_str}." if lines_str else "")
         ),
         "advanced": (
-            f"Deviation from theory. Mainline: {mainline_san}. "
-            f"Eval delta: -{cp_loss} cp."
+            f"Deviation from theory. Mainline: {mainline_san}. Eval delta: -{cp_loss} cp."
+            + (f" Top candidates: {lines_str}." if lines_str else "")
         ),
     }
     return Feedback(
         quality="alternative",
         explanation=explanations.get(skill_level, explanations["intermediate"]),
         centipawn_loss=cp_loss,
-        best_move=mainline_san,
+        lines=lines,
     )
 
 
@@ -59,8 +68,11 @@ def build_mistake_feedback(
     played_san: str,
     best_san: str,
     cp_loss: int,
+    lines: list[AnalysisLine] | None = None,
 ) -> Feedback:
     quality = _quality(cp_loss)
+    lines_str = _format_lines(lines, skill_level)
+
     explanations = {
         "beginner": {
             "mistake": (
@@ -73,12 +85,24 @@ def build_mistake_feedback(
             ),
         },
         "intermediate": {
-            "mistake": f"{played_san} is inaccurate (-{cp_loss} cp). Best was {best_san}.",
-            "blunder": f"{played_san} is a blunder (-{cp_loss} cp). Best was {best_san}.",
+            "mistake": (
+                f"{played_san} is inaccurate (-{cp_loss} cp). Best was {best_san}."
+                + (f" Top moves: {lines_str}." if lines_str else "")
+            ),
+            "blunder": (
+                f"{played_san} is a blunder (-{cp_loss} cp). Best was {best_san}."
+                + (f" Top moves: {lines_str}." if lines_str else "")
+            ),
         },
         "advanced": {
-            "mistake": f"Inaccuracy: {played_san}. Best: {best_san} (-{cp_loss} cp).",
-            "blunder": f"Blunder: {played_san}. Best: {best_san} (-{cp_loss} cp).",
+            "mistake": (
+                f"Inaccuracy: {played_san}. Best: {best_san} (-{cp_loss} cp)."
+                + (f" Candidates: {lines_str}." if lines_str else "")
+            ),
+            "blunder": (
+                f"Blunder: {played_san}. Best: {best_san} (-{cp_loss} cp)."
+                + (f" Candidates: {lines_str}." if lines_str else "")
+            ),
         },
     }
     level_map = explanations.get(skill_level, explanations["intermediate"])
@@ -87,5 +111,5 @@ def build_mistake_feedback(
         quality=quality,
         explanation=explanation,
         centipawn_loss=cp_loss,
-        best_move=best_san,
+        lines=lines,
     )

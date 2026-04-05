@@ -15,9 +15,22 @@ Chess openings trainer (React/TS + FastAPI + Stockfish). Target user: all skill 
 ## Stack
 - Backend: FastAPI (Python)
 - Frontend: React (TypeScript)
-- Engine: Stockfish (eval + move analysis)
+- Engine: Stockfish v18 (eval + move analysis, multipv)
 - Testing: pytest (backend), React Testing Library (frontend)
 - Linting: Ruff
+
+## Dev setup
+```bash
+brew install stockfish
+export STOCKFISH_PATH=$(which stockfish)
+cd backend && python -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/uvicorn app.main:app --reload
+```
+
+Tests requiring a real engine are gated on `STOCKFISH_PATH`:
+```bash
+STOCKFISH_PATH=$(which stockfish) python -m pytest tests/
+```
 
 ## Workflow (mandatory)
 For every feature:
@@ -51,6 +64,9 @@ Explanations must match the user's skill level.
 2. Move Feedback System (Stockfish-powered, beginner-friendly)
 3. Evaluation Bar
 4. Chaos Mode
+
+## Post-MVP Ideas
+- **Game Review**: fetch past games from chess.com public API (`api.chess.com/pub/player/{username}/games/{year}/{month}`, no auth needed for public games), run move-by-move through local Stockfish, annotate blunders/mistakes/inaccuracies with "better was X" suggestions. Bypasses chess.com's depth-limited premium review using the user's own engine. Infrastructure (Stockfish, board rendering) is already in place — the work is the annotation UI.
 
 ## Architecture
 
@@ -112,7 +128,7 @@ POST /session/{id}/opponent_move      ← { uci_move, fen }
 GET  /session/{id}/state              → { fen, score, move_history, mode, ... }
 
 POST /analysis/eval                   → { fen }
-                                      ← { eval_cp, best_move, depth }
+                                      ← { lines: [{move_uci, move_san, cp}], eval_cp, depth }
 ```
 
 ## Data Models (approved)
@@ -130,9 +146,16 @@ current_fen, move_history, score, tree_cursor
 **Feedback**
 ```python
 quality: "correct" | "alternative" | "mistake" | "blunder"
-explanation: str          # skill-level-appropriate
+explanation: str                   # skill-level-appropriate
 centipawn_loss: int | None
-best_move: str | None     # UCI
+lines: list[AnalysisLine] | None   # top N engine candidates (pre-move position)
+```
+
+**AnalysisLine**
+```python
+move_uci: str   # e.g. "e2e4"
+move_san: str   # e.g. "e4"
+cp: int         # centipawns for side to move
 ```
 
 **Opening data**
