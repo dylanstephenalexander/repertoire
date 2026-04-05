@@ -1,0 +1,59 @@
+.panel {
+  min-height: 80px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  background: #1e1e1e;
+  border: 1px solid #333;
+}
+
+.label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.explanation {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #ccc;
+}
+
+.thinking {
+  margin: 0;
+  color: #888;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+/* Quality tints */
+.correct {
+  border-color: #2d6a2d;
+}
+.correct .label {
+  color: #6abf6a;
+}
+
+.alternative {
+  border-color: #4a6fa5;
+}
+.alternative .label {
+  color: #7aaae0;
+}
+
+.mistake {
+  border-color: #8a6000;
+}
+.mistake .label {
+  color: #f0b030;
+}
+
+.blunder {
+  border-color: #7a1a1a;
+}
+.blunder .label {
+  color: #e05555;
+}

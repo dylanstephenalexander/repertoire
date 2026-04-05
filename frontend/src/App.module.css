@@ -1,0 +1,56 @@
+.root {
+  min-height: 100vh;
+  background: #121212;
+  color: #e0e0e0;
+  font-family: system-ui, sans-serif;
+}
+
+.layout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px;
+  padding: 32px 16px;
+  min-height: 100vh;
+}
+
+.evalBarWrapper {
+  width: 20px;
+  height: 560px;
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
+.boardWrapper {
+  width: 560px;
+  flex-shrink: 0;
+}
+
+.sidebar {
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.score {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #aaa;
+}
+
+.newGameButton {
+  padding: 10px 16px;
+  background: #2a5298;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.newGameButton:hover {
+  background: #3a6bc0;
+}

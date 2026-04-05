@@ -1,0 +1,19 @@
+.bar {
+  width: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #555;
+}
+
+.black {
+  background-color: #1a1a1a;
+  transition: height 0.4s ease;
+}
+
+.white {
+  background-color: #f0f0f0;
+  transition: height 0.4s ease;
+}

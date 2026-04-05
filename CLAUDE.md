@@ -21,10 +21,15 @@ Chess openings trainer (React/TS + FastAPI + Stockfish). Target user: all skill 
 
 ## Dev setup
 ```bash
+# Backend
 brew install stockfish
 export STOCKFISH_PATH=$(which stockfish)
 cd backend && python -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/uvicorn app.main:app --reload
+
+# Frontend
+cd frontend && npm install && npm run dev   # http://localhost:5173
+cd frontend && npm test                    # vitest (jsdom)
 ```
 
 Tests requiring a real engine are gated on `STOCKFISH_PATH`:
@@ -52,21 +57,16 @@ Explanations must match the user's skill level.
 
 ## Elo & Difficulty
 - Study Mode: Elo-agnostic. Always drills theoretically correct moves.
-- Chaos Mode: opponent scales to user's current Elo (UCI_LimitStrength + UCI_Elo).
-- Elo is adjustable any time (settings, not buried in menus).
-- After a Chaos Mode session, suggest Elo adjustment if performance warrants it:
-  - Struggling → "Want to drop the difficulty?"
-  - Dominating → "Ready to level up?"
-- Thresholds for suggestions are a design decision — leave for implementation phase.
+- Elo is adjustable any time (settings, not buried in menus) — relevant when Chaos Mode is implemented.
 
 ## MVP Features (in order)
 1. Study Mode (color + opening selection, accuracy score)
 2. Move Feedback System (Stockfish-powered, beginner-friendly)
 3. Evaluation Bar
-4. Chaos Mode
 
 ## Post-MVP Ideas
 - **Game Review**: fetch past games from chess.com public API (`api.chess.com/pub/player/{username}/games/{year}/{month}`, no auth needed for public games), run move-by-move through local Stockfish, annotate blunders/mistakes/inaccuracies with "better was X" suggestions. Bypasses chess.com's depth-limited premium review using the user's own engine. Infrastructure (Stockfish, board rendering) is already in place — the work is the annotation UI.
+- **Chaos Mode**: opponent scales to user's current Elo (UCI_LimitStrength + UCI_Elo). Two-request pattern — user move then separate `opponent_move` so frontend controls animation timing. Suggest Elo adjustment after session based on performance.
 
 ## Architecture
 
@@ -168,12 +168,14 @@ cp: int         # centipawns for side to move
 
 - **Sessions**: in-memory. Elo persisted in `localStorage` on frontend only.
 - **Stockfish**: bundled binary (macOS), path configurable via env var for other platforms.
-- **Board**: `react-chessboard` + `chess.js`
+- **Board**: `react-chessboard` + `chess.js`. Note: react-chessboard v3 uses `<Chessboard options={{...}} />` — all props are inside the `options` object, not flat props.
 - **Skill level + Elo**: stored in session, decoupled. `elo` controls engine strength; `skill_level` controls explanation style. Optional per-request override for skill_level.
 - **Move feedback logic**:
   - In-tree → "correct"
   - Off-tree, cp_loss ≤ 25 → "mainline was X, but yours is fine too"
   - Off-tree, cp_loss > 25 → mistake/blunder + explanation
   - Threshold (25cp) is tunable at implementation time
-- **Chaos Mode**: two-request pattern — user move then separate `opponent_move` request so frontend controls animation timing.
 - **MVP openings**: Italian Game, Sicilian Najdorf, Queen's Gambit, Ruy López, French Defence
+- **Frontend styling**: plain CSS modules (`.module.css` per component). No inline styles. No CSS framework.
+- **Opponent move UX**: after a correct user move, show "Thinking..." for ~1s, then POST `/opponent_move` and animate the response. Simulates game feel.
+- **Opening selector**: modal overlay on app start; dismissed once a session begins.
