@@ -101,6 +101,10 @@ def process_move(session_id: str, uci_move: str) -> MoveResult:
         _update_session(session, uci_move, new_fen, session.tree_cursor)
         return MoveResult(result="correct", feedback=feedback, fen=new_fen)
 
+    # Off-tree: snapshot state so the client can undo if desired
+    session.prev_fen = session.current_fen
+    session.prev_cursor = dict(session.tree_cursor)
+
     # Off-tree: evaluate with Stockfish
     if _engine is None:
         feedback = Feedback(
@@ -152,6 +156,25 @@ def process_move(session_id: str, uci_move: str) -> MoveResult:
 
     _update_session(session, uci_move, new_fen, {})
     return MoveResult(result=result, feedback=feedback, fen=new_fen, eval_cp=post_cp)
+
+
+def undo_move(session_id: str) -> str:
+    """Revert the session to the state before the last off-tree move.
+
+    Returns the restored FEN. Raises KeyError if session not found,
+    ValueError if there is no move to undo.
+    """
+    session = _sessions.get(session_id)
+    if session is None:
+        raise KeyError(f"Session not found: {session_id}")
+    if session.prev_fen is None:
+        raise ValueError("Nothing to undo")
+    session.current_fen = session.prev_fen
+    session.tree_cursor = session.prev_cursor or {}
+    session.move_history = session.move_history[:-1]
+    session.prev_fen = None
+    session.prev_cursor = None
+    return session.current_fen
 
 
 def get_opponent_move(session_id: str) -> OpponentMoveResponse:

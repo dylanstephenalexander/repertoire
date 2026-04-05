@@ -29,6 +29,9 @@ class SessionState(BaseModel):
     move_history: list[str]
     score: int
     tree_cursor: dict[str, Any]
+    # Stored before each off-tree move so the client can request an undo
+    prev_fen: str | None = None
+    prev_cursor: dict[str, Any] | None = None
 
 
 class MoveRequest(BaseModel):

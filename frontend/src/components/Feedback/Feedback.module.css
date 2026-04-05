@@ -57,3 +57,37 @@
 .blunder .label {
   color: #e05555;
 }
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.actionBtn {
+  flex: 1;
+  padding: 7px 0;
+  background: #2a2a2a;
+  border: 1px solid #555;
+  border-radius: 5px;
+  color: #ccc;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.actionBtn:hover {
+  background: #383838;
+  border-color: #888;
+  color: #fff;
+}
+
+.restartBtn {
+  flex: 0 0 auto;
+  color: #888;
+}
+
+.restartBtn:hover {
+  color: #ccc;
+}

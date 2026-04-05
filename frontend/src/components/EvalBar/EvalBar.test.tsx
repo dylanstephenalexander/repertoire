@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { EvalBar } from "./EvalBar";
 
-function getBarDivs(container: HTMLElement) {
+function getBarDivs() {
   const bar = screen.getByLabelText("Evaluation bar");
   const [top, bottom] = Array.from(bar.children) as HTMLElement[];
   return { top, bottom };
@@ -20,29 +20,29 @@ describe("EvalBar", () => {
   });
 
   it("null eval renders 50/50", () => {
-    const { container } = render(<EvalBar evalCp={null} orientation="white" />);
-    const { top, bottom } = getBarDivs(container);
+    render(<EvalBar evalCp={null} orientation="white" />);
+    const { top, bottom } = getBarDivs();
     expect(height(top)).toBe(50);
     expect(height(bottom)).toBe(50);
   });
 
   it("positive eval tilts toward white (white orientation — white is bottom)", () => {
-    const { container } = render(<EvalBar evalCp={500} orientation="white" />);
-    const { top, bottom } = getBarDivs(container);
+    render(<EvalBar evalCp={500} orientation="white" />);
+    const { top, bottom } = getBarDivs();
     // top = black section, bottom = white section; white should be larger
     expect(height(bottom)).toBeGreaterThan(height(top));
   });
 
   it("mate score pins bar fully to white", () => {
-    const { container } = render(<EvalBar evalCp={30000} orientation="white" />);
-    const { top, bottom } = getBarDivs(container);
+    render(<EvalBar evalCp={30000} orientation="white" />);
+    const { top, bottom } = getBarDivs();
     expect(height(top)).toBe(0);
     expect(height(bottom)).toBe(100);
   });
 
   it("negative mate score pins bar fully to black", () => {
-    const { container } = render(<EvalBar evalCp={-30000} orientation="white" />);
-    const { top, bottom } = getBarDivs(container);
+    render(<EvalBar evalCp={-30000} orientation="white" />);
+    const { top, bottom } = getBarDivs();
     expect(height(top)).toBe(100);
     expect(height(bottom)).toBe(0);
   });

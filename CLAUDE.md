@@ -67,6 +67,7 @@ Explanations must match the user's skill level.
 ## Post-MVP Ideas
 - **Game Review**: fetch past games from chess.com public API (`api.chess.com/pub/player/{username}/games/{year}/{month}`, no auth needed for public games), run move-by-move through local Stockfish, annotate blunders/mistakes/inaccuracies with "better was X" suggestions. Bypasses chess.com's depth-limited premium review using the user's own engine. Infrastructure (Stockfish, board rendering) is already in place — the work is the annotation UI.
 - **Chaos Mode**: opponent scales to user's current Elo (UCI_LimitStrength + UCI_Elo). Two-request pattern — user move then separate `opponent_move` so frontend controls animation timing. Suggest Elo adjustment after session based on performance.
+- **LLM Move Explanations**: replace hardcoded feedback templates in `backend/app/services/feedback.py` with Claude API calls. The `build_*_feedback` functions are the right seam — add `pre_move_fen: str` param and swap templates for a prompt. Needs `ANTHROPIC_API_KEY` env var; template strings stay as fallback when key is absent. Prompt shape: "In this position [FEN], the player moved [played_san] instead of [best_san] (-[cp_loss]cp). Explain in one sentence for a [skill_level] player." Would produce "You shouldn't move your knight there because the Queen can take it" style explanations naturally.
 
 ## Architecture
 
