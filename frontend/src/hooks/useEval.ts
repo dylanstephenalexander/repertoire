@@ -13,22 +13,26 @@ export function useEval(fen: string | null): EvalState {
     if (!fen) return;
 
     let cancelled = false;
-    setState({ evalCp: null, loading: true });
 
-    fetchEval(fen)
-      .then((resp) => {
-        if (!cancelled) {
-          setState({ evalCp: resp.eval_cp, loading: false });
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setState({ evalCp: null, loading: false });
-        }
-      });
+    const timer = setTimeout(() => {
+      setState({ evalCp: null, loading: true });
+
+      fetchEval(fen)
+        .then((resp) => {
+          if (!cancelled) {
+            setState({ evalCp: resp.eval_cp, loading: false });
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setState({ evalCp: null, loading: false });
+          }
+        });
+    }, 150);
 
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
   }, [fen]);
 

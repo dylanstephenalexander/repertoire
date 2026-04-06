@@ -3,7 +3,7 @@ from typing import Any
 
 import chess
 
-from app.engine.stockfish import StockfishEngine
+from app.engine.stockfish import FEEDBACK_DEPTH, StockfishEngine
 from app.models.feedback import AnalysisLine, Feedback, MoveResult
 from app.models.session import OpponentMoveResponse, SessionStartResponse, SessionState
 from app.services.feedback import (
@@ -117,8 +117,8 @@ def process_move(session_id: str, uci_move: str) -> MoveResult:
     if session.elo is not None:
         _engine.set_elo(session.elo)
     try:
-        pre_eval = _engine.analyse(session.current_fen)
-        post_eval = _engine.analyse(new_fen)
+        pre_eval = _engine.analyse(session.current_fen, depth=FEEDBACK_DEPTH)
+        post_eval = _engine.analyse(new_fen, depth=FEEDBACK_DEPTH)
     finally:
         if session.elo is not None:
             _engine.clear_elo()
@@ -226,7 +226,7 @@ def get_opponent_move(session_id: str) -> OpponentMoveResponse:
     new_fen = board.fen()
 
     _update_session(session, uci_move, new_fen, next_cursor)
-    return OpponentMoveResponse(uci_move=uci_move, fen=new_fen)
+    return OpponentMoveResponse(uci_move=uci_move, fen=new_fen, line_complete=not next_cursor)
 
 
 def _to_analysis_lines(

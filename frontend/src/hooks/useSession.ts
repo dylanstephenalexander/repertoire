@@ -32,7 +32,9 @@ interface UseSessionReturn {
   requestHint: () => Promise<void>;
 }
 
-const OPPONENT_THINKING_MS = 1000;
+// Minimum time the "thinking" state is shown — runs in parallel with the fetch,
+// so total disabled time = max(MIN_THINKING_MS, network latency), not the sum.
+const MIN_THINKING_MS = 500;
 
 export function useSession(): UseSessionReturn {
   const [session, setSession] = useState<SessionState | null>(null);
@@ -45,23 +47,27 @@ export function useSession(): UseSessionReturn {
         s ? { ...s, status: "opponent_thinking", feedback: null } : s
       );
 
-      await new Promise((r) => setTimeout(r, OPPONENT_THINKING_MS));
+      // Fetch and timer run in parallel — disabled time = max(MIN_THINKING_MS, network)
+      const [resp] = await Promise.all([
+        fetchOpponentMove(sessionId).catch(() => null),
+        new Promise((r) => setTimeout(r, MIN_THINKING_MS)),
+      ]);
 
-      try {
-        const resp = await fetchOpponentMove(sessionId);
+      if (resp) {
         setSession((s) =>
           s
             ? {
                 ...s,
                 fen: resp.fen,
-                status: "playing",
+                // line_complete means the tree has no more user moves after this opponent move
+                status: resp.line_complete ? "complete" : "playing",
                 score,
-                moveCount: moveCount + 1,
+                moveCount,
               }
             : s
         );
-      } catch {
-        // End of opening line — no more opponent moves
+      } else {
+        // fetchOpponentMove threw — end of opening line, no opponent move available
         setSession((s) =>
           s ? { ...s, status: "complete", score, moveCount } : s
         );
@@ -155,13 +161,18 @@ export function useSession(): UseSessionReturn {
     await begin(lastParams.current);
   }, [begin]);
 
+  const hintInFlight = useRef(false);
+
   const requestHint = useCallback(async () => {
-    if (!session || session.status !== "playing") return;
+    if (!session || session.status !== "playing" || hintInFlight.current) return;
+    hintInFlight.current = true;
     try {
       const { move_san, move_uci } = await fetchHint(session.sessionId);
       setSession((s) => (s ? { ...s, hint: { san: move_san, uci: move_uci } } : s));
     } catch {
-      // End of line or no hint available — ignore silently
+      setSession((s) => (s ? { ...s, hint: { san: "No hint available", uci: "" } } : s));
+    } finally {
+      hintInFlight.current = false;
     }
   }, [session]);
 

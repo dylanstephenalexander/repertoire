@@ -56,9 +56,14 @@
   transition: border-color 0.15s, color 0.15s;
 }
 
-.hintButton:hover {
+.hintButton:hover:not(:disabled) {
   border-color: #7faaff;
   color: #7faaff;
+}
+
+.hintButton:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .hintText {
@@ -68,20 +73,10 @@
   font-family: monospace;
 }
 
-.newGameButton {
-  padding: 10px 16px;
-  background: #2a5298;
-  border: none;
-  border-radius: 6px;
-  color: #fff;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.newGameButton:hover {
-  background: #3a6bc0;
+.completeActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .home {

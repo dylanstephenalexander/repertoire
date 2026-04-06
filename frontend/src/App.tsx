@@ -91,7 +91,7 @@ export function App() {
               orientation={session.userColor}
               onMove={move}
               disabled={isDisabled}
-              hintMove={session.hint?.uci}
+              hintMove={session.hint?.uci || undefined}
             />
           )}
         </main>
@@ -104,7 +104,11 @@ export function App() {
           )}
           {session?.status === "playing" && (
             <div className={styles.hintRow}>
-              <button className={styles.hintButton} onClick={requestHint}>
+              <button
+                className={styles.hintButton}
+                onClick={requestHint}
+                disabled={!!session.hint}
+              >
                 Hint
               </button>
               {session.hint && (
@@ -121,12 +125,14 @@ export function App() {
             onRestart={handleRestart}
           />
           {session?.status === "complete" && (
-            <button
-              className={styles.newGameButton}
-              onClick={() => setSelectorOpen(true)}
-            >
-              New game
-            </button>
+            <div className={styles.completeActions}>
+              <button className={styles.primaryBtn} onClick={handleRestart}>
+                Play again
+              </button>
+              <button className={styles.secondaryBtn} onClick={() => setSelectorOpen(true)}>
+                New game
+              </button>
+            </div>
           )}
         </aside>
       </div>

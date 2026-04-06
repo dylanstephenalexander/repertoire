@@ -34,7 +34,7 @@ export function Feedback({
   }
 
   if (!feedback) {
-    return <div className={styles.panel} />;
+    return null;
   }
 
   return (

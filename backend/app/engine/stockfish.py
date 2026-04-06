@@ -10,6 +10,10 @@ STOCKFISH_PATH = os.environ.get("STOCKFISH_PATH", str(_DEFAULT_BINARY))
 DEFAULT_DEPTH = 15
 DEFAULT_MULTIPV = 3
 
+# Tuned per-use-case depths
+EVAL_BAR_DEPTH = 10    # eval bar: fast, frequent, cosmetic
+FEEDBACK_DEPTH = 12    # off-tree move feedback: accurate enough, faster than 15
+
 
 class AnalysisLine:
     __slots__ = ("move_uci", "cp")

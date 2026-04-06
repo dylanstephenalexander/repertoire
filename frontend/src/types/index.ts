@@ -39,6 +39,7 @@ export interface MoveResponse {
 export interface OpponentMoveResponse {
   uci_move: string;
   fen: string;
+  line_complete: boolean;
 }
 
 export interface EvalResponse {

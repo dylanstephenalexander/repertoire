@@ -41,3 +41,4 @@ class MoveRequest(BaseModel):
 class OpponentMoveResponse(BaseModel):
     uci_move: str
     fen: str
+    line_complete: bool = False  # True when cursor is empty after this move
