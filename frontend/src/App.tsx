@@ -9,6 +9,7 @@ import { OpeningSelector } from "./components/OpeningSelector/OpeningSelector";
 import { useChaos } from "./hooks/useChaos";
 import { useEval } from "./hooks/useEval";
 import { useSession } from "./hooks/useSession";
+import { type NotationMode } from "./utils/notation";
 import styles from "./App.module.css";
 
 type AppMode = "home" | "study" | "chaos" | "review";
@@ -27,9 +28,44 @@ export function App() {
     restartChaos,
   } = useChaos();
 
-  const [mode, setMode] = useState<AppMode>("home");
+  const [mode, setMode] = useState<AppMode>(() => {
+    // Restore mode from history state on hard reload, default to home
+    return (history.state?.mode as AppMode) ?? "home";
+  });
+
+  // Push a history entry whenever mode changes so the browser back button works
+  function navigate(next: AppMode) {
+    history.pushState({ mode: next }, "");
+    setMode(next);
+  }
+
+  // Listen for browser back/forward
+  useEffect(() => {
+    function onPop(e: PopStateEvent) {
+      const prev = (e.state?.mode as AppMode) ?? "home";
+      // If navigating back from an active game, clear it
+      if (prev === "home" || prev === "study" || prev === "chaos") {
+        clearSession();
+        clearChaosSession();
+      }
+      setMode(prev);
+      setGuided(false);
+    }
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [clearSession, clearChaosSession]); // eslint-disable-line react-hooks/exhaustive-deps
   const [skillLevel, setSkillLevel] = useState("intermediate");
   const [guided, setGuided] = useState(false);
+  const [notationMode, setNotationMode] = useState<NotationMode>(
+    () => (localStorage.getItem("notation_mode") as NotationMode | null) ?? "notation"
+  );
+
+  function cycleNotation() {
+    const next: NotationMode =
+      notationMode === "notation" ? "readable" : notationMode === "readable" ? "both" : "notation";
+    setNotationMode(next);
+    localStorage.setItem("notation_mode", next);
+  }
 
   // Fetch engine status once so ChaosSelector can show what's available
   useEffect(() => {
@@ -65,7 +101,7 @@ export function App() {
   if (mode === "review") {
     return (
       <div className={styles.root}>
-        <GameReview skillLevel={skillLevel} onBack={() => setMode("home")} />
+        <GameReview skillLevel={skillLevel} onBack={() => navigate("home")} />
       </div>
     );
   }
@@ -77,13 +113,13 @@ export function App() {
         <div className={styles.home}>
           <h1 className={styles.homeTitle}>Repertoire</h1>
           <div className={styles.homeButtons}>
-            <button className={styles.primaryBtn} onClick={() => setMode("study")}>
+            <button className={styles.primaryBtn} onClick={() => navigate("study")}>
               Study Openings
             </button>
-            <button className={styles.primaryBtn} onClick={() => setMode("chaos")}>
+            <button className={styles.primaryBtn} onClick={() => navigate("chaos")}>
               Play vs Maia
             </button>
-            <button className={styles.secondaryBtn} onClick={() => setMode("review")}>
+            <button className={styles.secondaryBtn} onClick={() => navigate("review")}>
               Review a Game
             </button>
           </div>
@@ -101,7 +137,7 @@ export function App() {
             setSkillLevel(params.skill_level);
             await begin(params);
           }}
-          onBack={() => setMode("home")}
+          onBack={() => navigate("home")}
         />
       </div>
     );
@@ -116,7 +152,7 @@ export function App() {
             setSkillLevel(params.skill_level);
             await beginChaos(params);
           }}
-          onBack={() => setMode("home")}
+          onBack={() => navigate("home")}
           lc0Available={engineStatus?.lc0 ?? false}
           availableModels={engineStatus?.maiaModels ?? []}
         />
@@ -218,10 +254,16 @@ export function App() {
             feedback={currentFeedback}
             isOpponentThinking={currentStatus === "opponent_thinking"}
             awaitingDecision={currentStatus === "awaiting_decision"}
+            notationMode={notationMode}
             onRetry={retry}
             onContinue={continuePlay}
             onRestart={handleRestart}
           />
+          {currentFeedback && (
+            <button className={styles.notationToggle} onClick={cycleNotation} title="Toggle notation style">
+              {notationMode === "notation" ? "AN" : notationMode === "readable" ? "English" : "Both"}
+            </button>
+          )}
 
           {/* End-of-game actions */}
           {currentStatus === "complete" && (
@@ -256,8 +298,8 @@ export function App() {
               <button className={styles.secondaryBtn} onClick={() => {
                 clearSession();
                 clearChaosSession();
-                setMode("home");
                 setGuided(false);
+                navigate("home");
               }}>
                 Home
               </button>

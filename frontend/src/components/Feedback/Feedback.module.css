@@ -58,6 +58,13 @@
   color: #e05555;
 }
 
+.checkmate {
+  border-color: #4a2080;
+}
+.checkmate .label {
+  color: #b07fff;
+}
+
 .actions {
   display: flex;
   gap: 8px;

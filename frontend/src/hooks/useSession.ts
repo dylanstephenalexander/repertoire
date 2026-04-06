@@ -4,6 +4,23 @@ import { fetchHint, fetchOpponentMove, sendMove, startSession, undoMove } from "
 import type { SessionStartParams } from "../api/session";
 import type { Feedback } from "../types";
 
+/** Returns a checkmate Feedback if the position is terminal, otherwise null. */
+function checkmateFeedback(fen: string, userColor: "white" | "black"): Feedback | null {
+  try {
+    const chess = new Chess(fen);
+    if (!chess.isCheckmate()) return null;
+    const userWon = (chess.turn() === "w") === (userColor === "black");
+    return {
+      quality: "checkmate",
+      explanation: userWon ? "Checkmate! You won." : "Checkmate. Your opponent won.",
+      centipawn_loss: null,
+      lines: null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 type SessionStatus =
   | "idle"
   | "opponent_thinking"
@@ -55,18 +72,18 @@ export function useSession(): UseSessionReturn {
       ]);
 
       if (resp) {
-        setSession((s) =>
-          s
-            ? {
-                ...s,
-                fen: resp.fen,
-                // line_complete means the tree has no more user moves after this opponent move
-                status: resp.line_complete ? "complete" : "playing",
-                score,
-                moveCount,
-              }
-            : s
-        );
+        setSession((s) => {
+          if (!s) return s;
+          const mate = checkmateFeedback(resp.fen, s.userColor);
+          return {
+            ...s,
+            fen: resp.fen,
+            status: mate || resp.line_complete ? "complete" : "playing",
+            feedback: mate ?? s.feedback,
+            score,
+            moveCount,
+          };
+        });
       } else {
         // fetchOpponentMove threw — end of opening line, no opponent move available
         setSession((s) =>
@@ -118,15 +135,17 @@ export function useSession(): UseSessionReturn {
       const newScore =
         resp.result === "correct" ? session.score + 1 : session.score;
       const newMoveCount = session.moveCount + 1;
+      const mate = checkmateFeedback(resp.fen, session.userColor);
 
       setSession((s) =>
         s
           ? {
               ...s,
               fen: resp.fen,
-              feedback: resp.feedback,
+              feedback: mate ?? resp.feedback,
               score: newScore,
               moveCount: newMoveCount,
+              ...(mate ? { status: "complete" as const } : {}),
             }
           : s
       );

@@ -9,6 +9,22 @@ import {
 import type { ChaosStartParams } from "../api/chaos";
 import type { Feedback } from "../types";
 
+function checkmateFeedback(fen: string, userColor: "white" | "black"): Feedback | null {
+  try {
+    const chess = new Chess(fen);
+    if (!chess.isCheckmate()) return null;
+    const userWon = (chess.turn() === "w") === (userColor === "black");
+    return {
+      quality: "checkmate",
+      explanation: userWon ? "Checkmate! You won." : "Checkmate. Your opponent won.",
+      centipawn_loss: null,
+      lines: null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 type ChaosStatus =
   | "idle"
   | "opponent_thinking"
@@ -70,17 +86,18 @@ export function useChaos(): UseChaosReturn {
       ]);
 
       if (resp) {
-        setChaosSession((s) =>
-          s
-            ? {
-                ...s,
-                fen: resp.fen,
-                status: "playing",
-                openingName: resp.opening_name ?? s.openingName,
-                inTheory: resp.in_theory,
-              }
-            : s
-        );
+        setChaosSession((s) => {
+          if (!s) return s;
+          const mate = checkmateFeedback(resp.fen, s.userColor);
+          return {
+            ...s,
+            fen: resp.fen,
+            status: mate ? "complete" : "playing",
+            feedback: mate ?? s.feedback,
+            openingName: resp.opening_name ?? s.openingName,
+            inTheory: resp.in_theory,
+          };
+        });
       } else {
         setChaosSession((s) => (s ? { ...s, status: "complete" } : s));
       }
@@ -132,19 +149,25 @@ export function useChaos(): UseChaosReturn {
         chaosSession.feedbackEnabled,
       );
 
-      setChaosSession((s) =>
-        s
-          ? {
-              ...s,
-              fen: resp.fen,
-              feedback: resp.feedback ?? null,
-              openingName: resp.opening_name ?? s.openingName,
-              inTheory: resp.in_theory,
-            }
-          : s
-      );
+      const userColor = chaosSession.userColor;
+      setChaosSession((s) => {
+        if (!s) return s;
+        const mate = checkmateFeedback(resp.fen, userColor);
+        return {
+          ...s,
+          fen: resp.fen,
+          feedback: mate ?? resp.feedback ?? null,
+          openingName: resp.opening_name ?? s.openingName,
+          inTheory: resp.in_theory,
+          ...(mate ? { status: "complete" as const } : {}),
+        };
+      });
 
-      await triggerOpponentMove(chaosSession.sessionId);
+      // Only trigger opponent move if user didn't just deliver checkmate
+      const postMoveBoard = new Chess(resp.fen);
+      if (!postMoveBoard.isCheckmate()) {
+        await triggerOpponentMove(chaosSession.sessionId);
+      }
     },
     [chaosSession, triggerOpponentMove]
   );

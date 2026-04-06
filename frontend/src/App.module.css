@@ -73,6 +73,25 @@
   color: #888;
 }
 
+.notationToggle {
+  align-self: flex-start;
+  padding: 2px 8px;
+  background: transparent;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: #555;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.notationToggle:hover {
+  border-color: #555;
+  color: #888;
+}
+
 .hintButton {
   padding: 6px 14px;
   background: transparent;

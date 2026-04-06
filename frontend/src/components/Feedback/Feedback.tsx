@@ -1,10 +1,12 @@
 import type { Feedback as FeedbackType } from "../../types";
+import { translateExplanation, type NotationMode } from "../../utils/notation";
 import styles from "./Feedback.module.css";
 
 interface FeedbackProps {
   feedback: FeedbackType | null;
   isOpponentThinking: boolean;
   awaitingDecision: boolean;
+  notationMode: NotationMode;
   onRetry: () => void;
   onContinue: () => void;
   onRestart: () => void;
@@ -15,12 +17,14 @@ const QUALITY_LABELS: Record<FeedbackType["quality"], string> = {
   alternative: "Alternative",
   mistake: "Mistake",
   blunder: "Blunder",
+  checkmate: "Checkmate",
 };
 
 export function Feedback({
   feedback,
   isOpponentThinking,
   awaitingDecision,
+  notationMode,
   onRetry,
   onContinue,
   onRestart,
@@ -40,7 +44,7 @@ export function Feedback({
   return (
     <div className={`${styles.panel} ${styles[feedback.quality]}`}>
       <span className={styles.label}>{QUALITY_LABELS[feedback.quality]}</span>
-      <p className={styles.explanation}>{feedback.explanation}</p>
+      <p className={styles.explanation}>{translateExplanation(feedback.explanation, notationMode)}</p>
       {awaitingDecision && (
         <div className={styles.actions}>
           <button className={styles.actionBtn} onClick={onRetry}>
