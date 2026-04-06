@@ -183,14 +183,23 @@ def get_opponent_move(session_id: str) -> OpponentMoveResponse:
         raise KeyError(f"Session not found: {session_id}")
 
     uci_move = _first_tree_move(session.tree_cursor)
+
     if uci_move is None:
-        raise ValueError("No opponent move available — end of opening line")
+        # Off-tree or end of line: fall back to engine best move
+        if _engine is None:
+            raise ValueError("No opponent move available — end of opening line")
+        result = _engine.analyse(session.current_fen)
+        uci_move = result.get("best_move")
+        if not uci_move:
+            raise ValueError("Engine returned no best move")
+        next_cursor: dict = {}
+    else:
+        next_cursor = session.tree_cursor.get(uci_move) or {}
 
     board = chess.Board(session.current_fen)
     board.push(chess.Move.from_uci(uci_move))
     new_fen = board.fen()
 
-    next_cursor = session.tree_cursor.get(uci_move) or {}
     _update_session(session, uci_move, new_fen, next_cursor)
     return OpponentMoveResponse(uci_move=uci_move, fen=new_fen)
 

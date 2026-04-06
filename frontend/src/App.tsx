@@ -25,9 +25,8 @@ export function App() {
     session.status === "awaiting_decision" ||
     session.status === "complete";
 
-  function handleRestart() {
-    restart();
-    setSelectorOpen(true);
+  async function handleRestart() {
+    await restart();
   }
 
   return (
