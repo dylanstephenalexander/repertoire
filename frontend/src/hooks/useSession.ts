@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { Chess } from "chess.js";
-import { fetchOpponentMove, sendMove, startSession, undoMove } from "../api/session";
+import { fetchHint, fetchOpponentMove, sendMove, startSession, undoMove } from "../api/session";
 import type { SessionStartParams } from "../api/session";
 import type { Feedback } from "../types";
 
@@ -19,6 +19,7 @@ interface SessionState {
   feedback: Feedback | null;
   score: number;
   moveCount: number;
+  hint: { san: string; uci: string } | null;
 }
 
 interface UseSessionReturn {
@@ -28,6 +29,7 @@ interface UseSessionReturn {
   retry: () => Promise<void>;
   continuePlay: () => Promise<void>;
   restart: () => Promise<void>;
+  requestHint: () => Promise<void>;
 }
 
 const OPPONENT_THINKING_MS = 1000;
@@ -80,6 +82,7 @@ export function useSession(): UseSessionReturn {
         feedback: null,
         score: 0,
         moveCount: 0,
+        hint: null,
       };
       setSession(initial);
 
@@ -94,8 +97,8 @@ export function useSession(): UseSessionReturn {
     async (uciMove: string) => {
       if (!session || session.status !== "playing") return;
 
-      // Optimistic update: move the piece immediately so the board responds
-      // before the backend round-trip completes.
+      // Clear any active hint and optimistically move the piece
+      setSession((s) => (s ? { ...s, hint: null } : s));
       const chess = new Chess(session.fen);
       const from = uciMove.slice(0, 2);
       const to = uciMove.slice(2, 4);
@@ -152,5 +155,15 @@ export function useSession(): UseSessionReturn {
     await begin(lastParams.current);
   }, [begin]);
 
-  return { session, begin, move, retry, continuePlay, restart };
+  const requestHint = useCallback(async () => {
+    if (!session || session.status !== "playing") return;
+    try {
+      const { move_san, move_uci } = await fetchHint(session.sessionId);
+      setSession((s) => (s ? { ...s, hint: { san: move_san, uci: move_uci } } : s));
+    } catch {
+      // End of line or no hint available — ignore silently
+    }
+  }, [session]);
+
+  return { session, begin, move, retry, continuePlay, restart, requestHint };
 }

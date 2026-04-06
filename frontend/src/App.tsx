@@ -11,7 +11,7 @@ import styles from "./App.module.css";
 type AppMode = "study" | "review";
 
 export function App() {
-  const { session, begin, move, retry, continuePlay, restart } = useSession();
+  const { session, begin, move, retry, continuePlay, restart, requestHint } = useSession();
   const [selectorOpen, setSelectorOpen] = useState(false);
   const [mode, setMode] = useState<AppMode>("study");
   const [skillLevel, setSkillLevel] = useState("intermediate");
@@ -91,6 +91,7 @@ export function App() {
               orientation={session.userColor}
               onMove={move}
               disabled={isDisabled}
+              hintMove={session.hint?.uci}
             />
           )}
         </main>
@@ -99,6 +100,16 @@ export function App() {
           {session && (
             <div className={styles.score}>
               {session.score} / {session.moveCount}
+            </div>
+          )}
+          {session?.status === "playing" && (
+            <div className={styles.hintRow}>
+              <button className={styles.hintButton} onClick={requestHint}>
+                Hint
+              </button>
+              {session.hint && (
+                <span className={styles.hintText}>{session.hint.san}</span>
+              )}
             </div>
           )}
           <Feedback

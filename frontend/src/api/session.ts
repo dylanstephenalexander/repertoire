@@ -45,3 +45,7 @@ export function undoMove(sessionId: string): Promise<{ fen: string }> {
     method: "POST",
   });
 }
+
+export function fetchHint(sessionId: string): Promise<{ move_san: string; move_uci: string }> {
+  return apiFetch(`/session/${sessionId}/hint`);
+}

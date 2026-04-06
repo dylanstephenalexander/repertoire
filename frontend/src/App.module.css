@@ -39,6 +39,35 @@
   color: #aaa;
 }
 
+.hintRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hintButton {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid #444;
+  border-radius: 5px;
+  color: #aaa;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.hintButton:hover {
+  border-color: #7faaff;
+  color: #7faaff;
+}
+
+.hintText {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #64b4ff;
+  font-family: monospace;
+}
+
 .newGameButton {
   padding: 10px 16px;
   background: #2a5298;

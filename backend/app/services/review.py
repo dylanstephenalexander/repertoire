@@ -175,7 +175,7 @@ async def fetch_chess_com_games(username: str, year: int, month: int) -> list[Ga
 
     data = resp.json()
     summaries: list[GameSummary] = []
-    for g in data.get("games", []):
+    for g in reversed(data.get("games", [])):
         white_info = g.get("white", {})
         black_info = g.get("black", {})
         summaries.append(
@@ -203,9 +203,10 @@ def _format_timestamp(ts: int | str | None) -> str:
 
 def _chess_com_result(white: dict, black: dict) -> str:
     w = white.get("result", "")
+    b = black.get("result", "")
     if w == "win":
         return "1-0"
-    if w == "checkmated" or w == "resigned" or w == "timeout" or w == "abandoned":
+    if b == "win":
         return "0-1"
     return "1/2-1/2"
 

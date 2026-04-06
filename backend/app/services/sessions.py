@@ -164,6 +164,19 @@ def process_move(session_id: str, uci_move: str) -> MoveResult:
     return MoveResult(result=result, feedback=feedback, fen=new_fen, eval_cp=post_cp)
 
 
+def get_hint(session_id: str) -> dict:
+    """Return the first expected move from the tree cursor in SAN notation."""
+    session = _sessions.get(session_id)
+    if session is None:
+        raise KeyError(f"Session not found: {session_id}")
+    uci = _first_tree_move(session.tree_cursor)
+    if uci is None:
+        raise ValueError("No hint available — end of opening line")
+    board = chess.Board(session.current_fen)
+    san = board.san(chess.Move.from_uci(uci))
+    return {"move_san": san, "move_uci": uci}
+
+
 def undo_move(session_id: str) -> str:
     """Revert the session to the state before the last off-tree move.
 

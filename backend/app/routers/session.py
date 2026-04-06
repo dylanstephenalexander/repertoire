@@ -48,6 +48,16 @@ def opponent_move(session_id: str) -> OpponentMoveResponse:
         raise HTTPException(status_code=400, detail=str(exc))
 
 
+@router.get("/{session_id}/hint")
+def hint(session_id: str) -> dict:
+    try:
+        return session_svc.get_hint(session_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
 @router.post("/{session_id}/undo")
 def undo_move(session_id: str) -> dict:
     try:

@@ -8,6 +8,7 @@ interface BoardProps {
   orientation: "white" | "black";
   onMove: (uciMove: string) => void;
   disabled: boolean;
+  hintMove?: string; // UCI move to highlight (from + to squares) when a hint is active
 }
 
 /** Return the UCI move string if the drop is legal, or null. */
@@ -45,7 +46,7 @@ export function resolveMove(
   return null;
 }
 
-export function Board({ fen, orientation, onMove, disabled }: BoardProps) {
+export function Board({ fen, orientation, onMove, disabled, hintMove }: BoardProps) {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
 
   function handleSquareClick({ square }: { square: string }) {
@@ -94,8 +95,13 @@ export function Board({ fen, orientation, onMove, disabled }: BoardProps) {
     return true;
   }
 
-  // Highlight selected square
+  // Highlight selected square + hint square
   const customSquareStyles: Record<string, React.CSSProperties> = {};
+  if (hintMove) {
+    const hintStyle = { backgroundColor: "rgba(100, 180, 255, 0.55)" };
+    customSquareStyles[hintMove.slice(0, 2)] = hintStyle;
+    customSquareStyles[hintMove.slice(2, 4)] = hintStyle;
+  }
   if (selectedSquare) {
     customSquareStyles[selectedSquare] = { backgroundColor: "rgba(255, 255, 0, 0.4)" };
     // Highlight legal destinations
