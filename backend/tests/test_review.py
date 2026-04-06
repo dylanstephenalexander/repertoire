@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, patch
 from app.main import app
 from app.models.review import GameSummary
 from app.services import review as review_svc
+from app.services.review import clear_analysis_cache
 from app.services.sessions import get_engine, set_engine
 
 client = TestClient(app)
@@ -70,6 +71,7 @@ def reset_engine():
     original = get_engine()
     yield
     set_engine(original)
+    clear_analysis_cache()
 
 
 # ---------------------------------------------------------------------------

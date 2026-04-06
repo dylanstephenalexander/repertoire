@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Board } from "../Board/Board";
 import { EvalBar } from "../EvalBar/EvalBar";
 import { MoveList } from "./MoveList";
@@ -23,7 +23,11 @@ export function GameReview({ skillLevel, onBack }: GameReviewProps) {
   const { state, loadGames, analyse, goToMove, nextMove, prevMove, reset, currentFen, currentEvalCp, currentAnnotation } = useReview();
 
   const [source, setSource] = useState<"chess.com" | "lichess">("chess.com");
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(() => localStorage.getItem("review_username") ?? "");
+
+  useEffect(() => {
+    if (username) localStorage.setItem("review_username", username);
+  }, [username]);
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState(new Date().getMonth() + 1);
 

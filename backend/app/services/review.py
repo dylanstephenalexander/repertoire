@@ -5,6 +5,7 @@ Fetches games from chess.com / lichess public APIs and annotates each move
 using Stockfish (cp loss classification + skill-level-aware explanations).
 """
 
+import hashlib
 import io
 from typing import Literal
 
@@ -16,6 +17,18 @@ from app.engine.stockfish import StockfishEngine
 from app.models.review import GameSummary, MoveAnnotation, ReviewResponse
 
 REVIEW_DEPTH = 15  # separate constant so it can be tuned independently of study mode
+
+# In-memory cache: (pgn_hash, skill_level) → ReviewResponse
+_analysis_cache: dict[tuple[str, str], ReviewResponse] = {}
+
+
+def _cache_key(pgn: str, skill_level: str) -> tuple[str, str]:
+    return (hashlib.md5(pgn.encode()).hexdigest(), skill_level)
+
+
+def clear_analysis_cache() -> None:
+    """Clear the analysis cache. For testing only."""
+    _analysis_cache.clear()
 
 # Thresholds (cp loss, side-to-move perspective)
 _GOOD_THRESHOLD = 10
@@ -78,6 +91,10 @@ def _pgn_header(game: chess.pgn.Game, key: str, default: str = "?") -> str:
 
 
 def analyse_game(pgn_str: str, skill_level: str, engine: StockfishEngine) -> ReviewResponse:
+    key = _cache_key(pgn_str, skill_level)
+    if key in _analysis_cache:
+        return _analysis_cache[key]
+
     """Walk every move in the game and annotate with Stockfish."""
     game = chess.pgn.read_game(io.StringIO(pgn_str))
     if game is None:
@@ -144,7 +161,9 @@ def analyse_game(pgn_str: str, skill_level: str, engine: StockfishEngine) -> Rev
             )
         )
 
-    return ReviewResponse(white=white, black=black, result=result, moves=annotations)
+    response = ReviewResponse(white=white, black=black, result=result, moves=annotations)
+    _analysis_cache[key] = response
+    return response
 
 
 async def fetch_chess_com_games(username: str, year: int, month: int) -> list[GameSummary]:
@@ -173,9 +192,11 @@ async def fetch_chess_com_games(username: str, year: int, month: int) -> list[Ga
     return summaries
 
 
-def _format_timestamp(ts: int | None) -> str:
+def _format_timestamp(ts: int | str | None) -> str:
     if not ts:
         return ""
+    if isinstance(ts, str):
+        return ts[:10]  # already a date/datetime string
     from datetime import datetime, timezone
     return datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%d")
 
