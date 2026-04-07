@@ -108,28 +108,22 @@ def test_classify_blunder():
 # ---------------------------------------------------------------------------
 
 def test_explain_best_returns_none():
-    assert review_svc._explain("best", "e4", "e4", 0, "beginner") is None
+    assert review_svc._explain("best", "e4", "e4", 0) is None
 
 
 def test_explain_good_returns_none():
-    assert review_svc._explain("good", "e4", "e4", 5, "intermediate") is None
+    assert review_svc._explain("good", "e4", "e4", 5) is None
 
 
-def test_explain_beginner_mistake_no_cp_values():
-    result = review_svc._explain("mistake", "d4", "e4", 80, "beginner")
-    assert result is not None
-    assert "cp" not in result
-    assert "e4" in result  # best move mentioned
-
-
-def test_explain_advanced_mistake_includes_cp():
-    result = review_svc._explain("mistake", "d4", "e4", 80, "advanced")
+def test_explain_mistake_includes_cp():
+    result = review_svc._explain("mistake", "d4", "e4", 80)
     assert result is not None
     assert "80" in result
+    assert "e4" in result
 
 
-def test_explain_intermediate_blunder():
-    result = review_svc._explain("blunder", "Qh5", "Nf3", 200, "intermediate")
+def test_explain_blunder():
+    result = review_svc._explain("blunder", "Qh5", "Nf3", 200)
     assert result is not None
     assert "Qh5" in result
     assert "Nf3" in result
@@ -241,7 +235,7 @@ def test_router_analyse_returns_review_response():
     set_engine(MockReviewEngine(pre_cp=30, post_cp=-30))
     resp = client.post(
         "/review/analyse",
-        json={"pgn": ONE_MOVE_PGN, "skill_level": "intermediate"},
+        json={"pgn": ONE_MOVE_PGN},
     )
     assert resp.status_code == 200
     data = resp.json()
@@ -254,12 +248,11 @@ def test_router_analyse_returns_review_response():
     assert "fen_before" in move
 
 
-def test_router_analyse_skill_level_default_intermediate():
+def test_router_analyse_blunder_has_explanation():
     set_engine(MockReviewEngine(pre_cp=30, post_cp=100))  # big cp_loss → blunder
     resp = client.post("/review/analyse", json={"pgn": ONE_MOVE_PGN})
     assert resp.status_code == 200
     move = resp.json()["moves"][0]
-    # intermediate blunder explanation should mention cp
     assert move["explanation"] is not None
 
 

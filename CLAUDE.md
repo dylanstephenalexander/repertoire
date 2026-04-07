@@ -64,14 +64,37 @@ Explanations must match the user's skill level.
 2. Move Feedback System (Stockfish-powered, beginner-friendly)
 3. Evaluation Bar
 
+## Next to Implement
+
+**Pre-Analysis Engine Optimisation (feedback latency)**
+
+Currently `process_move` runs two serial Stockfish calls for off-tree moves: `pre_eval` (top-N lines from the position before the user moves) then `post_eval` (eval of the position after). Both block the response. Applies to Study Mode, Chaos Mode, and Maia play.
+
+**Core insight:** `pre_eval` with multipv=N already contains the cp value for any move the user plays that falls within the top N. `cp_loss = pre_cp - user_move_cp` (both from the same perspective — no second engine call needed). `post_eval` is only required when the user plays a move outside the top N (a genuine blunder Stockfish didn't rank).
+
+**Design:**
+- Add a second `StockfishEngine` instance (`_analysis_engine`) at startup alongside the existing `_engine` (used for opponent moves).
+- After `opponent_move` resolves, immediately start background pre_eval on `_analysis_engine` at higher multipv (start with 10; tune empirically — higher covers more user moves but slows the search). Store result + the FEN it was computed for on the session.
+- On `process_move` (off-tree path):
+  1. If cached pre_eval exists and FEN matches and user's move is in the lines → use cached cp, skip all engine calls.
+  2. If cached pre_eval exists but user's move is not in lines → fire post_eval on `_engine` (the main engine), wait for it only.
+  3. If pre_eval not yet done → fire post_eval on `_engine` in parallel, await both.
+- Clear the cache on every `process_move` regardless of outcome.
+- Best case (user took time to think, played a top-N move): zero engine calls at response time.
+- Worst case (user moved instantly or played a deep blunder): max(remaining pre_eval, post_eval) — never worse than current serial behaviour.
+
+**Open question at implementation time:** benchmark multipv values (5 / 10 / 15 / 20) against analysis speed in opening positions to pick the default.
+
 ## Post-MVP Ideas
 - **Game Review**: fetch past games from chess.com public API (`api.chess.com/pub/player/{username}/games/{year}/{month}`, no auth needed for public games), run move-by-move through local Stockfish, annotate blunders/mistakes/inaccuracies with "better was X" suggestions. Bypasses chess.com's depth-limited premium review using the user's own engine. Infrastructure (Stockfish, board rendering) is already in place — the work is the annotation UI.
 - **Chaos Mode**: opponent scales to user's current Elo (UCI_LimitStrength + UCI_Elo). Two-request pattern — user move then separate `opponent_move` so frontend controls animation timing. Suggest Elo adjustment after session based on performance. Note: `UCI_LimitStrength` has a floor of ~1320 Elo and doesn't simulate human-like mistakes well at lower ratings — consider **Maia Chess** for sub-1600 play. Maia is a neural net trained on millions of human games at specific Elo bands (1100–1900), predicts the move a human at that level would actually play (blunders included), and is UCI-compatible (drop-in replacement for the opponent engine at low Elos). See: [lczero.org/play/infrastructure/maia/](https://lczero.org/play/infrastructure/maia/).
 - **Promotion Picker UI**: currently `resolveMove` in `Board.tsx` always promotes to queen (hardcoded). A real picker should appear when a pawn reaches the back rank — show the four piece options (Q/R/B/N), let the user click one, then send the 5-char UCI. `react-chessboard` has a built-in `promotionDialogVariant` option; alternatively render a custom overlay. The seam is already clean: `useSession.move()` already handles 5-char UCI strings.
 - **LLM Move Explanations**: replace hardcoded feedback templates in `backend/app/services/feedback.py` with Claude API calls. The `build_*_feedback` functions are the right seam — add `pre_move_fen: str` param and swap templates for a prompt. Needs `ANTHROPIC_API_KEY` env var; template strings stay as fallback when key is absent. Prompt shape: "In this position [FEN], the player moved [played_san] instead of [best_san] (-[cp_loss]cp). Explain in one sentence for a [skill_level] player." Would produce "You shouldn't move your knight there because the Queen can take it" style explanations naturally.
 - **Desktop App (Electron/Tauri)**: bundle as a native desktop app so Stockfish, lc0, and Maia weights ship inside the package — no user install steps. Two viable options: **Electron** (Chromium + Node, larger bundle ~150MB but mature, easiest FastAPI sidecar story), **Tauri** (Rust shell + system WebView, ~10MB, faster startup, slightly more work for Python sidecar). FastAPI runs as a child process spawned by the shell on app launch; stdout/stderr piped for crash recovery. Stockfish + lc0 binaries go in `resources/` and are extracted to app data dir on first launch. Auto-update via Electron's built-in updater or Tauri updater plugin. Key remaining work: code-sign (macOS notarization required for Gatekeeper), platform-specific binary bundles (macOS arm64/x86_64 universal, Windows x64, Linux AppImage), Python bundling via PyInstaller or cx_Freeze to produce a single FastAPI executable (removes Python runtime dependency — preferred for distribution).
-- **Settings Panel**: eval bar toggle, feedback toggle, skill level selector — currently scattered. Consolidate into a `Settings/` slide-in panel (gear icon in sidebar). Designed for extensibility: each setting is a row, easy to add new ones.
+- **Settings Panel**: eval bar toggle, feedback toggle, skill level selector — currently scattered. Consolidate into a `Settings/` slide-in panel (gear icon in sidebar). Designed for extensibility: each setting is a row, easy to add new ones. **Notation mode** (AN / English / Both) is currently hardcoded to "readable" (`App.tsx` — `const notationMode: NotationMode = "readable"`); the `translateExplanation` utility and `NotationMode` type are fully implemented, just needs a settings toggle to expose it.
 - **Sub-1100 Opponents**: Maia's floor is 1100. For lower Elos: (1) clamp to Maia-1100 with a UI note, (2) Stockfish `UCI_LimitStrength` (unrealistic, misses tactics randomly not human-like), (3) community Maia-extending weights covering 800–1000 when available. Revisit when bundling for distribution.
+- **Sound Effects**: Add sound effects for moves. Experiment with differentiating sounds for castling, checkmate, check, etc.
+- **View Previous Moves**: Should be able to iterate through previous moves within a game. Back to Start, Back to Current, Back One Move, Up One Move. Cannot replay the gamestate from this point, but can view moves. -> Should moves be stored along with the eval? So that stockfish doesnt need to recalculate?`
 
 ## Architecture
 

@@ -3,6 +3,7 @@ import { Chess } from "chess.js";
 import { Board } from "./components/Board/Board";
 import { ChaosSelector } from "./components/ChaosSelector/ChaosSelector";
 import { EvalBar } from "./components/EvalBar/EvalBar";
+import { DebugPanel } from "./components/DebugPanel/DebugPanel";
 import { Feedback } from "./components/Feedback/Feedback";
 import { GameReview } from "./components/GameReview/GameReview";
 import { OpeningSelector } from "./components/OpeningSelector/OpeningSelector";
@@ -56,16 +57,7 @@ export function App() {
   }, [clearSession, clearChaosSession]); // eslint-disable-line react-hooks/exhaustive-deps
   const [skillLevel, setSkillLevel] = useState("intermediate");
   const [guided, setGuided] = useState(false);
-  const [notationMode, setNotationMode] = useState<NotationMode>(
-    () => (localStorage.getItem("notation_mode") as NotationMode | null) ?? "notation"
-  );
-
-  function cycleNotation() {
-    const next: NotationMode =
-      notationMode === "notation" ? "readable" : notationMode === "readable" ? "both" : "notation";
-    setNotationMode(next);
-    localStorage.setItem("notation_mode", next);
-  }
+  const notationMode: NotationMode = "readable";
 
   // Fetch engine status once so ChaosSelector can show what's available
   useEffect(() => {
@@ -168,6 +160,8 @@ export function App() {
   const currentColor = isStudy ? session!.userColor : chaosSession!.userColor;
   const currentStatus = isStudy ? session!.status : chaosSession!.status;
   const currentFeedback = isStudy ? (session!.feedback ?? null) : (chaosSession!.feedback ?? null);
+  const currentDebugMsg = isStudy ? (session!.debugMsg ?? null) : (chaosSession!.debugMsg ?? null);
+  const currentOpponentMoveDebug = isChaos ? (chaosSession!.opponentMoveDebug ?? null) : null;
 
   const isDisabled =
     currentStatus === "opponent_thinking" ||
@@ -249,21 +243,18 @@ export function App() {
             </div>
           )}
 
+          {/* Engine timing debug panel */}
+          <DebugPanel debugMsg={currentDebugMsg} opponentMoveDebug={currentOpponentMoveDebug} />
+
           {/* Feedback panel */}
           <Feedback
             feedback={currentFeedback}
-            isOpponentThinking={currentStatus === "opponent_thinking"}
             awaitingDecision={currentStatus === "awaiting_decision"}
             notationMode={notationMode}
             onRetry={retry}
             onContinue={continuePlay}
             onRestart={handleRestart}
           />
-          {currentFeedback && (
-            <button className={styles.notationToggle} onClick={cycleNotation} title="Toggle notation style">
-              {notationMode === "notation" ? "AN" : notationMode === "readable" ? "English" : "Both"}
-            </button>
-          )}
 
           {/* End-of-game actions */}
           {currentStatus === "complete" && (

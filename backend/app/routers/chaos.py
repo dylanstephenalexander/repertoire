@@ -31,7 +31,6 @@ def start_chaos(body: ChaosStartRequest) -> ChaosStartResponse:
         return chaos_svc.create_chaos_session(
             color=body.color,
             elo_band=body.elo_band,
-            skill_level=body.skill_level,
         )
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))

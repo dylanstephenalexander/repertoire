@@ -34,6 +34,7 @@ export interface MoveResponse {
   feedback: Feedback;
   fen: string;
   eval_cp: number | null;
+  debug_msg: string | null;
 }
 
 export interface OpponentMoveResponse {
@@ -74,6 +75,7 @@ export interface ChaosMoveResponse {
   feedback: Feedback | null;
   opening_name: string | null;
   in_theory: boolean;
+  debug_msg: string | null;
 }
 
 export interface ChaosOpponentMoveResponse {
@@ -81,6 +83,8 @@ export interface ChaosOpponentMoveResponse {
   fen: string;
   opening_name: string | null;
   in_theory: boolean;
+  opponent_move_time: number | null;
+  opponent_engine: string | null;
 }
 
 export type MoveQuality = "best" | "good" | "inaccuracy" | "mistake" | "blunder";

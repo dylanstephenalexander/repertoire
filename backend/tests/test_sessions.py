@@ -10,7 +10,6 @@ def _start_session(
     opening_id="italian",
     variation_id="giuoco_piano",
     color="white",
-    skill_level="beginner",
 ):
     resp = client.post(
         "/session/start",
@@ -19,7 +18,6 @@ def _start_session(
             "variation_id": variation_id,
             "color": color,
             "mode": "study",
-            "skill_level": skill_level,
         },
     )
     assert resp.status_code == 200
@@ -122,7 +120,7 @@ def test_off_tree_blunder_cp_loss(engine_blunder):
 def test_off_tree_with_engine_feedback_has_lines(engine_fine):
     """Mock engine lines are converted to AnalysisLine objects and attached to feedback."""
     session_svc.set_engine(engine_fine)
-    sid = _start_session(skill_level="advanced")["session_id"]
+    sid = _start_session()["session_id"]
     resp = client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
     lines = resp.json()["feedback"]["lines"]
     assert lines is not None
@@ -133,7 +131,7 @@ def test_off_tree_feedback_lines_have_san(engine_fine):
     """Lines attached to feedback must carry SAN notation, not raw UCI strings."""
     import re
     session_svc.set_engine(engine_fine)
-    sid = _start_session(skill_level="advanced")["session_id"]
+    sid = _start_session()["session_id"]
     resp = client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
     uci_pattern = re.compile(r'^[a-h][1-8][a-h][1-8][qrbn]?$')
     for line in resp.json()["feedback"]["lines"]:
@@ -219,17 +217,6 @@ def test_najdorf_variation_session():
 
 
 # ---------------------------------------------------------------------------
-# Skill level
-# ---------------------------------------------------------------------------
-
-def test_beginner_explanation_no_jargon():
-    sid = _start_session(skill_level="beginner")["session_id"]
-    resp = client.post(f"/session/{sid}/move", json={"uci_move": "e2e4"})
-    explanation = resp.json()["feedback"]["explanation"]
-    assert "cp" not in explanation
-
-
-# ---------------------------------------------------------------------------
 # Undo
 # ---------------------------------------------------------------------------
 
@@ -277,7 +264,7 @@ def test_elo_set_on_engine_for_off_tree_move():
     call_log: list[int | None] = []
 
     class TrackingEngine:
-        def analyse(self, fen, moves=None):
+        def analyse(self, fen, moves=None, multipv=None, depth=None):
             return {"eval_cp": 20, "best_move": "e2e4", "lines": [], "depth": 15}
 
         def set_elo(self, elo: int) -> None:
@@ -297,7 +284,6 @@ def test_elo_set_on_engine_for_off_tree_move():
             "variation_id": "giuoco_piano",
             "color": "white",
             "mode": "study",
-            "skill_level": "beginner",
             "elo": 1500,
         },
     )
@@ -331,3 +317,112 @@ def test_sessions_isolated_between_tests():
     client.post(f"/session/{sid}/move", json={"uci_move": "e2e4"})
     session_svc.clear_sessions()
     assert client.get(f"/session/{sid}/state").status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# Pre-eval cache paths
+# ---------------------------------------------------------------------------
+
+def test_pre_eval_cache_hit_uses_line_cp_no_extra_calls():
+    """
+    Case 1: pre_eval done, user's move is in the top-N lines.
+    Only one engine call (the pre_eval itself) — no post_eval needed.
+    """
+    call_log: list[str] = []
+
+    class TrackingEngine:
+        def analyse(self, fen, moves=None, multipv=None, depth=None):
+            call_log.append(fen)
+            # Return a line for d2d4 with cp=15 (pre_cp=20 → cp_loss=5, alternative)
+            return {
+                "eval_cp": 20,
+                "best_move": "e2e4",
+                "lines": [
+                    {"move_uci": "e2e4", "cp": 20},
+                    {"move_uci": "d2d4", "cp": 15},
+                ],
+                "depth": 12,
+            }
+
+    engine = TrackingEngine()
+    session_svc.set_engine(engine)
+    session_svc.set_analysis_engine(engine)
+
+    sid = _start_session()["session_id"]
+
+    # Inject a completed pre_eval future for this session (simulates opponent move having fired it)
+    from concurrent.futures import Future
+    f: Future = Future()
+    f.set_result((engine.analyse("ignored"), 0.1))  # (result, elapsed)
+    call_log.clear()  # reset after the seeding call above
+    session_svc._pre_eval_futures[sid] = f
+    session_svc._pre_eval_submit_times[sid] = 0.0
+
+    resp = client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
+    assert resp.status_code == 200
+    assert resp.json()["result"] == "alternative"
+    # No engine calls should have been made during process_move
+    assert call_log == [], f"Expected zero engine calls, got: {call_log}"
+
+
+def test_pre_eval_cache_hit_move_outside_lines_fires_post_eval():
+    """
+    Case 2: pre_eval done, but user's move is not in the top-N lines.
+    One post_eval call should fire on the main engine.
+    """
+    call_log: list[str] = []
+
+    class TrackingEngine:
+        def analyse(self, fen, moves=None, multipv=None, depth=None):
+            call_log.append(fen)
+            return {"eval_cp": 200, "best_move": "e2e4", "lines": [{"move_uci": "e2e4", "cp": 200}], "depth": 12}
+
+    engine = TrackingEngine()
+    session_svc.set_engine(engine)
+    session_svc.set_analysis_engine(engine)
+
+    sid = _start_session()["session_id"]
+
+    from concurrent.futures import Future
+    f: Future = Future()
+    # Pre_eval has no line for g1h3
+    f.set_result(({"eval_cp": 20, "best_move": "e2e4", "lines": [{"move_uci": "e2e4", "cp": 20}], "depth": 12}, 0.1))
+    call_log.clear()
+    session_svc._pre_eval_futures[sid] = f
+    session_svc._pre_eval_submit_times[sid] = 0.0
+
+    resp = client.post(f"/session/{sid}/move", json={"uci_move": "g1h3"})
+    assert resp.status_code == 200
+    assert resp.json()["result"] in ("mistake", "blunder")
+    # Exactly one post_eval call should have been made
+    assert len(call_log) == 1, f"Expected exactly 1 engine call, got: {call_log}"
+
+
+def test_pre_eval_cache_miss_falls_back_to_serial():
+    """
+    Case: no pre_eval future present (analysis engine absent / cleared).
+    Falls back to the original two-call serial path.
+    """
+    call_log: list[str] = []
+
+    class TrackingEngine:
+        def __init__(self):
+            self._n = 0
+        def analyse(self, fen, moves=None, multipv=None, depth=None):
+            call_log.append(fen)
+            cp = 20 if self._n == 0 else 60
+            self._n += 1
+            return {"eval_cp": cp, "best_move": "e2e4", "lines": [{"move_uci": "e2e4", "cp": cp}], "depth": 12}
+        def set_elo(self, elo): pass
+        def clear_elo(self): pass
+
+    engine = TrackingEngine()
+    session_svc.set_engine(engine)
+    # No analysis engine — forces serial path
+    session_svc.set_analysis_engine(None)
+
+    sid = _start_session()["session_id"]
+    resp = client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
+    assert resp.status_code == 200
+    assert resp.json()["result"] in ("alternative", "mistake", "blunder")
+    assert len(call_log) == 2, f"Expected 2 serial engine calls, got: {call_log}"

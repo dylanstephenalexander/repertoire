@@ -22,7 +22,6 @@ def start_session(body: SessionStartRequest) -> SessionStartResponse:
             color=body.color,
             mode=body.mode,
             elo=body.elo,
-            skill_level=body.skill_level,
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))

@@ -8,7 +8,6 @@ class SessionStartRequest(BaseModel):
     color: str  # "white" | "black"
     mode: str  # "study" | "chaos"
     elo: int | None = None
-    skill_level: str = "intermediate"  # "beginner" | "intermediate" | "advanced"
 
 
 class SessionStartResponse(BaseModel):
@@ -24,7 +23,6 @@ class SessionState(BaseModel):
     color: str
     mode: str
     elo: int | None
-    skill_level: str
     current_fen: str
     move_history: list[str]
     score: int

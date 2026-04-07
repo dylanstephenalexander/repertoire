@@ -28,7 +28,6 @@ class GameSummary(BaseModel):
 
 class ReviewRequest(BaseModel):
     pgn: str
-    skill_level: str = "intermediate"
 
 
 class ReviewResponse(BaseModel):

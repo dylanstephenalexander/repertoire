@@ -36,6 +36,6 @@ def analyse_game(body: ReviewRequest) -> ReviewResponse:
     if engine is None:
         raise HTTPException(status_code=503, detail="Engine not available")
     try:
-        return review_svc.analyse_game(body.pgn, body.skill_level, engine)
+        return review_svc.analyse_game(body.pgn, engine)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))

@@ -34,6 +34,7 @@ interface SessionState {
   userColor: "white" | "black";
   status: SessionStatus;
   feedback: Feedback | null;
+  debugMsg: string | null;
   score: number;
   moveCount: number;
   hint: { san: string; uci: string } | null;
@@ -104,6 +105,7 @@ export function useSession(): UseSessionReturn {
         userColor: params.color,
         status: "playing",
         feedback: null,
+        debugMsg: null,
         score: 0,
         moveCount: 0,
         hint: null,
@@ -143,6 +145,7 @@ export function useSession(): UseSessionReturn {
               ...s,
               fen: resp.fen,
               feedback: mate ?? resp.feedback,
+              debugMsg: resp.debug_msg ?? null,
               score: newScore,
               moveCount: newMoveCount,
               ...(mate ? { status: "complete" as const } : {}),

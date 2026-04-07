@@ -7,7 +7,6 @@ import type { Feedback as FeedbackType } from "../../types";
 const noop = vi.fn();
 
 const defaultProps = {
-  isOpponentThinking: false,
   awaitingDecision: false,
   notationMode: "notation" as const,
   onRetry: noop,
@@ -26,16 +25,11 @@ const makeFeedback = (
 });
 
 describe("Feedback", () => {
-  it("renders nothing visible when no feedback and not thinking", () => {
+  it("renders nothing when no feedback", () => {
     const { container } = render(
       <Feedback {...defaultProps} feedback={null} />
     );
     expect(container.firstChild).toBeNull();
-  });
-
-  it("shows Thinking... when opponent is thinking", () => {
-    render(<Feedback {...defaultProps} feedback={null} isOpponentThinking={true} />);
-    expect(screen.getByText(/thinking/i)).toBeInTheDocument();
   });
 
   it("shows correct label and explanation", () => {
@@ -52,18 +46,6 @@ describe("Feedback", () => {
   it("shows blunder label", () => {
     render(<Feedback {...defaultProps} feedback={makeFeedback("blunder")} />);
     expect(screen.getByText("Blunder")).toBeInTheDocument();
-  });
-
-  it("thinking takes priority over existing feedback", () => {
-    render(
-      <Feedback
-        {...defaultProps}
-        feedback={makeFeedback("mistake")}
-        isOpponentThinking={true}
-      />
-    );
-    expect(screen.queryByText("Mistake")).not.toBeInTheDocument();
-    expect(screen.getByText(/thinking/i)).toBeInTheDocument();
   });
 
   it("shows Retry, Continue, Restart buttons when awaiting decision", () => {

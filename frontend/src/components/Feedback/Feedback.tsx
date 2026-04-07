@@ -4,7 +4,6 @@ import styles from "./Feedback.module.css";
 
 interface FeedbackProps {
   feedback: FeedbackType | null;
-  isOpponentThinking: boolean;
   awaitingDecision: boolean;
   notationMode: NotationMode;
   onRetry: () => void;
@@ -22,21 +21,12 @@ const QUALITY_LABELS: Record<FeedbackType["quality"], string> = {
 
 export function Feedback({
   feedback,
-  isOpponentThinking,
   awaitingDecision,
   notationMode,
   onRetry,
   onContinue,
   onRestart,
 }: FeedbackProps) {
-  if (isOpponentThinking) {
-    return (
-      <div className={styles.panel}>
-        <p className={styles.thinking}>Thinking…</p>
-      </div>
-    );
-  }
-
   if (!feedback) {
     return null;
   }

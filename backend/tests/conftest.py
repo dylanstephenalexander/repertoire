@@ -27,7 +27,7 @@ class MockStockfishEngine:
         ]
         self._call_count = 0
 
-    def analyse(self, fen: str, moves=None) -> dict:
+    def analyse(self, fen: str, moves=None, multipv=None, depth=None) -> dict:
         # First call = pre-move position, second = post-move position
         if self._call_count % 2 == 0:
             result = {

@@ -84,7 +84,6 @@ def test_off_tree_move_has_lines(real_engine):
             "variation_id": "giuoco_piano",
             "color": "white",
             "mode": "study",
-            "skill_level": "advanced",
         },
     )
     sid = resp.json()["session_id"]
@@ -108,7 +107,6 @@ def test_off_tree_lines_are_legal_moves(real_engine):
             "variation_id": "giuoco_piano",
             "color": "white",
             "mode": "study",
-            "skill_level": "intermediate",
         },
     )
     sid = resp.json()["session_id"]
@@ -129,7 +127,6 @@ def test_correct_move_has_no_lines(real_engine):
             "variation_id": "giuoco_piano",
             "color": "white",
             "mode": "study",
-            "skill_level": "advanced",
         },
     )
     sid = resp.json()["session_id"]

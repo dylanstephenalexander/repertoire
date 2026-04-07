@@ -18,12 +18,12 @@ from app.models.review import GameSummary, MoveAnnotation, ReviewResponse
 
 REVIEW_DEPTH = 15  # separate constant so it can be tuned independently of study mode
 
-# In-memory cache: (pgn_hash, skill_level) → ReviewResponse
-_analysis_cache: dict[tuple[str, str], ReviewResponse] = {}
+# In-memory cache: pgn_hash → ReviewResponse
+_analysis_cache: dict[str, ReviewResponse] = {}
 
 
-def _cache_key(pgn: str, skill_level: str) -> tuple[str, str]:
-    return (hashlib.md5(pgn.encode()).hexdigest(), skill_level)
+def _cache_key(pgn: str) -> str:
+    return hashlib.md5(pgn.encode()).hexdigest()
 
 
 def clear_analysis_cache() -> None:
@@ -48,37 +48,11 @@ def _classify(cp_loss: int) -> Literal["best", "good", "inaccuracy", "mistake", 
     return "blunder"
 
 
-def _explain(
-    quality: str,
-    played_san: str,
-    best_san: str | None,
-    cp_loss: int,
-    skill_level: str,
-) -> str | None:
-    """Return a skill-level-aware explanation for annotated moves.
-
-    Returns None for 'best' and 'good' — no comment needed.
-    """
+def _explain(quality: str, played_san: str, best_san: str | None, cp_loss: int) -> str | None:
+    """Return an explanation for annotated moves. Returns None for 'best' and 'good'."""
     if quality in ("best", "good"):
         return None
-
     alt = best_san or "the engine's suggestion"
-
-    if skill_level == "beginner":
-        if quality == "inaccuracy":
-            return f"{played_san} is a slight inaccuracy. {alt} was a bit better."
-        if quality == "mistake":
-            return f"{played_san} gives your opponent an advantage. Try {alt} instead."
-        return f"Oops — {played_san} is a big mistake. {alt} was the right move here."
-
-    if skill_level == "advanced":
-        if quality == "inaccuracy":
-            return f"Inaccuracy: {played_san} (-{cp_loss} cp). Better: {alt}."
-        if quality == "mistake":
-            return f"Mistake: {played_san} (-{cp_loss} cp). Best: {alt}."
-        return f"Blunder: {played_san} (-{cp_loss} cp). Best: {alt}."
-
-    # intermediate (default)
     if quality == "inaccuracy":
         return f"{played_san} is slightly inaccurate (-{cp_loss} cp). {alt} was better."
     if quality == "mistake":
@@ -90,8 +64,8 @@ def _pgn_header(game: chess.pgn.Game, key: str, default: str = "?") -> str:
     return game.headers.get(key, default)
 
 
-def analyse_game(pgn_str: str, skill_level: str, engine: StockfishEngine) -> ReviewResponse:
-    key = _cache_key(pgn_str, skill_level)
+def analyse_game(pgn_str: str, engine: StockfishEngine) -> ReviewResponse:
+    key = _cache_key(pgn_str)
     if key in _analysis_cache:
         return _analysis_cache[key]
 
@@ -144,7 +118,7 @@ def analyse_game(pgn_str: str, skill_level: str, engine: StockfishEngine) -> Rev
         quality = _classify(cp_loss)
         # Only include best_move_san in annotation when there's something to comment on
         annotated_best = best_move_san if quality not in ("best", "good") else None
-        explanation = _explain(quality, played_san, annotated_best, cp_loss, skill_level)
+        explanation = _explain(quality, played_san, annotated_best, cp_loss)
 
         annotations.append(
             MoveAnnotation(

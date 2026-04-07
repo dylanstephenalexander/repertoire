@@ -1,4 +1,6 @@
+import time
 import uuid
+from concurrent.futures import Future, ThreadPoolExecutor
 from typing import Any
 
 import chess
@@ -17,11 +19,30 @@ from app.services.openings import get_variation_tree
 # In-memory session store
 _sessions: dict[str, SessionState] = {}
 
-# Shared engine instance (set during app lifespan)
+# Primary engine: opponent moves + serial fallback analysis
 _engine: StockfishEngine | None = None
 
+# Dedicated analysis engine: background pre_eval only
+_analysis_engine: StockfishEngine | None = None
 
-def set_engine(engine: StockfishEngine) -> None:
+# Single-worker executor serialises calls to _analysis_engine
+_analysis_executor: ThreadPoolExecutor = ThreadPoolExecutor(max_workers=1)
+
+# Single-worker executor for parallel post_eval (Case 3 fallback)
+_post_eval_executor: ThreadPoolExecutor = ThreadPoolExecutor(max_workers=1)
+
+# Keyed by session_id; holds the in-flight or completed pre_eval Future
+_pre_eval_futures: dict[str, "Future[dict]"] = {}
+
+# Timestamp (perf_counter) when each pre_eval was submitted — used to measure think time
+_pre_eval_submit_times: dict[str, float] = {}
+
+# Number of candidate moves analysed in background pre_eval.
+# Start at 3 (same cost as old inline pre_eval) and increase once benchmarked.
+PRE_EVAL_MULTIPV = 3
+
+
+def set_engine(engine: StockfishEngine | None) -> None:
     global _engine
     _engine = engine
 
@@ -30,10 +51,183 @@ def get_engine() -> StockfishEngine | None:
     return _engine
 
 
+def set_analysis_engine(engine: StockfishEngine | None) -> None:
+    global _analysis_engine
+    _analysis_engine = engine
+
+
+def get_analysis_engine() -> StockfishEngine | None:
+    return _analysis_engine
+
+
 def clear_sessions() -> None:
     """Clear all in-memory sessions. For testing only."""
     _sessions.clear()
+    _pre_eval_futures.clear()
+    _pre_eval_submit_times.clear()
 
+
+# ---------------------------------------------------------------------------
+# Pre-eval background machinery (shared with chaos.py)
+# ---------------------------------------------------------------------------
+
+def _run_analysis(
+    engine: StockfishEngine,
+    fen: str,
+    elo: int | None,
+    multipv: int,
+    depth: int,
+) -> tuple[dict, float]:
+    """Run a single Stockfish analysis call. Returns (result, elapsed_seconds)."""
+    if elo is not None:
+        engine.set_elo(elo)
+    try:
+        t0 = time.perf_counter()
+        result = engine.analyse(fen, multipv=multipv, depth=depth)
+        return result, time.perf_counter() - t0
+    finally:
+        if elo is not None:
+            engine.clear_elo()
+
+
+def submit_pre_eval(session_id: str, fen: str, elo: int | None) -> None:
+    """
+    Fire background pre_eval on the analysis engine after an opponent move.
+    No-op when the analysis engine is unavailable.
+    """
+    if _analysis_engine is None:
+        return
+    future = _analysis_executor.submit(
+        _run_analysis, _analysis_engine, fen, elo, PRE_EVAL_MULTIPV, FEEDBACK_DEPTH
+    )
+    _pre_eval_futures[session_id] = future
+    _pre_eval_submit_times[session_id] = time.perf_counter()
+
+
+def pop_pre_eval_future(session_id: str) -> "tuple[Future[dict], float] | tuple[None, None]":
+    """Remove and return (future, submit_time) for a session, or (None, None)."""
+    future = _pre_eval_futures.pop(session_id, None)
+    submit_time = _pre_eval_submit_times.pop(session_id, None)
+    if future is None or submit_time is None:
+        return None, None
+    return future, submit_time
+
+
+def _find_line_cp(lines: list[dict], uci_move: str) -> int | None:
+    """Return the cp value for uci_move from a list of engine lines, or None."""
+    for line in lines:
+        if line.get("move_uci") == uci_move:
+            return line.get("cp")
+    return None
+
+
+def evaluate_off_tree_eval(
+    session_id: str,
+    pre_fen: str,
+    new_fen: str,
+    uci_move: str,
+    elo: int | None,
+) -> tuple[int, list[dict], str | None, str]:
+    """
+    Compute cp_loss and supporting data for an off-tree move.
+
+    Returns (cp_loss, raw_pre_eval_lines, best_move_uci, debug_msg).
+
+    Three cases, best-to-worst latency:
+      1. Pre_eval done + user's move in top-N lines → zero engine calls.
+      2. Pre_eval done + move not in lines         → one fast post_eval call.
+      3. Pre_eval not done (or absent)             → pre + post in parallel,
+                                                     then prefer line cp if available.
+    """
+    future, submit_time = pop_pre_eval_future(session_id)
+    now = time.perf_counter()
+    think_time = (now - submit_time) if submit_time is not None else None
+    think_line = f"You thought for: {think_time:.2f}s" if think_time is not None else "Think time: unknown"
+
+    if future is None or _engine is None:
+        (cp_loss, lines, best_move), pre_t, post_t = _evaluate_serial(pre_fen, new_fen, uci_move, elo)
+        return (cp_loss, lines, best_move,
+                f"{think_line}\nPre-move Stockfish: {pre_t:.2f}s\nPost-move Stockfish: {post_t:.2f}s")
+
+    if future.done():
+        pre_eval, pre_t = future.result()
+        user_line_cp = _find_line_cp(pre_eval.get("lines", []), uci_move)
+        if user_line_cp is not None:
+            cp_loss, lines, best_move = _evaluate_from_pre_eval_no_post(pre_eval, uci_move)
+            return (cp_loss, lines, best_move,
+                    f"{think_line}\nPre-move Stockfish: {pre_t:.2f}s\nPost-move Stockfish: skipped")
+        cp_loss, lines, best_move, post_t = _evaluate_post_only(pre_eval, new_fen, uci_move, elo)
+        return (cp_loss, lines, best_move,
+                f"{think_line}\nPre-move Stockfish: {pre_t:.2f}s\nPost-move Stockfish: {post_t:.2f}s")
+
+    # Pre-move still running — fire post_eval in parallel
+    post_future = _post_eval_executor.submit(
+        _run_analysis, _engine, new_fen, elo, 1, FEEDBACK_DEPTH // 2
+    )
+
+    t0 = time.perf_counter()
+    pre_eval, pre_t = future.result()
+    pre_wait = time.perf_counter() - t0
+
+    user_line_cp = _find_line_cp(pre_eval.get("lines", []), uci_move)
+    pre_cp = pre_eval.get("eval_cp") or 0
+
+    if user_line_cp is not None:
+        post_future.cancel()
+        cp_loss = max(0, pre_cp - user_line_cp)
+        debug = f"{think_line}\nPre-move Stockfish: {pre_t:.2f}s (waited {pre_wait:.2f}s extra)\nPost-move Stockfish: skipped"
+    else:
+        post_result, post_t = post_future.result()
+        post_cp = post_result.get("eval_cp") or 0
+        cp_loss = max(0, pre_cp + post_cp)
+        debug = f"{think_line}\nPre-move Stockfish: {pre_t:.2f}s (waited {pre_wait:.2f}s extra)\nPost-move Stockfish: {post_t:.2f}s"
+
+    return cp_loss, pre_eval.get("lines", []), pre_eval.get("best_move"), debug
+
+
+def _evaluate_from_pre_eval_no_post(
+    pre_eval: dict,
+    uci_move: str,
+) -> tuple[int, list[dict], str | None]:
+    """Move was in pre_eval lines — compute cp_loss directly, no engine call."""
+    user_line_cp = _find_line_cp(pre_eval.get("lines", []), uci_move)
+    pre_cp = pre_eval.get("eval_cp") or 0
+    cp_loss = max(0, pre_cp - (user_line_cp or 0))
+    return cp_loss, pre_eval.get("lines", []), pre_eval.get("best_move")
+
+
+def _evaluate_post_only(
+    pre_eval: dict,
+    new_fen: str,
+    uci_move: str,
+    elo: int | None,
+) -> tuple[int, list[dict], str | None, float]:
+    """Move was outside pre_eval lines — run post_eval, return with its elapsed time."""
+    pre_cp = pre_eval.get("eval_cp") or 0
+    post_result, post_t = _run_analysis(_engine, new_fen, elo, 1, FEEDBACK_DEPTH // 2)
+    post_cp = post_result.get("eval_cp") or 0
+    cp_loss = max(0, pre_cp + post_cp)
+    return cp_loss, pre_eval.get("lines", []), pre_eval.get("best_move"), post_t
+
+
+def _evaluate_serial(
+    pre_fen: str,
+    new_fen: str,
+    uci_move: str,
+    elo: int | None,
+) -> tuple[tuple[int, list[dict], str | None], float, float]:
+    """Two-call serial path (analysis engine absent). Returns ((cp_loss, lines, best), pre_t, post_t)."""
+    pre_result, pre_t = _run_analysis(_engine, pre_fen, elo, PRE_EVAL_MULTIPV, FEEDBACK_DEPTH)
+    post_result, post_t = _run_analysis(_engine, new_fen, elo, 1, FEEDBACK_DEPTH // 2)
+    pre_cp = pre_result.get("eval_cp") or 0
+    post_cp = post_result.get("eval_cp") or 0
+    cp_loss = max(0, pre_cp + post_cp)
+    return (cp_loss, pre_result.get("lines", []), pre_result.get("best_move")), pre_t, post_t
+
+
+# ---------------------------------------------------------------------------
+# Session CRUD
+# ---------------------------------------------------------------------------
 
 def create_session(
     opening_id: str,
@@ -41,7 +235,6 @@ def create_session(
     color: str,
     mode: str,
     elo: int | None,
-    skill_level: str,
 ) -> SessionStartResponse:
     tree = get_variation_tree(opening_id, variation_id)
     if tree is None:
@@ -55,7 +248,6 @@ def create_session(
         color=color,
         mode=mode,
         elo=elo,
-        skill_level=skill_level,
         current_fen=board.fen(),
         move_history=[],
         score=0,
@@ -95,17 +287,22 @@ def process_move(session_id: str, uci_move: str) -> MoveResult:
     in_tree = uci_move in session.tree_cursor
 
     if in_tree:
+        future, submit_time = pop_pre_eval_future(session_id)
+        think_line = f"You thought for: {time.perf_counter() - submit_time:.2f}s" if submit_time is not None else "Think time: unknown"
+        if future is not None:
+            in_tree_debug = f"{think_line}\nPre-move Stockfish: was running — discarded (in-book move)\nPost-move Stockfish: skipped"
+        else:
+            in_tree_debug = f"{think_line}\nPre-move Stockfish: not running\nPost-move Stockfish: skipped (in-book move)"
         session.tree_cursor = session.tree_cursor[uci_move] or {}
         session.score += 1
-        feedback = build_correct_feedback(session.skill_level, played_san)
+        feedback = build_correct_feedback(played_san)
         _update_session(session, uci_move, new_fen, session.tree_cursor)
-        return MoveResult(result="correct", feedback=feedback, fen=new_fen)
+        return MoveResult(result="correct", feedback=feedback, fen=new_fen, debug_msg=in_tree_debug)
 
     # Off-tree: snapshot state so the client can undo if desired
     session.prev_fen = session.current_fen
     session.prev_cursor = dict(session.tree_cursor)
 
-    # Off-tree: evaluate with Stockfish
     if _engine is None:
         feedback = Feedback(
             quality="mistake",
@@ -114,24 +311,13 @@ def process_move(session_id: str, uci_move: str) -> MoveResult:
         _update_session(session, uci_move, new_fen, {})
         return MoveResult(result="mistake", feedback=feedback, fen=new_fen)
 
-    if session.elo is not None:
-        _engine.set_elo(session.elo)
-    try:
-        pre_eval = _engine.analyse(session.current_fen, depth=FEEDBACK_DEPTH)
-        post_eval = _engine.analyse(new_fen, depth=FEEDBACK_DEPTH)
-    finally:
-        if session.elo is not None:
-            _engine.clear_elo()
+    cp_loss, raw_lines, best_move_uci, debug_msg = evaluate_off_tree_eval(
+        session_id, session.current_fen, new_fen, uci_move, session.elo
+    )
 
-    pre_cp = pre_eval["eval_cp"] or 0
-    post_cp = post_eval["eval_cp"] or 0
-    cp_loss = max(0, pre_cp + post_cp)
-
-    # Convert raw engine lines → AnalysisLine with SAN
     pre_board = chess.Board(session.current_fen)
-    lines = _to_analysis_lines(pre_eval.get("lines", []), pre_board)
-
-    best_san = lines[0].move_san if lines else (pre_eval.get("best_move") or uci_move)
+    lines = _to_analysis_lines(raw_lines, pre_board)
+    best_san = lines[0].move_san if lines else (best_move_uci or uci_move)
 
     mainline_uci = _first_tree_move(session.tree_cursor)
     mainline_san: str | None = None
@@ -143,7 +329,6 @@ def process_move(session_id: str, uci_move: str) -> MoveResult:
 
     if cp_loss <= ALTERNATIVE_THRESHOLD_CP:
         feedback = build_alternative_feedback(
-            session.skill_level,
             played_san,
             mainline_san or best_san,
             cp_loss,
@@ -152,7 +337,6 @@ def process_move(session_id: str, uci_move: str) -> MoveResult:
         result = "alternative"
     else:
         feedback = build_mistake_feedback(
-            session.skill_level,
             played_san,
             best_san,
             cp_loss,
@@ -161,7 +345,7 @@ def process_move(session_id: str, uci_move: str) -> MoveResult:
         result = feedback.quality
 
     _update_session(session, uci_move, new_fen, {})
-    return MoveResult(result=result, feedback=feedback, fen=new_fen, eval_cp=post_cp)
+    return MoveResult(result=result, feedback=feedback, fen=new_fen, debug_msg=debug_msg)
 
 
 def get_hint(session_id: str) -> dict:
@@ -226,6 +410,10 @@ def get_opponent_move(session_id: str) -> OpponentMoveResponse:
     new_fen = board.fen()
 
     _update_session(session, uci_move, new_fen, next_cursor)
+
+    # Start background pre_eval for the position the user now faces
+    submit_pre_eval(session_id, new_fen, session.elo)
+
     return OpponentMoveResponse(uci_move=uci_move, fen=new_fen, line_complete=not next_cursor)
 
 

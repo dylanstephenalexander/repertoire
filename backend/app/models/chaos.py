@@ -11,7 +11,6 @@ class EngineStatusResponse(BaseModel):
 class ChaosStartRequest(BaseModel):
     color: str           # "white" | "black" | "random"
     elo_band: int        # 1100–1900 for Maia, 2000 for full Stockfish
-    skill_level: str = "intermediate"
 
 
 class ChaosStartResponse(BaseModel):
@@ -30,6 +29,7 @@ class ChaosMoveResponse(BaseModel):
     feedback: Feedback | None = None
     opening_name: str | None = None   # most specific theory name seen so far
     in_theory: bool = False           # True if this exact position is in the explorer
+    debug_msg: str | None = None      # temporary: pre-eval cache diagnostics
 
 
 class ChaosOpponentMoveResponse(BaseModel):
@@ -37,3 +37,5 @@ class ChaosOpponentMoveResponse(BaseModel):
     fen: str
     opening_name: str | None = None
     in_theory: bool = False
+    opponent_move_time: float | None = None   # seconds engine spent computing the move
+    opponent_engine: str | None = None        # "Maia" | "Stockfish"

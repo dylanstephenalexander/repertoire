@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 import chess
 
 from app.engine.maia import MaiaEngine, available_maia_models, lc0_available
-from app.engine.stockfish import FEEDBACK_DEPTH
+
 from app.models.chaos import (
     ChaosOpponentMoveResponse,
     ChaosMoveResponse,
@@ -14,11 +14,14 @@ from app.models.chaos import (
 from app.models.feedback import AnalysisLine, Feedback
 from app.services.feedback import (
     ALTERNATIVE_THRESHOLD_CP,
-    build_alternative_feedback,
     build_mistake_feedback,
 )
 from app.services.opening_detect import detect_opening
-from app.services.sessions import get_engine  # shared Stockfish instance
+from app.services.sessions import (  # shared Stockfish + pre_eval machinery
+    evaluate_off_tree_eval,
+    get_engine,
+    submit_pre_eval,
+)
 
 # In-memory chaos session store
 _chaos_sessions: dict[str, "_ChaosSession"] = {}
@@ -35,7 +38,6 @@ class _ChaosSession:
     session_id: str
     user_color: str        # "white" | "black"
     elo_band: int
-    skill_level: str
     current_fen: str
     move_history: list[str] = field(default_factory=list)
     opening_name: str | None = None  # most specific name confirmed so far
@@ -51,7 +53,6 @@ def engine_status() -> dict:
 def create_chaos_session(
     color: str,
     elo_band: int,
-    skill_level: str,
 ) -> ChaosStartResponse:
     if color == "random":
         color = random.choice(["white", "black"])
@@ -60,7 +61,6 @@ def create_chaos_session(
         session_id=str(uuid.uuid4()),
         user_color=color,
         elo_band=elo_band,
-        skill_level=skill_level,
         current_fen=chess.Board().fen(),
     )
     _chaos_sessions[session.session_id] = session
@@ -102,23 +102,28 @@ def process_chaos_move(
         session.opening_name = opening_hit
 
     feedback: Feedback | None = None
+    debug_msg: str | None = None
     if feedback_enabled:
-        feedback = _build_chaos_feedback(pre_fen, new_fen, played_san, uci_move, session.skill_level)
+        feedback, debug_msg = _build_chaos_feedback(session_id, pre_fen, new_fen, played_san, uci_move)
 
     return ChaosMoveResponse(
         fen=new_fen,
         feedback=feedback,
         opening_name=session.opening_name,
         in_theory=opening_hit is not None,
+        debug_msg=debug_msg,
     )
 
 
 def get_chaos_opponent_move(session_id: str) -> ChaosOpponentMoveResponse:
+    import time
     session = _chaos_sessions.get(session_id)
     if session is None:
         raise KeyError(f"Chaos session not found: {session_id}")
 
+    t0 = time.perf_counter()
     uci_move = _get_engine_move(session.current_fen, session.elo_band)
+    engine_move_time = time.perf_counter() - t0
 
     board = chess.Board(session.current_fen)
     move = chess.Move.from_uci(uci_move)
@@ -135,9 +140,15 @@ def get_chaos_opponent_move(session_id: str) -> ChaosOpponentMoveResponse:
     if opening_hit is not None:
         session.opening_name = opening_hit
 
+    # Start background pre_eval for the position the user now faces
+    submit_pre_eval(session.session_id, new_fen, None)
+
+    engine_label = "Maia" if session.elo_band < STOCKFISH_BAND else "Stockfish"
     return ChaosOpponentMoveResponse(
         uci_move=uci_move,
         fen=new_fen,
+        opponent_move_time=engine_move_time,
+        opponent_engine=engine_label,
         opening_name=session.opening_name,
         in_theory=opening_hit is not None,
     )
@@ -180,34 +191,30 @@ def _get_engine_move(fen: str, elo_band: int) -> str:
 
 
 def _build_chaos_feedback(
+    session_id: str,
     pre_fen: str,
     post_fen: str,
     played_san: str,
     uci_move: str,
-    skill_level: str,
-) -> Feedback | None:
-    engine = get_engine()
-    if engine is None:
-        return None
+) -> tuple[Feedback | None, str | None]:
+    if get_engine() is None:
+        return None, None
 
     try:
-        pre_eval = engine.analyse(pre_fen, depth=FEEDBACK_DEPTH)
-        post_eval = engine.analyse(post_fen, depth=FEEDBACK_DEPTH)
+        cp_loss, raw_lines, best_move_uci, debug_msg = evaluate_off_tree_eval(
+            session_id, pre_fen, post_fen, uci_move, None
+        )
     except Exception:
-        return None
-
-    pre_cp = pre_eval.get("eval_cp") or 0
-    post_cp = post_eval.get("eval_cp") or 0
-    cp_loss = max(0, pre_cp + post_cp)
+        return None, None
 
     if cp_loss <= ALTERNATIVE_THRESHOLD_CP:
-        return None  # Good move — no feedback needed
+        return None, debug_msg  # Good move — no feedback needed, but still emit debug
 
     pre_board = chess.Board(pre_fen)
-    lines = _to_analysis_lines(pre_eval.get("lines", []), pre_board)
-    best_san = lines[0].move_san if lines else (pre_eval.get("best_move") or uci_move)
+    lines = _to_analysis_lines(raw_lines, pre_board)
+    best_san = lines[0].move_san if lines else (best_move_uci or uci_move)
 
-    return build_mistake_feedback(skill_level, played_san, best_san, cp_loss, lines=lines)
+    return build_mistake_feedback(played_san, best_san, cp_loss, lines=lines), debug_msg
 
 
 def _to_analysis_lines(raw_lines: list[dict], board: chess.Board) -> list[AnalysisLine]:

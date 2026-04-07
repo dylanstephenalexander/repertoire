@@ -9,9 +9,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.engine.stockfish import StockfishEngine
 from app.routers import analysis, chaos, openings, review, session
 from app.services.chaos import stop_all_maia_engines
-from app.services.sessions import set_engine
+from app.services.sessions import set_analysis_engine, set_engine
 
 _engine: StockfishEngine | None = None
+_analysis_engine: StockfishEngine | None = None
 
 
 def _find_stockfish() -> str:
@@ -26,15 +27,21 @@ def _find_stockfish() -> str:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global _engine
+    global _engine, _analysis_engine
     path = _find_stockfish()
     if path:
         _engine = StockfishEngine(path=path)
         _engine.start()
         set_engine(_engine)
+
+        _analysis_engine = StockfishEngine(path=path)
+        _analysis_engine.start()
+        set_analysis_engine(_analysis_engine)
     yield
     if _engine:
         _engine.stop()
+    if _analysis_engine:
+        _analysis_engine.stop()
     stop_all_maia_engines()
 
 

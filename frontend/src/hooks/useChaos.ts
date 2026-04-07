@@ -37,6 +37,8 @@ interface ChaosState {
   userColor: "white" | "black";
   status: ChaosStatus;
   feedback: Feedback | null;
+  debugMsg: string | null;
+  opponentMoveDebug: string | null;
   openingName: string | null;
   inTheory: boolean;
   eloBand: number;
@@ -89,11 +91,15 @@ export function useChaos(): UseChaosReturn {
         setChaosSession((s) => {
           if (!s) return s;
           const mate = checkmateFeedback(resp.fen, s.userColor);
+          const opponentMoveDebug = resp.opponent_move_time != null
+            ? `Opponent move (${resp.opponent_engine ?? "engine"}): ${resp.opponent_move_time.toFixed(2)}s`
+            : null;
           return {
             ...s,
             fen: resp.fen,
             status: mate ? "complete" : "playing",
             feedback: mate ?? s.feedback,
+            opponentMoveDebug,
             openingName: resp.opening_name ?? s.openingName,
             inTheory: resp.in_theory,
           };
@@ -115,6 +121,8 @@ export function useChaos(): UseChaosReturn {
         userColor: resp.user_color,
         status: "playing",
         feedback: null,
+        debugMsg: null,
+        opponentMoveDebug: null,
         openingName: null,
         inTheory: false,
         eloBand: params.elo_band,
@@ -157,6 +165,7 @@ export function useChaos(): UseChaosReturn {
           ...s,
           fen: resp.fen,
           feedback: mate ?? resp.feedback ?? null,
+          debugMsg: resp.debug_msg ?? null,
           openingName: resp.opening_name ?? s.openingName,
           inTheory: resp.in_theory,
           ...(mate ? { status: "complete" as const } : {}),

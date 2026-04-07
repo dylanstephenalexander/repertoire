@@ -19,3 +19,4 @@ class MoveResult(BaseModel):
     feedback: Feedback
     fen: str
     eval_cp: int | None = None   # best line cp after the move
+    debug_msg: str | None = None  # temporary: pre-eval cache diagnostics
