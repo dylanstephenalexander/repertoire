@@ -4,6 +4,7 @@ import type {
   ChaosMoveResponse,
   ChaosOpponentMoveResponse,
   EngineStatusResponse,
+  ExplanationResponse,
 } from "../types";
 
 export type { ChaosStartResponse, ChaosMoveResponse, ChaosOpponentMoveResponse };
@@ -39,4 +40,8 @@ export function fetchChaosOpponentMove(sessionId: string): Promise<ChaosOpponent
   return apiFetch<ChaosOpponentMoveResponse>(`/chaos/${sessionId}/opponent_move`, {
     method: "POST",
   });
+}
+
+export function fetchChaosExplanation(sessionId: string): Promise<ExplanationResponse> {
+  return apiFetch<ExplanationResponse>(`/chaos/${sessionId}/explanation`);
 }

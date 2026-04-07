@@ -160,6 +160,7 @@ export function App() {
   const currentDebugMsg = isStudy ? (session!.debugMsg ?? null) : (chaosSession!.debugMsg ?? null);
   const currentLlmDebugMsg = isStudy ? (session!.llmDebugMsg ?? null) : (chaosSession!.llmDebugMsg ?? null);
   const currentOpponentMoveDebug = isChaos ? (chaosSession!.opponentMoveDebug ?? null) : null;
+  const currentExplanationPending = isStudy ? session!.explanationPending : chaosSession!.explanationPending;
 
   const isDisabled =
     currentStatus === "opponent_thinking" ||
@@ -249,6 +250,7 @@ export function App() {
             feedback={currentFeedback}
             awaitingDecision={currentStatus === "awaiting_decision"}
             notationMode={notationMode}
+            explanationPending={currentExplanationPending}
             onRetry={retry}
             onContinue={continuePlay}
             onRestart={handleRestart}

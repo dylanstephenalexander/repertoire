@@ -106,9 +106,8 @@ async def process_chaos_move(
 
     feedback: Feedback | None = None
     debug_msg: str | None = None
-    llm_debug_msg: str | None = None
     if feedback_enabled:
-        feedback, debug_msg, llm_debug_msg = await _build_chaos_feedback(session_id, pre_fen, new_fen, played_san, uci_move)
+        feedback, debug_msg = await _build_chaos_feedback(session_id, pre_fen, new_fen, played_san, uci_move)
 
     return ChaosMoveResponse(
         fen=new_fen,
@@ -116,7 +115,6 @@ async def process_chaos_move(
         opening_name=session.opening_name,
         in_theory=opening_hit is not None,
         debug_msg=debug_msg,
-        llm_debug_msg=llm_debug_msg,
     )
 
 
@@ -159,9 +157,23 @@ def get_chaos_opponent_move(session_id: str) -> ChaosOpponentMoveResponse:
     )
 
 
+_pending_chaos_explanations: dict[str, tuple[str, str]] = {}
+
+
+async def _store_chaos_explanation(session_id: str, pre_fen: str, played_san: str, best_san: str, cp_loss: int, quality: str, opponent_san: str | None) -> None:
+    explanation, llm_debug = await get_explanation(pre_fen, played_san, best_san, cp_loss, quality, opponent_san)
+    if explanation:
+        _pending_chaos_explanations[session_id] = (explanation, llm_debug)
+
+
+def pop_pending_chaos_explanation(session_id: str) -> tuple[str, str] | None:
+    return _pending_chaos_explanations.pop(session_id, None)
+
+
 def clear_chaos_sessions() -> None:
     """For testing only."""
     _chaos_sessions.clear()
+    _pending_chaos_explanations.clear()
 
 
 def stop_all_maia_engines() -> None:
@@ -201,27 +213,33 @@ async def _build_chaos_feedback(
     post_fen: str,
     played_san: str,
     uci_move: str,
-) -> tuple[Feedback | None, str | None, str | None]:
+) -> tuple[Feedback | None, str | None]:
     if get_engine() is None:
-        return None, None, None
+        return None, None
 
     try:
-        cp_loss, raw_lines, best_move_uci, debug_msg = await asyncio.to_thread(
+        cp_loss, raw_lines, best_move_uci, debug_msg, opponent_uci = await asyncio.to_thread(
             evaluate_off_tree_eval, session_id, pre_fen, post_fen, uci_move, None
         )
     except Exception:
-        return None, None, None
+        return None, None
+    opponent_san: str | None = None
+    if opponent_uci:
+        try:
+            opponent_san = chess.Board(post_fen).san(chess.Move.from_uci(opponent_uci))
+        except Exception:
+            pass
 
     if cp_loss <= ALTERNATIVE_THRESHOLD_CP:
-        return None, debug_msg, None  # Good move — no feedback needed
+        return None, debug_msg  # Good move — no feedback needed
 
     pre_board = chess.Board(pre_fen)
     lines = _to_analysis_lines(raw_lines, pre_board)
     best_san = lines[0].move_san if lines else (best_move_uci or uci_move)
 
     quality = quality_from_cp_loss(cp_loss)
-    llm_exp, llm_debug = await get_explanation(pre_fen, played_san, best_san, cp_loss, quality)
-    return build_mistake_feedback(played_san, best_san, cp_loss, lines=lines, explanation=llm_exp), debug_msg, llm_debug
+    asyncio.create_task(_store_chaos_explanation(session_id, pre_fen, played_san, best_san, cp_loss, quality, opponent_san))
+    return build_mistake_feedback(played_san, best_san, cp_loss, lines=lines), debug_msg
 
 
 def _to_analysis_lines(raw_lines: list[dict], board: chess.Board) -> list[AnalysisLine]:

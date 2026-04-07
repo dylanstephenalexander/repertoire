@@ -30,7 +30,6 @@ class ChaosMoveResponse(BaseModel):
     opening_name: str | None = None   # most specific theory name seen so far
     in_theory: bool = False           # True if this exact position is in the explorer
     debug_msg: str | None = None
-    llm_debug_msg: str | None = None
 
 
 class ChaosOpponentMoveResponse(BaseModel):

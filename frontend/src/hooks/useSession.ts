@@ -1,8 +1,28 @@
 import { useCallback, useRef, useState } from "react";
 import { Chess } from "chess.js";
-import { fetchHint, fetchOpponentMove, sendMove, startSession, undoMove } from "../api/session";
+import { fetchExplanation, fetchHint, fetchOpponentMove, sendMove, startSession, undoMove } from "../api/session";
 import type { SessionStartParams } from "../api/session";
 import type { Feedback } from "../types";
+
+async function pollExplanation(
+  sessionId: string,
+  onReady: (explanation: string, llmDebug: string | null) => void,
+  onGiveUp: () => void,
+  maxAttempts = 12,
+  intervalMs = 1000,
+) {
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise((r) => setTimeout(r, intervalMs));
+    try {
+      const resp = await fetchExplanation(sessionId);
+      if (resp.explanation) {
+        onReady(resp.explanation, resp.llm_debug);
+        return;
+      }
+    } catch { /* ignore network errors, keep polling */ }
+  }
+  onGiveUp();
+}
 
 /** Returns a checkmate Feedback if the position is terminal, otherwise null. */
 function checkmateFeedback(fen: string, userColor: "white" | "black"): Feedback | null {
@@ -36,6 +56,7 @@ interface SessionState {
   feedback: Feedback | null;
   debugMsg: string | null;
   llmDebugMsg: string | null;
+  explanationPending: boolean;
   score: number;
   moveCount: number;
   hint: { san: string; uci: string } | null;
@@ -108,6 +129,7 @@ export function useSession(): UseSessionReturn {
         feedback: null,
         debugMsg: null,
         llmDebugMsg: null,
+        explanationPending: false,
         score: 0,
         moveCount: 0,
         hint: null,
@@ -141,6 +163,7 @@ export function useSession(): UseSessionReturn {
       const newMoveCount = session.moveCount + 1;
       const mate = checkmateFeedback(resp.fen, session.userColor);
 
+      const isMistakeOrBlunder = resp.result === "mistake" || resp.result === "blunder";
       setSession((s) =>
         s
           ? {
@@ -148,7 +171,8 @@ export function useSession(): UseSessionReturn {
               fen: resp.fen,
               feedback: mate ?? resp.feedback,
               debugMsg: resp.debug_msg ?? null,
-              llmDebugMsg: resp.llm_debug_msg ?? null,
+              llmDebugMsg: null,
+              explanationPending: !mate && isMistakeOrBlunder,
               score: newScore,
               moveCount: newMoveCount,
               ...(mate ? { status: "complete" as const } : {}),
@@ -160,6 +184,32 @@ export function useSession(): UseSessionReturn {
         await triggerOpponentMove(session.sessionId, newScore, newMoveCount);
       } else {
         setSession((s) => (s ? { ...s, status: "awaiting_decision" } : s));
+      }
+
+      if (!mate && isMistakeOrBlunder) {
+        const capturedSessionId = session.sessionId;
+        pollExplanation(
+          capturedSessionId,
+          (explanation, llmDebug) => {
+            setSession((s) => {
+              if (!s || s.sessionId !== capturedSessionId) return s;
+              return {
+                ...s,
+                explanationPending: false,
+                llmDebugMsg: llmDebug,
+                feedback: s.feedback
+                  ? { ...s.feedback, explanation, llm_explanation: true }
+                  : s.feedback,
+              };
+            });
+          },
+          () => {
+            setSession((s) => {
+              if (!s || s.sessionId !== capturedSessionId) return s;
+              return { ...s, explanationPending: false };
+            });
+          },
+        );
       }
     },
     [session, triggerOpponentMove]

@@ -20,5 +20,4 @@ class MoveResult(BaseModel):
     feedback: Feedback
     fen: str
     eval_cp: int | None = None
-    debug_msg: str | None = None       # engine timing diagnostics
-    llm_debug_msg: str | None = None   # LLM call diagnostics
+    debug_msg: str | None = None

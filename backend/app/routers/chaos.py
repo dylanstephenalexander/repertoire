@@ -36,6 +36,15 @@ def start_chaos(body: ChaosStartRequest) -> ChaosStartResponse:
         raise HTTPException(status_code=500, detail=str(exc))
 
 
+@router.get("/{session_id}/explanation")
+def get_chaos_explanation(session_id: str) -> dict:
+    result = chaos_svc.pop_pending_chaos_explanation(session_id)
+    if result is None:
+        return {"explanation": None, "llm_debug": None}
+    explanation, llm_debug = result
+    return {"explanation": explanation, "llm_debug": llm_debug}
+
+
 @router.post("/{session_id}/move", response_model=ChaosMoveResponse)
 async def make_chaos_move(session_id: str, body: ChaosMoveRequest) -> ChaosMoveResponse:
     try:

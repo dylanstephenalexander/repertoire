@@ -68,6 +68,15 @@ def undo_move(session_id: str) -> dict:
         raise HTTPException(status_code=400, detail=str(exc))
 
 
+@router.get("/{session_id}/explanation")
+def get_explanation(session_id: str) -> dict:
+    result = session_svc.pop_pending_explanation(session_id)
+    if result is None:
+        return {"explanation": None, "llm_debug": None}
+    explanation, llm_debug = result
+    return {"explanation": explanation, "llm_debug": llm_debug}
+
+
 @router.get("/{session_id}/state", response_model=SessionState)
 def get_state(session_id: str) -> SessionState:
     state = session_svc.get_session(session_id)

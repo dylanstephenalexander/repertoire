@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { Chess } from "chess.js";
 import {
+  fetchChaosExplanation,
   fetchChaosOpponentMove,
   fetchEngineStatus,
   sendChaosMove,
@@ -8,6 +9,26 @@ import {
 } from "../api/chaos";
 import type { ChaosStartParams } from "../api/chaos";
 import type { Feedback } from "../types";
+
+async function pollChaosExplanation(
+  sessionId: string,
+  onReady: (explanation: string, llmDebug: string | null) => void,
+  onGiveUp: () => void,
+  maxAttempts = 12,
+  intervalMs = 1000,
+) {
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise((r) => setTimeout(r, intervalMs));
+    try {
+      const resp = await fetchChaosExplanation(sessionId);
+      if (resp.explanation) {
+        onReady(resp.explanation, resp.llm_debug);
+        return;
+      }
+    } catch { /* ignore */ }
+  }
+  onGiveUp();
+}
 
 function checkmateFeedback(fen: string, userColor: "white" | "black"): Feedback | null {
   try {
@@ -39,6 +60,7 @@ interface ChaosState {
   feedback: Feedback | null;
   debugMsg: string | null;
   llmDebugMsg: string | null;
+  explanationPending: boolean;
   opponentMoveDebug: string | null;
   openingName: string | null;
   inTheory: boolean;
@@ -59,6 +81,8 @@ interface UseChaosReturn {
   chaosMove: (uciMove: string) => Promise<void>;
   toggleFeedback: () => void;
   resign: () => void;
+  clearChaosSession: () => void;
+  restartChaos: () => Promise<void>;
 }
 
 const MIN_THINKING_MS = 500;
@@ -124,6 +148,7 @@ export function useChaos(): UseChaosReturn {
         feedback: null,
         debugMsg: null,
         llmDebugMsg: null,
+        explanationPending: false,
         opponentMoveDebug: null,
         openingName: null,
         inTheory: false,
@@ -160,15 +185,19 @@ export function useChaos(): UseChaosReturn {
       );
 
       const userColor = chaosSession.userColor;
+      const capturedSessionId = chaosSession.sessionId;
+      const mate = checkmateFeedback(resp.fen, userColor);
+      const quality = resp.feedback?.quality;
+      const isMistakeOrBlunder = quality === "mistake" || quality === "blunder";
       setChaosSession((s) => {
         if (!s) return s;
-        const mate = checkmateFeedback(resp.fen, userColor);
         return {
           ...s,
           fen: resp.fen,
           feedback: mate ?? resp.feedback ?? null,
           debugMsg: resp.debug_msg ?? null,
-          llmDebugMsg: resp.llm_debug_msg ?? null,
+          llmDebugMsg: null,
+          explanationPending: !mate && isMistakeOrBlunder,
           openingName: resp.opening_name ?? s.openingName,
           inTheory: resp.in_theory,
           ...(mate ? { status: "complete" as const } : {}),
@@ -178,7 +207,32 @@ export function useChaos(): UseChaosReturn {
       // Only trigger opponent move if user didn't just deliver checkmate
       const postMoveBoard = new Chess(resp.fen);
       if (!postMoveBoard.isCheckmate()) {
-        await triggerOpponentMove(chaosSession.sessionId);
+        await triggerOpponentMove(capturedSessionId);
+      }
+
+      if (!mate && isMistakeOrBlunder) {
+        pollChaosExplanation(
+          capturedSessionId,
+          (explanation, llmDebug) => {
+            setChaosSession((s) => {
+              if (!s || s.sessionId !== capturedSessionId) return s;
+              return {
+                ...s,
+                explanationPending: false,
+                llmDebugMsg: llmDebug,
+                feedback: s.feedback
+                  ? { ...s.feedback, explanation, llm_explanation: true }
+                  : s.feedback,
+              };
+            });
+          },
+          () => {
+            setChaosSession((s) => {
+              if (!s || s.sessionId !== capturedSessionId) return s;
+              return { ...s, explanationPending: false };
+            });
+          },
+        );
       }
     },
     [chaosSession, triggerOpponentMove]

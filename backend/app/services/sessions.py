@@ -40,6 +40,10 @@ _pre_eval_futures: dict[str, "Future[dict]"] = {}
 # Timestamp (perf_counter) when each pre_eval was submitted — used to measure think time
 _pre_eval_submit_times: dict[str, float] = {}
 
+# LLM explanation results, stored once the background task completes
+# (explanation, llm_debug) — absent while in-flight, present when ready
+_pending_explanations: dict[str, tuple[str, str]] = {}
+
 # Number of candidate moves analysed in background pre_eval.
 # Start at 3 (same cost as old inline pre_eval) and increase once benchmarked.
 PRE_EVAL_MULTIPV = 3
@@ -68,6 +72,19 @@ def clear_sessions() -> None:
     _sessions.clear()
     _pre_eval_futures.clear()
     _pre_eval_submit_times.clear()
+    _pending_explanations.clear()
+
+
+async def _store_explanation(session_id: str, pre_fen: str, played_san: str, best_san: str, cp_loss: int, quality: str, opponent_san: str | None) -> None:
+    """Background task: fetch LLM explanation and store it for polling."""
+    explanation, llm_debug = await get_explanation(pre_fen, played_san, best_san, cp_loss, quality, opponent_san)
+    if explanation:
+        _pending_explanations[session_id] = (explanation, llm_debug)
+
+
+def pop_pending_explanation(session_id: str) -> tuple[str, str] | None:
+    """Return and remove the pending LLM explanation, or None if not ready."""
+    return _pending_explanations.pop(session_id, None)
 
 
 # ---------------------------------------------------------------------------
@@ -130,17 +147,20 @@ def evaluate_off_tree_eval(
     new_fen: str,
     uci_move: str,
     elo: int | None,
-) -> tuple[int, list[dict], str | None, str]:
+) -> tuple[int, list[dict], str | None, str, str | None]:
     """
     Compute cp_loss and supporting data for an off-tree move.
 
-    Returns (cp_loss, raw_pre_eval_lines, best_move_uci, debug_msg).
+    Returns (cp_loss, raw_pre_eval_lines, best_move_uci, debug_msg, opponent_response_uci).
+
+    opponent_response_uci is the engine's best reply to the user's move — used to
+    ground LLM explanations ("after Rb1, Black plays Qxb1") so the model narrates
+    facts rather than hallucinating the tactical sequence.
 
     Three cases, best-to-worst latency:
-      1. Pre_eval done + user's move in top-N lines → zero engine calls.
-      2. Pre_eval done + move not in lines         → one fast post_eval call.
-      3. Pre_eval not done (or absent)             → pre + post in parallel,
-                                                     then prefer line cp if available.
+      1. Pre_eval done + user's move in top-N lines → one shallow post call for opponent.
+      2. Pre_eval done + move not in lines         → one post_eval call (cp + opponent).
+      3. Pre_eval not done (or absent)             → pre + post in parallel.
     """
     future, submit_time = pop_pre_eval_future(session_id)
     now = time.perf_counter()
@@ -148,20 +168,26 @@ def evaluate_off_tree_eval(
     think_line = f"You thought for: {think_time:.2f}s" if think_time is not None else "Think time: unknown"
 
     if future is None or _engine is None:
-        (cp_loss, lines, best_move), pre_t, post_t = _evaluate_serial(pre_fen, new_fen, uci_move, elo)
+        (cp_loss, lines, best_move, opponent_uci), pre_t, post_t = _evaluate_serial(pre_fen, new_fen, uci_move, elo)
         return (cp_loss, lines, best_move,
-                f"{think_line}\nPre-move Stockfish: {pre_t:.2f}s\nPost-move Stockfish: {post_t:.2f}s")
+                f"{think_line}\nPre-move Stockfish: {pre_t:.2f}s\nPost-move Stockfish: {post_t:.2f}s",
+                opponent_uci)
 
     if future.done():
         pre_eval, pre_t = future.result()
         user_line_cp = _find_line_cp(pre_eval.get("lines", []), uci_move)
         if user_line_cp is not None:
+            # Case 1: cp from pre_eval; shallow post call to get opponent's response
             cp_loss, lines, best_move = _evaluate_from_pre_eval_no_post(pre_eval, uci_move)
+            opp_result, opp_t = _run_analysis(_engine, new_fen, elo, 1, 10)
+            opponent_uci = opp_result.get("best_move")
             return (cp_loss, lines, best_move,
-                    f"{think_line}\nPre-move Stockfish: {pre_t:.2f}s\nPost-move Stockfish: skipped")
-        cp_loss, lines, best_move, post_t = _evaluate_post_only(pre_eval, new_fen, uci_move, elo)
+                    f"{think_line}\nPre-move Stockfish: {pre_t:.2f}s\nPost-move Stockfish: {opp_t:.2f}s (opponent only)",
+                    opponent_uci)
+        cp_loss, lines, best_move, opponent_uci, post_t = _evaluate_post_only(pre_eval, new_fen, uci_move, elo)
         return (cp_loss, lines, best_move,
-                f"{think_line}\nPre-move Stockfish: {pre_t:.2f}s\nPost-move Stockfish: {post_t:.2f}s")
+                f"{think_line}\nPre-move Stockfish: {pre_t:.2f}s\nPost-move Stockfish: {post_t:.2f}s",
+                opponent_uci)
 
     # Pre-move still running — fire post_eval in parallel
     post_future = _post_eval_executor.submit(
@@ -176,16 +202,19 @@ def evaluate_off_tree_eval(
     pre_cp = pre_eval.get("eval_cp") or 0
 
     if user_line_cp is not None:
-        post_future.cancel()
+        # Post already running but we don't need it for cp — still collect opponent response
+        post_result, post_t = post_future.result()
         cp_loss = max(0, pre_cp - user_line_cp)
-        debug = f"{think_line}\nPre-move Stockfish: {pre_t:.2f}s (waited {pre_wait:.2f}s extra)\nPost-move Stockfish: skipped"
+        opponent_uci = post_result.get("best_move")
+        debug = f"{think_line}\nPre-move Stockfish: {pre_t:.2f}s (waited {pre_wait:.2f}s extra)\nPost-move Stockfish: {post_t:.2f}s (opponent only)"
     else:
         post_result, post_t = post_future.result()
         post_cp = post_result.get("eval_cp") or 0
         cp_loss = max(0, pre_cp + post_cp)
+        opponent_uci = post_result.get("best_move")
         debug = f"{think_line}\nPre-move Stockfish: {pre_t:.2f}s (waited {pre_wait:.2f}s extra)\nPost-move Stockfish: {post_t:.2f}s"
 
-    return cp_loss, pre_eval.get("lines", []), pre_eval.get("best_move"), debug
+    return cp_loss, pre_eval.get("lines", []), pre_eval.get("best_move"), debug, opponent_uci
 
 
 def _evaluate_from_pre_eval_no_post(
@@ -204,13 +233,13 @@ def _evaluate_post_only(
     new_fen: str,
     uci_move: str,
     elo: int | None,
-) -> tuple[int, list[dict], str | None, float]:
-    """Move was outside pre_eval lines — run post_eval, return with its elapsed time."""
+) -> tuple[int, list[dict], str | None, str | None, float]:
+    """Move was outside pre_eval lines — run post_eval; returns cp + opponent response."""
     pre_cp = pre_eval.get("eval_cp") or 0
     post_result, post_t = _run_analysis(_engine, new_fen, elo, 1, FEEDBACK_DEPTH // 2)
     post_cp = post_result.get("eval_cp") or 0
     cp_loss = max(0, pre_cp + post_cp)
-    return cp_loss, pre_eval.get("lines", []), pre_eval.get("best_move"), post_t
+    return cp_loss, pre_eval.get("lines", []), pre_eval.get("best_move"), post_result.get("best_move"), post_t
 
 
 def _evaluate_serial(
@@ -218,14 +247,14 @@ def _evaluate_serial(
     new_fen: str,
     uci_move: str,
     elo: int | None,
-) -> tuple[tuple[int, list[dict], str | None], float, float]:
-    """Two-call serial path (analysis engine absent). Returns ((cp_loss, lines, best), pre_t, post_t)."""
+) -> tuple[tuple[int, list[dict], str | None, str | None], float, float]:
+    """Two-call serial path (analysis engine absent). Returns ((cp_loss, lines, best, opponent), pre_t, post_t)."""
     pre_result, pre_t = _run_analysis(_engine, pre_fen, elo, PRE_EVAL_MULTIPV, FEEDBACK_DEPTH)
     post_result, post_t = _run_analysis(_engine, new_fen, elo, 1, FEEDBACK_DEPTH // 2)
     pre_cp = pre_result.get("eval_cp") or 0
     post_cp = post_result.get("eval_cp") or 0
     cp_loss = max(0, pre_cp + post_cp)
-    return (cp_loss, pre_result.get("lines", []), pre_result.get("best_move")), pre_t, post_t
+    return (cp_loss, pre_result.get("lines", []), pre_result.get("best_move"), post_result.get("best_move")), pre_t, post_t
 
 
 # ---------------------------------------------------------------------------
@@ -315,9 +344,15 @@ async def process_move(session_id: str, uci_move: str) -> MoveResult:
         return MoveResult(result="mistake", feedback=feedback, fen=new_fen)
 
     pre_fen = session.current_fen
-    cp_loss, raw_lines, best_move_uci, debug_msg = await asyncio.to_thread(
+    cp_loss, raw_lines, best_move_uci, debug_msg, opponent_uci = await asyncio.to_thread(
         evaluate_off_tree_eval, session_id, pre_fen, new_fen, uci_move, session.elo
     )
+    opponent_san: str | None = None
+    if opponent_uci:
+        try:
+            opponent_san = chess.Board(new_fen).san(chess.Move.from_uci(opponent_uci))
+        except Exception:
+            pass
 
     pre_board = chess.Board(pre_fen)
     lines = _to_analysis_lines(raw_lines, pre_board)
@@ -332,28 +367,17 @@ async def process_move(session_id: str, uci_move: str) -> MoveResult:
             mainline_san = mainline_uci
 
     if cp_loss <= ALTERNATIVE_THRESHOLD_CP:
-        feedback = build_alternative_feedback(
-            played_san,
-            mainline_san or best_san,
-            cp_loss,
-            lines=lines,
-        )
-        llm_debug = "LLM: skipped (alternative move)"
+        feedback = build_alternative_feedback(played_san, mainline_san or best_san, cp_loss, lines=lines)
         result = "alternative"
     else:
         quality = quality_from_cp_loss(cp_loss)
-        llm_exp, llm_debug = await get_explanation(pre_fen, played_san, best_san, cp_loss, quality)
-        feedback = build_mistake_feedback(
-            played_san,
-            best_san,
-            cp_loss,
-            lines=lines,
-            explanation=llm_exp,
-        )
+        feedback = build_mistake_feedback(played_san, best_san, cp_loss, lines=lines)
         result = feedback.quality
+        # Fire LLM in background — client polls /session/{id}/explanation
+        asyncio.create_task(_store_explanation(session_id, pre_fen, played_san, best_san, cp_loss, quality, opponent_san))
 
     _update_session(session, uci_move, new_fen, {})
-    return MoveResult(result=result, feedback=feedback, fen=new_fen, debug_msg=debug_msg, llm_debug_msg=llm_debug)
+    return MoveResult(result=result, feedback=feedback, fen=new_fen, debug_msg=debug_msg)
 
 
 def get_hint(session_id: str) -> dict:

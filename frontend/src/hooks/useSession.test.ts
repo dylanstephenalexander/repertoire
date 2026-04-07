@@ -11,6 +11,8 @@ vi.mock("../api/session", () => ({
   sendMove: vi.fn(),
   fetchOpponentMove: vi.fn(),
   undoMove: vi.fn(),
+  fetchHint: vi.fn(),
+  fetchExplanation: vi.fn().mockResolvedValue({ explanation: null, llm_debug: null }),
 }));
 
 import * as sessionApi from "../api/session";
@@ -93,6 +95,7 @@ describe("begin", () => {
     vi.mocked(sessionApi.fetchOpponentMove).mockResolvedValue({
       uci_move: "e2e4",
       fen: AFTER_E4_FEN,
+      line_complete: false,
     });
 
     const { result } = renderHook(() => useSession());
@@ -148,10 +151,12 @@ describe("move", () => {
       feedback: CORRECT_FEEDBACK,
       fen: AFTER_E4_FEN,
       eval_cp: null,
+      debug_msg: null,
     });
     vi.mocked(sessionApi.fetchOpponentMove).mockResolvedValue({
       uci_move: "e7e5",
       fen: AFTER_E5_FEN,
+      line_complete: false,
     });
 
     await act(async () => { await result.current.move("e2e4"); });
@@ -170,6 +175,7 @@ describe("move", () => {
       feedback: MISTAKE_FEEDBACK,
       fen: AFTER_E4_FEN,
       eval_cp: null,
+      debug_msg: null,
     });
 
     await act(async () => { await result.current.move("d2d4"); });
@@ -187,6 +193,7 @@ describe("move", () => {
       feedback: blunderFeedback,
       fen: AFTER_E4_FEN,
       eval_cp: null,
+      debug_msg: null,
     });
 
     await act(async () => { await result.current.move("d2d4"); });
@@ -203,6 +210,7 @@ describe("move", () => {
       feedback: MISTAKE_FEEDBACK,
       fen: AFTER_E4_FEN,
       eval_cp: null,
+      debug_msg: null,
     });
 
     await act(async () => { await result.current.move("d2d4"); });
@@ -230,6 +238,7 @@ describe("retry", () => {
       feedback: MISTAKE_FEEDBACK,
       fen: AFTER_E4_FEN,
       eval_cp: null,
+      debug_msg: null,
     });
     vi.mocked(sessionApi.undoMove).mockResolvedValue({ fen: START_FEN });
 
@@ -264,10 +273,12 @@ describe("continuePlay", () => {
       feedback: MISTAKE_FEEDBACK,
       fen: AFTER_E4_FEN,
       eval_cp: null,
+      debug_msg: null,
     });
     vi.mocked(sessionApi.fetchOpponentMove).mockResolvedValue({
       uci_move: "e7e5",
       fen: AFTER_E5_FEN,
+      line_complete: false,
     });
 
     const { result } = renderHook(() => useSession());

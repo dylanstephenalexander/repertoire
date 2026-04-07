@@ -11,6 +11,7 @@ vi.mock("../api/chaos", () => ({
   startChaos: vi.fn(),
   sendChaosMove: vi.fn(),
   fetchChaosOpponentMove: vi.fn(),
+  fetchChaosExplanation: vi.fn().mockResolvedValue({ explanation: null, llm_debug: null }),
 }));
 
 import * as chaosApi from "../api/chaos";
@@ -29,6 +30,16 @@ const GOOD_MOVE_RESP = {
   feedback: null,
   opening_name: null,
   in_theory: false,
+  debug_msg: null,
+};
+
+const OPPONENT_MOVE_RESP_E5 = {
+  uci_move: "e7e5",
+  fen: AFTER_E5_FEN,
+  opening_name: null,
+  in_theory: false,
+  opponent_move_time: null,
+  opponent_engine: null,
 };
 
 const MISTAKE_FEEDBACK = {
@@ -115,6 +126,8 @@ describe("beginChaos", () => {
       fen: AFTER_E4_FEN,
       opening_name: null,
       in_theory: false,
+      opponent_move_time: null,
+      opponent_engine: null,
     });
 
     const { result } = renderHook(() => useChaos());
@@ -172,12 +185,7 @@ describe("chaosMove", () => {
     const { result } = await startWhiteSession();
 
     vi.mocked(chaosApi.sendChaosMove).mockResolvedValue(GOOD_MOVE_RESP);
-    vi.mocked(chaosApi.fetchChaosOpponentMove).mockResolvedValue({
-      uci_move: "e7e5",
-      fen: AFTER_E5_FEN,
-      opening_name: null,
-      in_theory: false,
-    });
+    vi.mocked(chaosApi.fetchChaosOpponentMove).mockResolvedValue(OPPONENT_MOVE_RESP_E5);
 
     await act(async () => { await result.current.chaosMove("e2e4"); });
 
@@ -215,8 +223,7 @@ describe("chaosMove", () => {
       in_theory: true,
     });
     vi.mocked(chaosApi.fetchChaosOpponentMove).mockResolvedValue({
-      uci_move: "e7e5",
-      fen: AFTER_E5_FEN,
+      ...OPPONENT_MOVE_RESP_E5,
       opening_name: "King's Pawn Game",
       in_theory: true,
     });
@@ -243,12 +250,7 @@ describe("chaosMove", () => {
     const { result } = await startWhiteSession();
 
     vi.mocked(chaosApi.sendChaosMove).mockResolvedValue(GOOD_MOVE_RESP);
-    vi.mocked(chaosApi.fetchChaosOpponentMove).mockResolvedValue({
-      uci_move: "e7e5",
-      fen: AFTER_E5_FEN,
-      opening_name: null,
-      in_theory: false,
-    });
+    vi.mocked(chaosApi.fetchChaosOpponentMove).mockResolvedValue(OPPONENT_MOVE_RESP_E5);
 
     await act(async () => { await result.current.chaosMove("e2e4"); });
 

@@ -29,6 +29,11 @@
   font-size: 0.9rem;
 }
 
+.analyzing {
+  color: #888;
+  font-style: italic;
+}
+
 /* Quality tints */
 .correct {
   border-color: #2d6a2d;

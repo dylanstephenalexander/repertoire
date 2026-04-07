@@ -361,8 +361,8 @@ def test_pre_eval_cache_hit_uses_line_cp_no_extra_calls():
     resp = client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
     assert resp.status_code == 200
     assert resp.json()["result"] == "alternative"
-    # No engine calls should have been made during process_move
-    assert call_log == [], f"Expected zero engine calls, got: {call_log}"
+    # One shallow engine call on the post-move FEN to get the opponent's response
+    assert len(call_log) == 1, f"Expected one engine call (opponent response), got: {call_log}"
 
 
 def test_pre_eval_cache_hit_move_outside_lines_fires_post_eval():

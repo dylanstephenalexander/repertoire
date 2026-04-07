@@ -1,5 +1,6 @@
 import { apiFetch } from "./client";
 import type {
+  ExplanationResponse,
   MoveResponse,
   OpponentMoveResponse,
   SessionStartResponse,
@@ -47,4 +48,8 @@ export function undoMove(sessionId: string): Promise<{ fen: string }> {
 
 export function fetchHint(sessionId: string): Promise<{ move_san: string; move_uci: string }> {
   return apiFetch(`/session/${sessionId}/hint`);
+}
+
+export function fetchExplanation(sessionId: string): Promise<ExplanationResponse> {
+  return apiFetch<ExplanationResponse>(`/session/${sessionId}/explanation`);
 }
