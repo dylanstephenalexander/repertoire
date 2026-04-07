@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Chess } from "chess.js";
 import { Board } from "./components/Board/Board";
 import { ChaosSelector } from "./components/ChaosSelector/ChaosSelector";
@@ -9,6 +9,7 @@ import { GameReview } from "./components/GameReview/GameReview";
 import { OpeningSelector } from "./components/OpeningSelector/OpeningSelector";
 import { SessionMoveList } from "./components/SessionMoveList/SessionMoveList";
 import { useChaos } from "./hooks/useChaos";
+import { useChessSound } from "./hooks/useChessSound";
 import { useEval } from "./hooks/useEval";
 import { useSession } from "./hooks/useSession";
 import { type NotationMode } from "./utils/notation";
@@ -68,6 +69,18 @@ export function App() {
 
   const [guided, setGuided] = useState(false);
   const notationMode: NotationMode = "readable";
+  const { playMoveSound } = useChessSound();
+
+  // Play a sound whenever a new position is pushed (user or opponent move)
+  const prevPositionCountRef = useRef(0);
+  useEffect(() => {
+    const positions = session?.positions ?? chaosSession?.positions ?? [];
+    if (positions.length > prevPositionCountRef.current && prevPositionCountRef.current > 0) {
+      const last = positions[positions.length - 1];
+      if (last?.san) playMoveSound(last.san);
+    }
+    prevPositionCountRef.current = positions.length;
+  }, [session?.positions.length, chaosSession?.positions.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     checkEngineStatus();
