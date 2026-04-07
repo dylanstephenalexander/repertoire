@@ -10,7 +10,7 @@ const PIECE_KEY: Record<string, string> = {
   q: "bQ", r: "bR", b: "bB", n: "bN", p: "bP",
 };
 
-function computeCaptured(fen: string) {
+export function computeCaptured(fen: string) {
   const start: Record<string, number> = {
     P: 8, N: 2, B: 2, R: 2, Q: 1,
     p: 8, n: 2, b: 2, r: 2, q: 1,
@@ -36,8 +36,8 @@ function computeCaptured(fen: string) {
   capturedByBlack.sort(byValue);
 
   const whiteAdv =
-    capturedByWhite.reduce((s, p) => s + (PIECE_VALUES[p] ?? 0), 0) -
-    capturedByBlack.reduce((s, p) => s + (PIECE_VALUES[p] ?? 0), 0);
+    capturedByWhite.reduce((s, p) => s + (PIECE_VALUES[p.toLowerCase()] ?? 0), 0) -
+    capturedByBlack.reduce((s, p) => s + (PIECE_VALUES[p.toLowerCase()] ?? 0), 0);
 
   return { capturedByWhite, capturedByBlack, whiteAdv };
 }
