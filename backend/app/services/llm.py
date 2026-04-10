@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 from typing import Protocol, runtime_checkable
@@ -18,9 +19,12 @@ class GeminiProvider:
         self._model = model
 
     async def explain(self, prompt: str) -> str:
-        response = await self._client.aio.models.generate_content(
-            model=self._model,
-            contents=prompt,
+        response = await asyncio.wait_for(
+            self._client.aio.models.generate_content(
+                model=self._model,
+                contents=prompt,
+            ),
+            timeout=8.0,
         )
         return response.text.strip()
 

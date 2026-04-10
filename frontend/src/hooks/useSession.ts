@@ -6,13 +6,16 @@ import type { Feedback, PositionEntry } from "../types";
 
 async function pollExplanation(
   sessionId: string,
+  signal: { aborted: boolean },
   onReady: (explanation: string | null, llmDebug: string) => void,
   onGiveUp: () => void,
   maxAttempts = 12,
   intervalMs = 1000,
 ) {
   for (let i = 0; i < maxAttempts; i++) {
+    if (signal.aborted) return;
     await new Promise((r) => setTimeout(r, intervalMs));
+    if (signal.aborted) return;
     try {
       const resp = await fetchExplanation(sessionId);
       if (resp.llm_debug !== null) {
@@ -21,21 +24,30 @@ async function pollExplanation(
       }
     } catch { /* ignore network errors, keep polling */ }
   }
-  onGiveUp();
+  if (!signal.aborted) onGiveUp();
 }
 
-/** Returns a checkmate Feedback if the position is terminal, otherwise null. */
-function checkmateFeedback(fen: string, userColor: "white" | "black"): Feedback | null {
+/** Returns terminal Feedback (checkmate or draw) if the game is over, otherwise null. */
+function terminalFeedback(fen: string, userColor: "white" | "black"): Feedback | null {
   try {
     const chess = new Chess(fen);
-    if (!chess.isCheckmate()) return null;
-    const userWon = (chess.turn() === "w") === (userColor === "black");
-    return {
-      quality: "checkmate",
-      explanation: userWon ? "Checkmate! You won." : "Checkmate. Your opponent won.",
-      centipawn_loss: null,
-      lines: null,
-    };
+    if (chess.isCheckmate()) {
+      const userWon = (chess.turn() === "w") === (userColor === "black");
+      return {
+        quality: "checkmate",
+        explanation: userWon ? "Checkmate! You won." : "Checkmate. Your opponent won.",
+        centipawn_loss: null,
+        lines: null,
+      };
+    }
+    if (chess.isDraw()) {
+      let explanation = "Draw.";
+      if (chess.isStalemate()) explanation = "Draw by stalemate.";
+      else if (chess.isThreefoldRepetition()) explanation = "Draw by threefold repetition.";
+      else if (chess.isInsufficientMaterial()) explanation = "Draw by insufficient material.";
+      return { quality: "draw", explanation, centipawn_loss: null, lines: null };
+    }
+    return null;
   } catch {
     return null;
   }
@@ -77,11 +89,14 @@ interface UseSessionReturn {
   updatePositionEval: (fen: string, cp: number) => void;
 }
 
-const MIN_THINKING_MS = 500;
+let _thinkingDelayOverride: number | null = null;
+export function _setThinkingDelayForTest(ms: number | null) { _thinkingDelayOverride = ms; }
+function thinkingDelay() { return _thinkingDelayOverride ?? (500 + Math.random() * 4500); }
 
 export function useSession(): UseSessionReturn {
   const [session, setSession] = useState<SessionState | null>(null);
   const lastParams = useRef<SessionStartParams | null>(null);
+  const abortExplanationPollRef = useRef<{ aborted: boolean } | null>(null);
 
   const triggerOpponentMove = useCallback(
     async (sessionId: string, score: number, moveCount: number) => {
@@ -91,7 +106,7 @@ export function useSession(): UseSessionReturn {
 
       const [resp] = await Promise.all([
         fetchOpponentMove(sessionId).catch(() => null),
-        new Promise((r) => setTimeout(r, MIN_THINKING_MS)),
+        new Promise((r) => setTimeout(r, thinkingDelay())),
       ]);
 
       if (resp) {
@@ -109,7 +124,7 @@ export function useSession(): UseSessionReturn {
             opponentSan = result?.san ?? resp.uci_move;
           } catch { /* fall back to UCI */ }
 
-          const mate = checkmateFeedback(resp.fen, s.userColor);
+          const mate = terminalFeedback(resp.fen, s.userColor);
           const newPosition: PositionEntry = { fen: resp.fen, san: opponentSan, feedback: null, evalCp: null };
           return {
             ...s,
@@ -180,7 +195,7 @@ export function useSession(): UseSessionReturn {
       const newScore =
         resp.result === "correct" ? session.score + 1 : session.score;
       const newMoveCount = session.moveCount + 1;
-      const mate = checkmateFeedback(resp.fen, session.userColor);
+      const mate = terminalFeedback(resp.fen, session.userColor);
 
       const isMistakeOrBlunder = resp.result === "mistake" || resp.result === "blunder";
       const newPosition: PositionEntry = {
@@ -216,8 +231,12 @@ export function useSession(): UseSessionReturn {
 
       if (!mate && isMistakeOrBlunder) {
         const capturedSessionId = session.sessionId;
+        if (abortExplanationPollRef.current) abortExplanationPollRef.current.aborted = true;
+        const signal = { aborted: false };
+        abortExplanationPollRef.current = signal;
         pollExplanation(
           capturedSessionId,
+          signal,
           (explanation, llmDebug) => {
             setSession((s) => {
               if (!s || s.sessionId !== capturedSessionId) return s;

@@ -82,8 +82,8 @@ async def _store_explanation(session_id: str, pre_fen: str, played_san: str, bes
 
 
 def pop_pending_explanation(session_id: str) -> tuple[str, str] | None:
-    """Return and remove the pending LLM explanation, or None if not ready."""
-    return _pending_explanations.pop(session_id, None)
+    """Return the pending LLM explanation without removing it, or None if not ready."""
+    return _pending_explanations.get(session_id)
 
 
 # ---------------------------------------------------------------------------

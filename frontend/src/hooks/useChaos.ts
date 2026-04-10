@@ -12,13 +12,16 @@ import type { Feedback, PositionEntry } from "../types";
 
 async function pollChaosExplanation(
   sessionId: string,
+  signal: { aborted: boolean },
   onReady: (explanation: string | null, llmDebug: string) => void,
   onGiveUp: () => void,
   maxAttempts = 12,
   intervalMs = 1000,
 ) {
   for (let i = 0; i < maxAttempts; i++) {
+    if (signal.aborted) return;
     await new Promise((r) => setTimeout(r, intervalMs));
+    if (signal.aborted) return;
     try {
       const resp = await fetchChaosExplanation(sessionId);
       if (resp.llm_debug !== null) {
@@ -27,20 +30,29 @@ async function pollChaosExplanation(
       }
     } catch { /* ignore */ }
   }
-  onGiveUp();
+  if (!signal.aborted) onGiveUp();
 }
 
-function checkmateFeedback(fen: string, userColor: "white" | "black"): Feedback | null {
+function terminalFeedback(fen: string, userColor: "white" | "black"): Feedback | null {
   try {
     const chess = new Chess(fen);
-    if (!chess.isCheckmate()) return null;
-    const userWon = (chess.turn() === "w") === (userColor === "black");
-    return {
-      quality: "checkmate",
-      explanation: userWon ? "Checkmate! You won." : "Checkmate. Your opponent won.",
-      centipawn_loss: null,
-      lines: null,
-    };
+    if (chess.isCheckmate()) {
+      const userWon = (chess.turn() === "w") === (userColor === "black");
+      return {
+        quality: "checkmate",
+        explanation: userWon ? "Checkmate! You won." : "Checkmate. Your opponent won.",
+        centipawn_loss: null,
+        lines: null,
+      };
+    }
+    if (chess.isDraw()) {
+      let explanation = "Draw.";
+      if (chess.isStalemate()) explanation = "Draw by stalemate.";
+      else if (chess.isThreefoldRepetition()) explanation = "Draw by threefold repetition.";
+      else if (chess.isInsufficientMaterial()) explanation = "Draw by insufficient material.";
+      return { quality: "draw", explanation, centipawn_loss: null, lines: null };
+    }
+    return null;
   } catch {
     return null;
   }
@@ -89,12 +101,15 @@ interface UseChaosReturn {
   updateChaosPositionEval: (fen: string, cp: number) => void;
 }
 
-const MIN_THINKING_MS = 500;
+let _thinkingDelayOverride: number | null = null;
+export function _setThinkingDelayForTest(ms: number | null) { _thinkingDelayOverride = ms; }
+function thinkingDelay() { return _thinkingDelayOverride ?? (500 + Math.random() * 4500); }
 
 export function useChaos(): UseChaosReturn {
   const [chaosSession, setChaosSession] = useState<ChaosState | null>(null);
   const [engineStatus, setEngineStatus] = useState<EngineStatus | null>(null);
   const lastParams = useRef<ChaosStartParams | null>(null);
+  const abortExplanationPollRef = useRef<{ aborted: boolean } | null>(null);
 
   const checkEngineStatus = useCallback(async () => {
     try {
@@ -111,10 +126,13 @@ export function useChaos(): UseChaosReturn {
         s ? { ...s, status: "opponent_thinking" } : s
       );
 
+      const delay = thinkingDelay();
+      const t0 = Date.now();
       const [resp] = await Promise.all([
         fetchChaosOpponentMove(sessionId).catch(() => null),
-        new Promise((r) => setTimeout(r, MIN_THINKING_MS)),
+        new Promise((r) => setTimeout(r, delay)),
       ]);
+      const totalMs = Date.now() - t0;
 
       if (resp) {
         setChaosSession((s) => {
@@ -130,9 +148,12 @@ export function useChaos(): UseChaosReturn {
             opponentSan = result?.san ?? resp.uci_move;
           } catch { /* fall back to UCI */ }
 
-          const mate = checkmateFeedback(resp.fen, s.userColor);
+          const mate = terminalFeedback(resp.fen, s.userColor);
+          const maiaMs = (resp.opponent_move_time ?? 0) * 1000;
+          const waitMs = Math.max(0, totalMs - maiaMs);
+          const engineLabel = resp.opponent_engine ?? "engine";
           const opponentMoveDebug = resp.opponent_move_time != null
-            ? `Opponent move (${resp.opponent_engine ?? "engine"}): ${resp.opponent_move_time.toFixed(2)}s`
+            ? `Maia (${engineLabel}): ${resp.opponent_move_time.toFixed(2)}s\nWait: ${(waitMs / 1000).toFixed(2)}s`
             : null;
           const newPosition: PositionEntry = { fen: resp.fen, san: opponentSan, feedback: null, evalCp: null };
           return {
@@ -208,7 +229,7 @@ export function useChaos(): UseChaosReturn {
 
       const userColor = chaosSession.userColor;
       const capturedSessionId = chaosSession.sessionId;
-      const mate = checkmateFeedback(resp.fen, userColor);
+      const mate = terminalFeedback(resp.fen, userColor);
       const quality = resp.feedback?.quality;
       const isMistakeOrBlunder = quality === "mistake" || quality === "blunder";
       const newPosition: PositionEntry = {
@@ -241,8 +262,12 @@ export function useChaos(): UseChaosReturn {
       }
 
       if (!mate && isMistakeOrBlunder) {
+        if (abortExplanationPollRef.current) abortExplanationPollRef.current.aborted = true;
+        const signal = { aborted: false };
+        abortExplanationPollRef.current = signal;
         pollChaosExplanation(
           capturedSessionId,
+          signal,
           (explanation, llmDebug) => {
             setChaosSession((s) => {
               if (!s || s.sessionId !== capturedSessionId) return s;

@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
-import { useChaos } from "./useChaos";
+import { useChaos, _setThinkingDelayForTest } from "./useChaos";
+
+beforeEach(() => { _setThinkingDelayForTest(0); });
+
 
 // ---------------------------------------------------------------------------
 // Mock API layer

@@ -17,6 +17,7 @@ const QUALITY_LABELS: Record<FeedbackType["quality"], string> = {
   mistake: "Mistake",
   blunder: "Blunder",
   checkmate: "Checkmate",
+  draw: "Draw",
 };
 
 export function Feedback({

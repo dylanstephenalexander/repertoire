@@ -241,6 +241,7 @@ export function App() {
             orientation={currentColor}
             onMove={isStudy ? move : chaosMove}
             disabled={isDisabled}
+            allowPreMove={currentStatus === "opponent_thinking"}
             hintMove={isStudy && !isReviewing ? (session!.hint?.uci || undefined) : undefined}
           />
           <CapturedPieces

@@ -65,6 +65,13 @@
   color: #b07fff;
 }
 
+.draw {
+  border-color: #555;
+}
+.draw .label {
+  color: #aaa;
+}
+
 .actions {
   display: flex;
   gap: 8px;

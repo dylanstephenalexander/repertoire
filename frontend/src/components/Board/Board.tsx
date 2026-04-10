@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import styles from "./Board.module.css";
@@ -8,6 +8,7 @@ interface BoardProps {
   orientation: "white" | "black";
   onMove: (uciMove: string) => void;
   disabled: boolean;
+  allowPreMove?: boolean;
   hintMove?: string; // UCI move to highlight (from + to squares) when a hint is active
 }
 
@@ -46,10 +47,20 @@ export function resolveMove(
   return null;
 }
 
-export function Board({ fen, orientation, onMove, disabled, hintMove }: BoardProps) {
+export function Board({ fen, orientation, onMove, disabled, allowPreMove = false, hintMove }: BoardProps) {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [shaking, setShaking] = useState(false);
+  const [preMoveDisplay, setPreMoveDisplay] = useState<string | null>(null);
+  const preMoveRef = useRef<string | null>(null);
   const shakeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevDisabledRef = useRef(disabled);
+  const onMoveRef = useRef(onMove);
+  onMoveRef.current = onMove;
+
+  function setPreMove(uci: string | null) {
+    preMoveRef.current = uci;
+    setPreMoveDisplay(uci);
+  }
 
   const triggerShake = useCallback(() => {
     if (shakeTimeoutRef.current) clearTimeout(shakeTimeoutRef.current);
@@ -57,7 +68,54 @@ export function Board({ fen, orientation, onMove, disabled, hintMove }: BoardPro
     shakeTimeoutRef.current = setTimeout(() => setShaking(false), 150);
   }, []);
 
+  // Fire or cancel pre-move when board re-enables
+  useEffect(() => {
+    const wasDisabled = prevDisabledRef.current;
+    prevDisabledRef.current = disabled;
+
+    if (wasDisabled && !disabled) {
+      const pm = preMoveRef.current;
+      if (pm) {
+        setPreMove(null);
+        const uci = resolveMove(fen, pm.slice(0, 2), pm.slice(2, 4));
+        if (uci) setTimeout(() => onMoveRef.current(uci), 500);
+      }
+    }
+  }, [disabled, fen]); // preMoveRef intentionally omitted — always fresh via ref
+
+  // Clear pre-move when leaving pre-move mode
+  useEffect(() => {
+    if (!allowPreMove) setPreMove(null);
+  }, [allowPreMove]);
+
+  const userColor = orientation === "white" ? "w" : "b";
+
   function handleSquareClick({ square }: { square: string }) {
+    // Pre-move mode: board is disabled but opponent is thinking
+    if (disabled && allowPreMove) {
+      if (selectedSquare) {
+        const chess = new Chess(fen);
+        const movingPiece = chess.get(selectedSquare as Parameters<typeof chess.get>[0]);
+        if (movingPiece?.color === userColor && square !== selectedSquare) {
+          setPreMove(`${selectedSquare}${square}`);
+          setSelectedSquare(null);
+        } else {
+          // Re-select if clicking another own piece
+          const clicked = chess.get(square as Parameters<typeof chess.get>[0]);
+          if (clicked?.color === userColor) {
+            setSelectedSquare(square);
+          } else {
+            setSelectedSquare(null);
+          }
+        }
+      } else {
+        const chess = new Chess(fen);
+        const piece = chess.get(square as Parameters<typeof chess.get>[0]);
+        if (piece?.color === userColor) setSelectedSquare(square);
+      }
+      return;
+    }
+
     if (disabled) {
       triggerShake();
       return;
@@ -70,10 +128,9 @@ export function Board({ fen, orientation, onMove, disabled, hintMove }: BoardPro
         onMove(uci);
         return;
       }
-      // Clicked an invalid target — if it's one of our pieces, re-select it
       const chess = new Chess(fen);
       const clicked = chess.get(square as Parameters<typeof chess.get>[0]);
-      const turn = chess.turn(); // 'w' or 'b'
+      const turn = chess.turn();
       if (clicked && clicked.color === turn) {
         setSelectedSquare(square);
       } else {
@@ -82,7 +139,6 @@ export function Board({ fen, orientation, onMove, disabled, hintMove }: BoardPro
       return;
     }
 
-    // No piece selected yet — select if it's the side to move
     const chess = new Chess(fen);
     const piece = chess.get(square as Parameters<typeof chess.get>[0]);
     const turn = chess.turn();
@@ -98,7 +154,21 @@ export function Board({ fen, orientation, onMove, disabled, hintMove }: BoardPro
     sourceSquare: string;
     targetSquare: string | null;
   }): boolean {
-    if (disabled || !targetSquare) {
+    if (!targetSquare) return false;
+
+    // Pre-move mode
+    if (disabled && allowPreMove) {
+      const chess = new Chess(fen);
+      const piece = chess.get(sourceSquare as Parameters<typeof chess.get>[0]);
+      if (piece?.color === userColor) {
+        setPreMove(`${sourceSquare}${targetSquare}`);
+        setSelectedSquare(null);
+        return true;
+      }
+      return false;
+    }
+
+    if (disabled) {
       triggerShake();
       return false;
     }
@@ -112,20 +182,31 @@ export function Board({ fen, orientation, onMove, disabled, hintMove }: BoardPro
     return true;
   }
 
-  // Highlight selected square + hint square
+  function handleRightClick() {
+    setPreMove(null);
+    setSelectedSquare(null);
+  }
+
+  // Build square highlights
   const customSquareStyles: Record<string, React.CSSProperties> = {};
   if (hintMove) {
     const hintStyle = { backgroundColor: "rgba(100, 180, 255, 0.55)" };
     customSquareStyles[hintMove.slice(0, 2)] = hintStyle;
     customSquareStyles[hintMove.slice(2, 4)] = hintStyle;
   }
+  if (preMoveDisplay) {
+    const preMoveStyle = { backgroundColor: "rgba(220, 50, 50, 0.65)" };
+    customSquareStyles[preMoveDisplay.slice(0, 2)] = preMoveStyle;
+    customSquareStyles[preMoveDisplay.slice(2, 4)] = preMoveStyle;
+  }
   if (selectedSquare) {
     customSquareStyles[selectedSquare] = { backgroundColor: "rgba(255, 255, 0, 0.4)" };
-    // Highlight legal destinations
-    const chess = new Chess(fen);
-    chess.moves({ verbose: true, square: selectedSquare as Parameters<typeof chess.moves>[0]["square"] }).forEach((m) => {
-      customSquareStyles[m.to] = { backgroundColor: "rgba(0, 200, 0, 0.25)" };
-    });
+    if (!disabled) {
+      const chess = new Chess(fen);
+      chess.moves({ verbose: true, square: selectedSquare as Parameters<typeof chess.moves>[0]["square"] }).forEach((m) => {
+        customSquareStyles[m.to] = { backgroundColor: "rgba(0, 200, 0, 0.25)" };
+      });
+    }
   }
 
   return (
@@ -137,6 +218,7 @@ export function Board({ fen, orientation, onMove, disabled, hintMove }: BoardPro
           boardStyle: { borderRadius: "4px" },
           onPieceDrop: handleDrop,
           onSquareClick: handleSquareClick,
+          onSquareRightClick: handleRightClick,
           squareStyles: customSquareStyles,
           dropSquareStyle: { boxShadow: "inset 0 0 0 3px rgba(100, 180, 255, 0.8)" },
           animationDurationInMs: 150,

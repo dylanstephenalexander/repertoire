@@ -17,7 +17,7 @@ export interface AnalysisLine {
 }
 
 export interface Feedback {
-  quality: "correct" | "alternative" | "mistake" | "blunder" | "checkmate";
+  quality: "correct" | "alternative" | "mistake" | "blunder" | "checkmate" | "draw";
   explanation: string;
   centipawn_loss: number | null;
   lines: AnalysisLine[] | null;

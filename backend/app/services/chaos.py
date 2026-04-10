@@ -16,7 +16,6 @@ from app.models.feedback import AnalysisLine, Feedback
 from app.services.feedback import (
     ALTERNATIVE_THRESHOLD_CP,
     build_mistake_feedback,
-    quality_from_cp_loss,
 )
 from app.services.llm import get_explanation
 from app.services.opening_detect import detect_opening
@@ -167,7 +166,7 @@ async def _store_chaos_explanation(session_id: str, pre_fen: str, played_san: st
 
 
 def pop_pending_chaos_explanation(session_id: str) -> tuple[str, str] | None:
-    return _pending_chaos_explanations.pop(session_id, None)
+    return _pending_chaos_explanations.get(session_id)
 
 
 def clear_chaos_sessions() -> None:
@@ -232,7 +231,6 @@ async def _build_chaos_feedback(
     lines = _to_analysis_lines(raw_lines, pre_board)
     best_san = lines[0].move_san if lines else (best_move_uci or uci_move)
 
-    quality = quality_from_cp_loss(cp_loss)
     tactical_facts = _derive_tactical_facts(pre_board, post_board, move, opponent_uci, played_san, best_san)
     asyncio.create_task(_store_chaos_explanation(session_id, pre_fen, played_san, best_san, cp_loss, tactical_facts))
     return build_mistake_feedback(played_san, best_san, cp_loss, lines=lines), debug_msg
