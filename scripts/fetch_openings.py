@@ -17,6 +17,7 @@ import urllib.request
 from pathlib import Path
 
 OUT_PATH = Path(__file__).parent.parent / "backend" / "app" / "data" / "openings.tsv"
+OUT_ALL_PATH = Path(__file__).parent.parent / "backend" / "app" / "data" / "openings_all.tsv"
 
 # Each opening lists the variations we ship. `prefix` controls which lichess
 # rows are included (matched against the lichess `name` column).
@@ -131,6 +132,14 @@ def main() -> None:
         writer.writerows(out_rows)
 
     print(f"\nWrote {len(out_rows)} rows → {OUT_PATH}")
+
+    # Write the full Lichess dataset for opening detection (covers all openings).
+    with OUT_ALL_PATH.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=["eco", "name", "pgn"], delimiter="\t")
+        writer.writeheader()
+        writer.writerows({"eco": r["eco"], "name": r["name"], "pgn": r["pgn"]} for r in all_rows)
+
+    print(f"Wrote {len(all_rows)} rows → {OUT_ALL_PATH}")
 
 
 if __name__ == "__main__":

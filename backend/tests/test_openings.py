@@ -92,51 +92,135 @@ def test_variation_tree_all_moves_legal(opening_id: str, variation_id: str):
 # Opening detection — local lookup
 # ---------------------------------------------------------------------------
 
-from app.services.opening_detect import detect_opening, _normalise_fen, _build_lookup
+from app.services.opening_detect import detect_opening, _normalise_fen, _build_lookup, _common_label
 
 
-def test_detect_giuoco_piano():
-    """Terminal position of the Giuoco Piano starting variation is recognised."""
-    # 1.e4 e5 2.Nf3 Nc6 3.Bc4 Bc5
-    fen = "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4"
-    assert detect_opening(fen) == "Italian Game: Giuoco Piano"
+def _play(*ucis: str) -> str:
+    """Return the FEN reached after playing the given UCI moves from the start."""
+    board = chess.Board()
+    for uci in ucis:
+        board.push(chess.Move.from_uci(uci))
+    return board.fen()
 
 
-def test_detect_najdorf():
-    """Najdorf position is recognised."""
-    # 1.e4 c5 2.Nf3 d6 3.d4 cxd4 4.Nxd4 Nf6 5.Nc3 a6
-    fen = "rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6"
-    assert detect_opening(fen) == "Sicilian Defense: Najdorf Variation"
+# -- _common_label unit tests ------------------------------------------------
+
+def test_common_label_single_full_name():
+    assert _common_label({"Italian Game: Giuoco Piano"}) == "Italian Game: Giuoco Piano"
+
+def test_common_label_same_opening_different_variations():
+    names = {"Ruy Lopez: Morphy Defense", "Ruy Lopez: Berlin Defense", "Ruy Lopez: Closed"}
+    assert _common_label(names) == "Ruy Lopez"
+
+def test_common_label_different_openings():
+    names = {"Italian Game: Giuoco Piano", "Ruy Lopez: Morphy Defense"}
+    assert _common_label(names) is None
+
+def test_common_label_opening_without_variation_mixed():
+    # A name without ": " mixed with one that has it → only opening is common
+    names = {"Sicilian Defense", "Sicilian Defense: Najdorf Variation"}
+    assert _common_label(names) == "Sicilian Defense"
+
+def test_common_label_empty():
+    assert _common_label(set()) is None
 
 
-def test_intermediate_position_returns_none():
-    """After 1.e4 alone (not a terminal position in any line) — no name."""
-    fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
-    assert detect_opening(fen) is None
+# -- Lookup coverage ---------------------------------------------------------
 
+def test_build_lookup_covers_full_dataset():
+    """With openings_all.tsv the lookup should be well above the 5-opening subset."""
+    assert len(_build_lookup()) > 5000
+
+
+# -- Original 5 openings -----------------------------------------------------
+
+def test_detect_italian():
+    name = detect_opening(_play("e2e4", "e7e5", "g1f3", "b8c6", "f1c4", "f8c5", "c2c3"))
+    assert name is not None and "Italian" in name
+
+def test_detect_sicilian():
+    name = detect_opening(_play("e2e4", "c7c5", "g1f3", "d7d6", "d2d4", "c5d4", "f3d4", "g8f6", "b1c3", "a7a6"))
+    assert name is not None and "Sicilian" in name
+
+def test_detect_ruy_lopez():
+    name = detect_opening(_play("e2e4", "e7e5", "g1f3", "b8c6", "f1b5"))
+    assert name is not None and "Ruy Lopez" in name
+
+def test_detect_queens_gambit():
+    # 1.d4 d5 2.c4 dxc4 — unambiguously Queen's Gambit Accepted
+    name = detect_opening(_play("d2d4", "d7d5", "c2c4", "d5c4"))
+    assert name is not None and "Queen" in name
+
+def test_detect_french():
+    name = detect_opening(_play("e2e4", "e7e6", "d2d4", "d7d5"))
+    assert name is not None and "French" in name
+
+
+# -- Openings outside the original 5 ----------------------------------------
+
+def test_detect_caro_kann():
+    name = detect_opening(_play("e2e4", "c7c6", "d2d4", "d7d5"))
+    assert name is not None and "Caro-Kann" in name
+
+def test_detect_scotch():
+    # Need 3...exd4 4.Nxd4 to disambiguate from Italian transpositions
+    name = detect_opening(_play("e2e4", "e7e5", "g1f3", "b8c6", "d2d4", "e5d4", "f3d4"))
+    assert name is not None and "Scotch" in name
+
+def test_detect_london():
+    # 1.d4 Nf6 2.Bf4 — Indian Defense: Accelerated London System
+    name = detect_opening(_play("d2d4", "g8f6", "c1f4"))
+    assert name is not None and "London" in name
+
+def test_detect_nimzo_indian():
+    name = detect_opening(_play("d2d4", "g8f6", "c2c4", "e7e6", "b1c3", "f8b4"))
+    assert name is not None and "Nimzo" in name
+
+def test_detect_kings_gambit():
+    # 1.e4 e5 2.f4 exf4 3.Bc4 — King's Gambit Accepted
+    name = detect_opening(_play("e2e4", "e7e5", "f2f4", "e5f4", "f1c4"))
+    assert name is not None and "King" in name
+
+
+# -- Label-narrowing progression ---------------------------------------------
+
+def test_label_narrows_as_moves_progress():
+    """Each new label should be a refinement of the previous, never a jump to a different opening."""
+    moves = ["e2e4", "e7e5", "g1f3", "b8c6", "f1b5", "a7a6"]  # Ruy Lopez: Morphy
+    board = chess.Board()
+    prev_label: str | None = None
+    for uci in moves:
+        board.push(chess.Move.from_uci(uci))
+        label = detect_opening(board.fen())
+        if label is not None and prev_label is not None:
+            assert prev_label in label or label in prev_label, (
+                f"Label jumped from '{prev_label}' to '{label}'"
+            )
+        if label is not None:
+            prev_label = label
+
+
+# -- Edge cases --------------------------------------------------------------
 
 def test_starting_position_returns_none():
-    assert detect_opening("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") is None
+    assert detect_opening(_play()) is None
 
+def test_ambiguous_after_e4_returns_none():
+    assert detect_opening(_play("e2e4")) is None
+
+def test_out_of_book_returns_none():
+    # 1.a4 a5 2.h4 h5 — not in any opening book
+    assert detect_opening(_play("a2a4", "a7a5", "h2h4", "h7h5")) is None
 
 def test_normalise_fen_strips_clocks():
     fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
     assert _normalise_fen(fen) == "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq -"
 
-
 def test_normalise_fen_handles_short_fen():
-    short = "8/8/8/8/8/8/8/8 w"
-    assert _normalise_fen(short) == short
-
-
-def test_build_lookup_is_populated():
-    lookup = _build_lookup()
-    assert len(lookup) > 100
-
+    assert _normalise_fen("8/8/8/8/8/8/8/8 w") == "8/8/8/8/8/8/8/8 w"
 
 def test_detect_opening_clock_independent():
-    """Same position with different clock values should map to the same name."""
-    # Two FENs that differ only in halfmove/fullmove clocks
+    """Same position with different clock values must map to the same name."""
     fen_a = "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4"
     fen_b = "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 10 99"
     assert detect_opening(fen_a) == detect_opening(fen_b)
