@@ -47,15 +47,36 @@ export function resolveMove(
   return null;
 }
 
+/**
+ * Validate a pre-move by flipping the FEN active color and checking legality.
+ * En passant is cleared — it belongs to the current side and is invalid after flipping.
+ * Returns the resolved UCI string if pseudo-legal, or null.
+ */
+export function resolvePreMove(fen: string, from: string, to: string): string | null {
+  const parts = fen.split(" ");
+  parts[1] = parts[1] === "w" ? "b" : "w";
+  parts[3] = "-";
+  try {
+    return resolveMove(parts.join(" "), from, to);
+  } catch {
+    return null;
+  }
+}
+
 export function Board({ fen, orientation, onMove, disabled, allowPreMove = false, hintMove }: BoardProps) {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [shaking, setShaking] = useState(false);
   const [preMoveDisplay, setPreMoveDisplay] = useState<string | null>(null);
   const preMoveRef = useRef<string | null>(null);
   const shakeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const prevDisabledRef = useRef(disabled);
+  const prevAllowPreMoveRef = useRef(allowPreMove);
   const onMoveRef = useRef(onMove);
   onMoveRef.current = onMove;
+  // Keep refs current so drag callbacks always read latest values, not stale closures.
+  const disabledRef = useRef(disabled);
+  disabledRef.current = disabled;
+  const allowPreMoveRef = useRef(allowPreMove);
+  allowPreMoveRef.current = allowPreMove;
 
   function setPreMove(uci: string | null) {
     preMoveRef.current = uci;
@@ -68,45 +89,51 @@ export function Board({ fen, orientation, onMove, disabled, allowPreMove = false
     shakeTimeoutRef.current = setTimeout(() => setShaking(false), 150);
   }, []);
 
-  // Fire or cancel pre-move when board re-enables
+  // Fire or cancel pre-move when allowPreMove transitions true→false (opponent just moved).
+  // Using allowPreMove as the trigger avoids the race where disabled and allowPreMove change
+  // in the same render and a pre-move queued just before the transition gets dropped.
   useEffect(() => {
-    const wasDisabled = prevDisabledRef.current;
-    prevDisabledRef.current = disabled;
+    const wasAllowed = prevAllowPreMoveRef.current;
+    prevAllowPreMoveRef.current = allowPreMove;
 
-    if (wasDisabled && !disabled) {
+    if (wasAllowed && !allowPreMove) {
+      // Opponent's turn just ended — either fire or discard the queued pre-move.
       const pm = preMoveRef.current;
-      if (pm) {
-        setPreMove(null);
+      setPreMove(null);
+      if (pm && !disabled) {
+        // Re-validate against the new FEN (opponent's move may have made it illegal).
         const uci = resolveMove(fen, pm.slice(0, 2), pm.slice(2, 4));
-        if (uci) setTimeout(() => onMoveRef.current(uci), 500);
+        if (uci) onMoveRef.current(uci);
       }
     }
-  }, [disabled, fen]); // preMoveRef intentionally omitted — always fresh via ref
-
-  // Clear pre-move when leaving pre-move mode
-  useEffect(() => {
-    if (!allowPreMove) setPreMove(null);
-  }, [allowPreMove]);
+  }, [allowPreMove, disabled, fen]);
 
   const userColor = orientation === "white" ? "w" : "b";
 
   function handleSquareClick({ square }: { square: string }) {
+    const disabled = disabledRef.current;
+    const allowPreMove = allowPreMoveRef.current;
     // Pre-move mode: board is disabled but opponent is thinking
     if (disabled && allowPreMove) {
       if (selectedSquare) {
-        const chess = new Chess(fen);
-        const movingPiece = chess.get(selectedSquare as Parameters<typeof chess.get>[0]);
-        if (movingPiece?.color === userColor && square !== selectedSquare) {
-          setPreMove(`${selectedSquare}${square}`);
+        if (square === selectedSquare) {
           setSelectedSquare(null);
+          return;
+        }
+        // Validate pseudo-legality before accepting the pre-move
+        const uci = resolvePreMove(fen, selectedSquare, square);
+        if (uci) {
+          setPreMove(uci);
+          setSelectedSquare(null);
+          return;
+        }
+        // Re-select if clicking another own piece
+        const chess = new Chess(fen);
+        const clicked = chess.get(square as Parameters<typeof chess.get>[0]);
+        if (clicked?.color === userColor) {
+          setSelectedSquare(square);
         } else {
-          // Re-select if clicking another own piece
-          const clicked = chess.get(square as Parameters<typeof chess.get>[0]);
-          if (clicked?.color === userColor) {
-            setSelectedSquare(square);
-          } else {
-            setSelectedSquare(null);
-          }
+          setSelectedSquare(null);
         }
       } else {
         const chess = new Chess(fen);
@@ -155,13 +182,14 @@ export function Board({ fen, orientation, onMove, disabled, allowPreMove = false
     targetSquare: string | null;
   }): boolean {
     if (!targetSquare) return false;
+    const disabled = disabledRef.current;
+    const allowPreMove = allowPreMoveRef.current;
 
-    // Pre-move mode
+    // Pre-move mode: validate pseudo-legality before accepting
     if (disabled && allowPreMove) {
-      const chess = new Chess(fen);
-      const piece = chess.get(sourceSquare as Parameters<typeof chess.get>[0]);
-      if (piece?.color === userColor) {
-        setPreMove(`${sourceSquare}${targetSquare}`);
+      const uci = resolvePreMove(fen, sourceSquare, targetSquare);
+      if (uci) {
+        setPreMove(uci);
         setSelectedSquare(null);
         return true;
       }
@@ -202,10 +230,22 @@ export function Board({ fen, orientation, onMove, disabled, allowPreMove = false
   if (selectedSquare) {
     customSquareStyles[selectedSquare] = { backgroundColor: "rgba(255, 255, 0, 0.4)" };
     if (!disabled) {
+      // Normal mode: show legal destinations
       const chess = new Chess(fen);
       chess.moves({ verbose: true, square: selectedSquare as Parameters<typeof chess.moves>[0]["square"] }).forEach((m) => {
         customSquareStyles[m.to] = { backgroundColor: "rgba(0, 200, 0, 0.25)" };
       });
+    } else if (allowPreMove) {
+      // Pre-move mode: show pseudo-legal destinations (flipped color)
+      const parts = fen.split(" ");
+      parts[1] = parts[1] === "w" ? "b" : "w";
+      parts[3] = "-";
+      try {
+        const chess = new Chess(parts.join(" "));
+        chess.moves({ verbose: true, square: selectedSquare as Parameters<typeof chess.moves>[0]["square"] }).forEach((m) => {
+          customSquareStyles[m.to] = { backgroundColor: "rgba(0, 200, 0, 0.25)" };
+        });
+      } catch { /* ignore invalid FEN */ }
     }
   }
 

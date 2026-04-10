@@ -258,10 +258,10 @@ export function App() {
             </div>
           )}
 
-          {/* Opening name — chaos only */}
-          {isChaos && (
+          {/* Opening name — chaos only, hidden until detected */}
+          {isChaos && chaosSession!.openingName && (
             <div className={chaosSession!.inTheory ? styles.openingName : styles.openingNameFaded}>
-              {chaosSession!.openingName ?? "Opening"}
+              {chaosSession!.openingName}
             </div>
           )}
 
