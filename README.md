@@ -1,5 +1,8 @@
 # Repertoire
 
+![video demo](https://github.com/user-attachments/assets/5620b530-3bac-40fe-be61-5dc7fae9577c)
+
+
 A free, self-hosted chess training tool. No subscriptions, no paywalls, no depth limits — everything runs locally using your own engine.
 
 ## What it does
