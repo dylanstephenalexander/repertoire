@@ -93,8 +93,6 @@ class StockfishEngine:
         effective_depth = depth if depth is not None else self._depth
         with self._lock:
             self._send(f"setoption name MultiPV value {effective_multipv}")
-            self._send("isready")
-            self._wait_for("readyok")
             self._set_position(fen, moves)
             self._send(f"go depth {effective_depth}")
             return self._collect_multipv_result()
@@ -124,9 +122,9 @@ class StockfishEngine:
             self._send(f"position fen {fen}")
 
     def _collect_multipv_result(self) -> dict:
-        # Track the latest info line per multipv index at the deepest depth seen
+        # Track the latest info line per multipv index, depth tracked per-PV
         best_by_pv: dict[int, dict] = {}   # pv_index -> {cp, move}
-        best_depth = 0
+        depth_by_pv: dict[int, int] = {}   # pv_index -> best depth seen
 
         while True:
             line = self._readline()
@@ -143,8 +141,8 @@ class StockfishEngine:
                 except (ValueError, IndexError):
                     continue
 
-                if depth >= best_depth:
-                    best_depth = depth
+                if depth >= depth_by_pv.get(pv_idx, 0):
+                    depth_by_pv[pv_idx] = depth
                     best_by_pv[pv_idx] = {"cp": cp, "move": move}
 
             elif line.startswith("info") and "score mate" in line:
@@ -159,8 +157,8 @@ class StockfishEngine:
                     move = parts[pv_pos + 1]
                 except (ValueError, IndexError):
                     continue
-                if depth >= best_depth:
-                    best_depth = depth
+                if depth >= depth_by_pv.get(pv_idx, 0):
+                    depth_by_pv[pv_idx] = depth
                     best_by_pv[pv_idx] = {"cp": cp, "move": move}
 
             elif line.startswith("bestmove"):
