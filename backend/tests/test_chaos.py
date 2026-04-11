@@ -349,11 +349,12 @@ def test_chaos_explanation_endpoint_returns_null_when_no_pending_future():
 
 def test_chaos_explanation_endpoint_returns_data_from_resolved_future(monkeypatch):
     """When the LLM has finished, the endpoint returns its result."""
+    import app.routers.chaos as chaos_router
     sid = _start()
     # Bypass the Future plumbing by monkey-patching the await helper.
     async def fake_await(_session_id, timeout=12.0):
         return ("Knight is hanging.", "gemini-2.5-flash — OK\n\nKnight is hanging.")
-    monkeypatch.setattr(chaos_svc, "await_chaos_explanation", fake_await)
+    monkeypatch.setattr(chaos_router, "await_explanation", fake_await)
     resp = client.get(f"/chaos/{sid}/explanation")
     assert resp.json()["explanation"] == "Knight is hanging."
     assert "OK" in resp.json()["llm_debug"]
@@ -362,6 +363,7 @@ def test_chaos_explanation_endpoint_returns_data_from_resolved_future(monkeypatc
 def test_chaos_explanation_endpoint_consumes_future(monkeypatch):
     """One Future per mistake — second consecutive call (no new mistake) returns null.
     This is the architecture that prevents the rate-limit polling loop."""
+    import app.routers.chaos as chaos_router
     sid = _start()
     call_count = {"n": 0}
     async def fake_await(_session_id, timeout=12.0):
@@ -369,7 +371,7 @@ def test_chaos_explanation_endpoint_consumes_future(monkeypatch):
         if call_count["n"] == 1:
             return ("Blunder.", "gemini-2.5-flash — OK\n\nBlunder.")
         return None
-    monkeypatch.setattr(chaos_svc, "await_chaos_explanation", fake_await)
+    monkeypatch.setattr(chaos_router, "await_explanation", fake_await)
     resp1 = client.get(f"/chaos/{sid}/explanation")
     resp2 = client.get(f"/chaos/{sid}/explanation")
     assert resp1.json()["explanation"] == "Blunder."
