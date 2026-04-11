@@ -38,7 +38,7 @@ export function SessionMoveList({ positions, viewIndex, onSelect }: Props) {
   }
 
   function handleBack() {
-    if (isLive) onSelect(positions.length - 1);
+    if (isLive) onSelect(positions.length - 2);
     else if (viewIndex! > 0) onSelect(viewIndex! - 1);
   }
 

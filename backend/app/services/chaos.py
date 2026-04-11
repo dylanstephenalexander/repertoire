@@ -157,22 +157,62 @@ def get_chaos_opponent_move(session_id: str) -> ChaosOpponentMoveResponse:
     )
 
 
-_pending_chaos_explanations: dict[str, tuple[str, str]] = {}
+# Per-session Future for the in-flight LLM explanation. Resolved when the
+# background task completes (success, failure, or timeout). The /explanation
+# endpoint long-polls on this Future — clients make ONE request per mistake,
+# not a polling loop.
+_chaos_llm_futures: dict[str, "asyncio.Future[tuple[str | None, str]]"] = {}
+
+# Long-poll wait cap. Should exceed the LLM timeout (8s in llm.py) so the
+# Future has time to resolve naturally even on slow LLM responses.
+CHAOS_EXPLANATION_WAIT_TIMEOUT = 12.0
 
 
-async def _store_chaos_explanation(session_id: str, pre_fen: str, played_san: str, best_san: str, cp_loss: int, tactical_facts: list[str]) -> None:
-    explanation, llm_debug = await get_explanation(pre_fen, played_san, best_san, cp_loss, tactical_facts)
-    _pending_chaos_explanations[session_id] = (explanation, llm_debug)
+def _start_chaos_explanation_task(
+    session_id: str,
+    pre_fen: str,
+    played_san: str,
+    best_san: str,
+    cp_loss: int,
+    tactical_facts: list[str],
+) -> None:
+    """Kick off the LLM call and register a Future the endpoint can await."""
+    loop = asyncio.get_running_loop()
+    fut: asyncio.Future[tuple[str | None, str]] = loop.create_future()
+    _chaos_llm_futures[session_id] = fut
+
+    async def _run() -> None:
+        try:
+            result = await get_explanation(pre_fen, played_san, best_san, cp_loss, tactical_facts)
+            if not fut.done():
+                fut.set_result(result)
+        except Exception as exc:  # defensive — get_explanation already swallows its own exceptions
+            if not fut.done():
+                fut.set_result((None, f"error — {type(exc).__name__}"))
+
+    asyncio.create_task(_run())
 
 
-def pop_pending_chaos_explanation(session_id: str) -> tuple[str, str] | None:
-    return _pending_chaos_explanations.get(session_id)
+async def await_chaos_explanation(
+    session_id: str,
+    timeout: float = CHAOS_EXPLANATION_WAIT_TIMEOUT,
+) -> tuple[str | None, str] | None:
+    """Long-poll: block until the LLM result is ready, or return None on timeout."""
+    fut = _chaos_llm_futures.get(session_id)
+    if fut is None:
+        return None
+    try:
+        result = await asyncio.wait_for(asyncio.shield(fut), timeout=timeout)
+    except asyncio.TimeoutError:
+        return None
+    _chaos_llm_futures.pop(session_id, None)
+    return result
 
 
 def clear_chaos_sessions() -> None:
     """For testing only."""
     _chaos_sessions.clear()
-    _pending_chaos_explanations.clear()
+    _chaos_llm_futures.clear()
 
 
 def stop_all_maia_engines() -> None:
@@ -232,7 +272,7 @@ async def _build_chaos_feedback(
     best_san = lines[0].move_san if lines else (best_move_uci or uci_move)
 
     tactical_facts = _derive_tactical_facts(pre_board, post_board, move, opponent_uci, played_san, best_san)
-    asyncio.create_task(_store_chaos_explanation(session_id, pre_fen, played_san, best_san, cp_loss, tactical_facts))
+    _start_chaos_explanation_task(session_id, pre_fen, played_san, best_san, cp_loss, tactical_facts)
     return build_mistake_feedback(played_san, best_san, cp_loss, lines=lines), debug_msg
 
 

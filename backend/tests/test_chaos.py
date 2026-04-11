@@ -338,7 +338,8 @@ def test_chaos_sessions_isolated_between_tests():
 # Explanation endpoint — idempotency and not-ready state
 # ---------------------------------------------------------------------------
 
-def test_chaos_explanation_endpoint_returns_null_when_not_ready():
+def test_chaos_explanation_endpoint_returns_null_when_no_pending_future():
+    """No mistake registered → no Future → endpoint returns nulls without blocking."""
     sid = _start()
     resp = client.get(f"/chaos/{sid}/explanation")
     assert resp.status_code == 200
@@ -346,19 +347,31 @@ def test_chaos_explanation_endpoint_returns_null_when_not_ready():
     assert resp.json()["llm_debug"] is None
 
 
-def test_chaos_explanation_endpoint_returns_data_when_ready():
+def test_chaos_explanation_endpoint_returns_data_from_resolved_future(monkeypatch):
+    """When the LLM has finished, the endpoint returns its result."""
     sid = _start()
-    chaos_svc._pending_chaos_explanations[sid] = ("Knight is hanging.", "gemini-2.0-flash — OK\n\nKnight is hanging.")
+    # Bypass the Future plumbing by monkey-patching the await helper.
+    async def fake_await(_session_id, timeout=12.0):
+        return ("Knight is hanging.", "gemini-2.5-flash — OK\n\nKnight is hanging.")
+    monkeypatch.setattr(chaos_svc, "await_chaos_explanation", fake_await)
     resp = client.get(f"/chaos/{sid}/explanation")
     assert resp.json()["explanation"] == "Knight is hanging."
     assert "OK" in resp.json()["llm_debug"]
 
 
-def test_chaos_explanation_endpoint_is_idempotent():
-    """Second call returns the same result — not consumed on first read."""
+def test_chaos_explanation_endpoint_consumes_future(monkeypatch):
+    """One Future per mistake — second consecutive call (no new mistake) returns null.
+    This is the architecture that prevents the rate-limit polling loop."""
     sid = _start()
-    chaos_svc._pending_chaos_explanations[sid] = ("Blunder.", "gemini-2.0-flash — OK\n\nBlunder.")
+    call_count = {"n": 0}
+    async def fake_await(_session_id, timeout=12.0):
+        call_count["n"] += 1
+        if call_count["n"] == 1:
+            return ("Blunder.", "gemini-2.5-flash — OK\n\nBlunder.")
+        return None
+    monkeypatch.setattr(chaos_svc, "await_chaos_explanation", fake_await)
     resp1 = client.get(f"/chaos/{sid}/explanation")
     resp2 = client.get(f"/chaos/{sid}/explanation")
-    assert resp1.json() == resp2.json()
-    assert resp2.json()["explanation"] == "Blunder."
+    assert resp1.json()["explanation"] == "Blunder."
+    assert resp2.json()["explanation"] is None
+    assert resp2.json()["llm_debug"] is None

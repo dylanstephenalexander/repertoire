@@ -522,10 +522,10 @@ describe("draw detection", () => {
 });
 
 // ---------------------------------------------------------------------------
-// LLM polling — only polls once per mistake, abort on second mistake
+// LLM explanation — single long-poll request per mistake (no polling loop)
 // ---------------------------------------------------------------------------
 
-describe("LLM explanation polling", () => {
+describe("LLM explanation request", () => {
   async function startWhiteSession() {
     vi.mocked(sessionApi.startSession).mockResolvedValue({
       session_id: "abc",
@@ -537,7 +537,7 @@ describe("LLM explanation polling", () => {
     return hook;
   }
 
-  it("polls explanation after a mistake and resolves llmDebugMsg", async () => {
+  it("fires exactly one explanation request after a mistake", async () => {
     const { result } = await startWhiteSession();
 
     vi.mocked(sessionApi.sendMove).mockResolvedValue({
@@ -547,23 +547,27 @@ describe("LLM explanation polling", () => {
       eval_cp: null,
       debug_msg: null,
     });
-    let pollCount = 0;
+    let callCount = 0;
     vi.mocked(sessionApi.fetchExplanation).mockImplementation(() => {
-      pollCount++;
-      if (pollCount < 2) return Promise.resolve({ explanation: null, llm_debug: null });
-      return Promise.resolve({ explanation: "Knight is hanging.", llm_debug: "gemini-2.0-flash — OK\n\nKnight is hanging." });
+      callCount++;
+      return Promise.resolve({
+        explanation: "Knight is hanging.",
+        llm_debug: "gemini-2.5-flash — OK\n\nKnight is hanging.",
+      });
     });
 
     await act(async () => { await result.current.move("d2d4"); });
 
     await waitFor(
       () => expect(result.current.session?.llmDebugMsg).toContain("OK"),
-      { timeout: 8000 },
+      { timeout: 5000 },
     );
     expect(result.current.session?.explanationPending).toBe(false);
+    // Critical: ONE request only — not the 8–12 loop that caused the rate limiting
+    expect(callCount).toBe(1);
   }, 10000);
 
-  it("sets explanationPending true during polling, false when done", async () => {
+  it("sets explanationPending true while waiting, false when result arrives", async () => {
     const { result } = await startWhiteSession();
 
     let resolveExplanation!: (v: { explanation: string; llm_debug: string }) => void;
@@ -583,13 +587,13 @@ describe("LLM explanation polling", () => {
     await waitFor(() => expect(result.current.session?.explanationPending).toBe(true), { timeout: 2500 });
 
     act(() => {
-      resolveExplanation({ explanation: "Blunder.", llm_debug: "gemini-2.0-flash — OK\n\nBlunder." });
+      resolveExplanation({ explanation: "Blunder.", llm_debug: "gemini-2.5-flash — OK\n\nBlunder." });
     });
 
     await waitFor(() => expect(result.current.session?.explanationPending).toBe(false), { timeout: 2500 });
   });
 
-  it("stops polling once explanation is received — does not keep calling", async () => {
+  it("clears explanationPending when the backend returns null (timeout)", async () => {
     const { result } = await startWhiteSession();
 
     vi.mocked(sessionApi.sendMove).mockResolvedValue({
@@ -603,18 +607,20 @@ describe("LLM explanation polling", () => {
     let callCount = 0;
     vi.mocked(sessionApi.fetchExplanation).mockImplementation(() => {
       callCount++;
-      return Promise.resolve({ explanation: "Blunder.", llm_debug: "gemini-2.0-flash — OK\n\nBlunder." });
+      return Promise.resolve({ explanation: null, llm_debug: null });
     });
 
     await act(async () => { await result.current.move("d2d4"); });
 
-    await waitFor(() => expect(result.current.session?.llmDebugMsg).toContain("OK"), { timeout: 5000 });
+    await waitFor(
+      () => expect(result.current.session?.explanationPending).toBe(false),
+      { timeout: 3000 },
+    );
+    // Single request even on timeout — no retry loop
+    expect(callCount).toBe(1);
+  });
 
-    // Polling stopped promptly — should be a small number, not 12 (the old bug)
-    expect(callCount).toBeLessThan(3);
-  }, 10000);
-
-  it("does not poll for a correct move", async () => {
+  it("does not fetch an explanation for a correct move", async () => {
     const { result } = await startWhiteSession();
 
     vi.mocked(sessionApi.sendMove).mockResolvedValue({
@@ -634,5 +640,16 @@ describe("LLM explanation polling", () => {
     await waitFor(() => expect(result.current.session?.fen).toBe(AFTER_E5_FEN), { timeout: 2500 });
 
     expect(sessionApi.fetchExplanation).not.toHaveBeenCalled();
+  });
+
+  it("concurrent move calls do not trigger duplicate API calls", async () => {
+    const { result } = await startWhiteSession();
+
+    vi.mocked(sessionApi.sendMove).mockReturnValue(new Promise(() => {}));
+
+    act(() => { result.current.move("e2e4"); });
+    act(() => { result.current.move("e2e4"); });
+
+    expect(sessionApi.sendMove).toHaveBeenCalledTimes(1);
   });
 });

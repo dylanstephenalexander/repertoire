@@ -37,8 +37,10 @@ def start_chaos(body: ChaosStartRequest) -> ChaosStartResponse:
 
 
 @router.get("/{session_id}/explanation")
-def get_chaos_explanation(session_id: str) -> dict:
-    result = chaos_svc.pop_pending_chaos_explanation(session_id)
+async def get_chaos_explanation(session_id: str) -> dict:
+    """Long-poll: blocks server-side until the LLM result is ready, or returns
+    null on timeout. Clients should make ONE request per mistake — no loop."""
+    result = await chaos_svc.await_chaos_explanation(session_id)
     if result is None:
         return {"explanation": None, "llm_debug": None}
     explanation, llm_debug = result

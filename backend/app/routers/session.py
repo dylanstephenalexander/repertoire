@@ -69,8 +69,10 @@ def undo_move(session_id: str) -> dict:
 
 
 @router.get("/{session_id}/explanation")
-def get_explanation(session_id: str) -> dict:
-    result = session_svc.pop_pending_explanation(session_id)
+async def get_explanation(session_id: str) -> dict:
+    """Long-poll: blocks server-side until the LLM result is ready, or returns
+    null on timeout. Clients should make ONE request per mistake — no loop."""
+    result = await session_svc.await_explanation(session_id)
     if result is None:
         return {"explanation": None, "llm_debug": None}
     explanation, llm_debug = result

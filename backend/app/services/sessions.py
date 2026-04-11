@@ -40,9 +40,15 @@ _pre_eval_futures: dict[str, "Future[dict]"] = {}
 # Timestamp (perf_counter) when each pre_eval was submitted — used to measure think time
 _pre_eval_submit_times: dict[str, float] = {}
 
-# LLM explanation results, stored once the background task completes
-# (explanation, llm_debug) — absent while in-flight, present when ready
-_pending_explanations: dict[str, tuple[str, str]] = {}
+# Per-session Future for the in-flight LLM explanation. Resolved when the
+# background task completes (success, failure, or timeout). The /explanation
+# endpoint long-polls on this Future — clients make ONE request per mistake,
+# not a polling loop.
+_session_llm_futures: dict[str, "asyncio.Future[tuple[str | None, str]]"] = {}
+
+# Long-poll wait cap. Should exceed the LLM timeout (8s in llm.py) so the
+# Future has time to resolve naturally even on slow LLM responses.
+SESSION_EXPLANATION_WAIT_TIMEOUT = 12.0
 
 # Number of candidate moves analysed in background pre_eval.
 # Start at 3 (same cost as old inline pre_eval) and increase once benchmarked.
@@ -130,18 +136,48 @@ def clear_sessions() -> None:
     _sessions.clear()
     _pre_eval_futures.clear()
     _pre_eval_submit_times.clear()
-    _pending_explanations.clear()
+    _session_llm_futures.clear()
 
 
-async def _store_explanation(session_id: str, pre_fen: str, played_san: str, best_san: str, cp_loss: int, tactical_facts: list[str]) -> None:
-    """Background task: fetch LLM explanation and store it for polling."""
-    explanation, llm_debug = await get_explanation(pre_fen, played_san, best_san, cp_loss, tactical_facts)
-    _pending_explanations[session_id] = (explanation, llm_debug)
+def _start_explanation_task(
+    session_id: str,
+    pre_fen: str,
+    played_san: str,
+    best_san: str,
+    cp_loss: int,
+    tactical_facts: list[str],
+) -> None:
+    """Kick off the LLM call and register a Future the endpoint can await."""
+    loop = asyncio.get_running_loop()
+    fut: asyncio.Future[tuple[str | None, str]] = loop.create_future()
+    _session_llm_futures[session_id] = fut
+
+    async def _run() -> None:
+        try:
+            result = await get_explanation(pre_fen, played_san, best_san, cp_loss, tactical_facts)
+            if not fut.done():
+                fut.set_result(result)
+        except Exception as exc:  # defensive — get_explanation already swallows its own exceptions
+            if not fut.done():
+                fut.set_result((None, f"error — {type(exc).__name__}"))
+
+    asyncio.create_task(_run())
 
 
-def pop_pending_explanation(session_id: str) -> tuple[str, str] | None:
-    """Return the pending LLM explanation without removing it, or None if not ready."""
-    return _pending_explanations.get(session_id)
+async def await_explanation(
+    session_id: str,
+    timeout: float = SESSION_EXPLANATION_WAIT_TIMEOUT,
+) -> tuple[str | None, str] | None:
+    """Long-poll: block until the LLM result is ready, or return None on timeout."""
+    fut = _session_llm_futures.get(session_id)
+    if fut is None:
+        return None
+    try:
+        result = await asyncio.wait_for(asyncio.shield(fut), timeout=timeout)
+    except asyncio.TimeoutError:
+        return None
+    _session_llm_futures.pop(session_id, None)
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -427,8 +463,8 @@ async def process_move(session_id: str, uci_move: str) -> MoveResult:
         # Derive concrete facts for LLM (python-chess, no inference needed from the model)
         post_board = chess.Board(new_fen)
         tactical_facts = _derive_tactical_facts(pre_board, post_board, move, opponent_uci, played_san, best_san)
-        # Fire LLM in background — client polls /session/{id}/explanation
-        asyncio.create_task(_store_explanation(session_id, pre_fen, played_san, best_san, cp_loss, tactical_facts))
+        # Fire LLM in background — client long-polls /session/{id}/explanation
+        _start_explanation_task(session_id, pre_fen, played_san, best_san, cp_loss, tactical_facts)
 
     _update_session(session, uci_move, new_fen, {})
     return MoveResult(result=result, feedback=feedback, fen=new_fen, debug_msg=debug_msg)

@@ -4,27 +4,25 @@ import { fetchExplanation, fetchHint, fetchOpponentMove, sendMove, startSession,
 import type { SessionStartParams } from "../api/session";
 import type { Feedback, PositionEntry } from "../types";
 
-async function pollExplanation(
+async function fetchExplanationOnce(
   sessionId: string,
   signal: { aborted: boolean },
   onReady: (explanation: string | null, llmDebug: string) => void,
   onGiveUp: () => void,
-  maxAttempts = 12,
-  intervalMs = 1000,
 ) {
-  for (let i = 0; i < maxAttempts; i++) {
+  // ONE request — backend long-polls until the LLM finishes (or its own timeout).
+  // No loop, no interval, no rate-limit risk.
+  try {
+    const resp = await fetchExplanation(sessionId);
     if (signal.aborted) return;
-    await new Promise((r) => setTimeout(r, intervalMs));
-    if (signal.aborted) return;
-    try {
-      const resp = await fetchExplanation(sessionId);
-      if (resp.llm_debug !== null) {
-        onReady(resp.explanation, resp.llm_debug);
-        return;
-      }
-    } catch { /* ignore network errors, keep polling */ }
+    if (resp.llm_debug !== null) {
+      onReady(resp.explanation, resp.llm_debug);
+    } else {
+      onGiveUp();
+    }
+  } catch {
+    if (!signal.aborted) onGiveUp();
   }
-  if (!signal.aborted) onGiveUp();
 }
 
 /** Returns terminal Feedback (checkmate or draw) if the game is over, otherwise null. */
@@ -97,6 +95,7 @@ export function useSession(): UseSessionReturn {
   const [session, setSession] = useState<SessionState | null>(null);
   const lastParams = useRef<SessionStartParams | null>(null);
   const abortExplanationPollRef = useRef<{ aborted: boolean } | null>(null);
+  const movePendingRef = useRef(false);
 
   const triggerOpponentMove = useCallback(
     async (sessionId: string, score: number, moveCount: number) => {
@@ -176,7 +175,10 @@ export function useSession(): UseSessionReturn {
   const move = useCallback(
     async (uciMove: string) => {
       if (!session || session.status !== "playing") return;
+      if (movePendingRef.current) return;
+      movePendingRef.current = true;
 
+      try {
       // Capture the index this user move will occupy in positions[]
       const userMovePositionIdx = session.positions.length;
 
@@ -236,7 +238,7 @@ export function useSession(): UseSessionReturn {
         if (abortExplanationPollRef.current) abortExplanationPollRef.current.aborted = true;
         const signal = { aborted: false };
         abortExplanationPollRef.current = signal;
-        pollExplanation(
+        fetchExplanationOnce(
           capturedSessionId,
           signal,
           (explanation, llmDebug) => {
@@ -267,6 +269,9 @@ export function useSession(): UseSessionReturn {
             });
           },
         );
+      }
+      } finally {
+        movePendingRef.current = false;
       }
     },
     [session, triggerOpponentMove]

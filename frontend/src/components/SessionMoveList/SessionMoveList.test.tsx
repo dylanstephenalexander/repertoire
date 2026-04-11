@@ -163,4 +163,12 @@ describe("SessionMoveList click interactions", () => {
     await userEvent.click(screen.getByTitle("Previous move"));
     expect(onSelect).toHaveBeenCalledWith(2);
   });
+
+  it("clicking ◀ from live state (viewIndex=null) goes to second-to-last position", async () => {
+    const onSelect = vi.fn();
+    render(<SessionMoveList positions={POSITIONS} viewIndex={null} onSelect={onSelect} />);
+    await userEvent.click(screen.getByTitle("Previous move"));
+    // POSITIONS has 5 entries (indices 0–4); live back should go to index 3
+    expect(onSelect).toHaveBeenCalledWith(3);
+  });
 });

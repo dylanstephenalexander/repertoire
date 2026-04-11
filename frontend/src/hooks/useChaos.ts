@@ -10,27 +10,25 @@ import {
 import type { ChaosStartParams } from "../api/chaos";
 import type { Feedback, PositionEntry } from "../types";
 
-async function pollChaosExplanation(
+async function fetchChaosExplanationOnce(
   sessionId: string,
   signal: { aborted: boolean },
   onReady: (explanation: string | null, llmDebug: string) => void,
   onGiveUp: () => void,
-  maxAttempts = 12,
-  intervalMs = 1000,
 ) {
-  for (let i = 0; i < maxAttempts; i++) {
+  // ONE request — backend long-polls until the LLM finishes (or its own timeout).
+  // No loop, no interval, no rate-limit risk.
+  try {
+    const resp = await fetchChaosExplanation(sessionId);
     if (signal.aborted) return;
-    await new Promise((r) => setTimeout(r, intervalMs));
-    if (signal.aborted) return;
-    try {
-      const resp = await fetchChaosExplanation(sessionId);
-      if (resp.llm_debug !== null) {
-        onReady(resp.explanation, resp.llm_debug);
-        return;
-      }
-    } catch { /* ignore */ }
+    if (resp.llm_debug !== null) {
+      onReady(resp.explanation, resp.llm_debug);
+    } else {
+      onGiveUp();
+    }
+  } catch {
+    if (!signal.aborted) onGiveUp();
   }
-  if (!signal.aborted) onGiveUp();
 }
 
 function terminalFeedback(fen: string, userColor: "white" | "black"): Feedback | null {
@@ -110,6 +108,7 @@ export function useChaos(): UseChaosReturn {
   const [engineStatus, setEngineStatus] = useState<EngineStatus | null>(null);
   const lastParams = useRef<ChaosStartParams | null>(null);
   const abortExplanationPollRef = useRef<{ aborted: boolean } | null>(null);
+  const movePendingRef = useRef(false);
 
   const checkEngineStatus = useCallback(async () => {
     try {
@@ -207,7 +206,10 @@ export function useChaos(): UseChaosReturn {
   const chaosMove = useCallback(
     async (uciMove: string) => {
       if (!chaosSession || chaosSession.status !== "playing") return;
+      if (movePendingRef.current) return;
+      movePendingRef.current = true;
 
+      try {
       const userMovePositionIdx = chaosSession.positions.length;
 
       // Optimistic update
@@ -260,7 +262,7 @@ export function useChaos(): UseChaosReturn {
         if (abortExplanationPollRef.current) abortExplanationPollRef.current.aborted = true;
         const signal = { aborted: false };
         abortExplanationPollRef.current = signal;
-        pollChaosExplanation(
+        fetchChaosExplanationOnce(
           capturedSessionId,
           signal,
           (explanation, llmDebug) => {
@@ -295,6 +297,9 @@ export function useChaos(): UseChaosReturn {
 
       if (!mate) {
         await triggerOpponentMove(capturedSessionId);
+      }
+      } finally {
+        movePendingRef.current = false;
       }
     },
     [chaosSession, triggerOpponentMove]

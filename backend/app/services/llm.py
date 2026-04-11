@@ -35,7 +35,7 @@ _provider: LLMProvider | None = None
 def init_provider() -> None:
     global _provider
     api_key = os.environ.get("GEMINI_API_KEY", "")
-    model = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+    model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
     if api_key:
         _provider = GeminiProvider(api_key, model)
         logger.info("LLM provider: Gemini (%s)", model)
@@ -63,7 +63,7 @@ async def get_explanation(
     """
     if _provider is None:
         return None, "No provider configured (GEMINI_API_KEY not set)"
-    model = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+    model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
     if tactical_facts:
         facts_section = (
@@ -91,6 +91,6 @@ async def get_explanation(
         logger.info("Gemini response: %s", result)
         return result, f"{model} — OK\n\n{result}"
     except Exception as exc:
-        logger.warning("Gemini call failed: %s", exc)
-        summary = str(exc).split("{")[0].strip().rstrip(".")
+        logger.warning("Gemini call failed: %s: %s", type(exc).__name__, exc)
+        summary = str(exc).split("{")[0].strip().rstrip(".") or type(exc).__name__
         return None, f"{model} — {summary}"

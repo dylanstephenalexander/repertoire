@@ -374,10 +374,10 @@ describe("draw detection", () => {
 });
 
 // ---------------------------------------------------------------------------
-// LLM explanation polling — only polls once, aborts previous on new mistake
+// LLM explanation — single long-poll request per mistake (no polling loop)
 // ---------------------------------------------------------------------------
 
-describe("LLM explanation polling", () => {
+describe("LLM explanation request", () => {
   async function startWhiteSession() {
     vi.mocked(chaosApi.startChaos).mockResolvedValue({
       session_id: "abc",
@@ -389,35 +389,7 @@ describe("LLM explanation polling", () => {
     return hook;
   }
 
-  it("polls explanation after a mistake and resolves llmDebugMsg", async () => {
-    const { result } = await startWhiteSession();
-
-    vi.mocked(chaosApi.sendChaosMove).mockResolvedValue({
-      fen: AFTER_E4_FEN,
-      feedback: MISTAKE_FEEDBACK,
-      opening_name: null,
-      in_theory: false,
-      debug_msg: null,
-    });
-    vi.mocked(chaosApi.fetchChaosOpponentMove).mockReturnValue(new Promise(() => {}));
-
-    let pollCount = 0;
-    vi.mocked(chaosApi.fetchChaosExplanation).mockImplementation(() => {
-      pollCount++;
-      if (pollCount < 2) return Promise.resolve({ explanation: null, llm_debug: null });
-      return Promise.resolve({ explanation: "Knight is hanging.", llm_debug: "gemini-2.0-flash — OK\n\nKnight is hanging." });
-    });
-
-    act(() => { result.current.chaosMove("e2e4"); });
-
-    await waitFor(
-      () => expect(result.current.chaosSession?.llmDebugMsg).toContain("OK"),
-      { timeout: 8000 },
-    );
-    expect(result.current.chaosSession?.explanationPending).toBe(false);
-  }, 10000);
-
-  it("stops polling once explanation is received — does not keep calling", async () => {
+  it("fires exactly one explanation request after a mistake", async () => {
     const { result } = await startWhiteSession();
 
     vi.mocked(chaosApi.sendChaosMove).mockResolvedValue({
@@ -432,18 +404,52 @@ describe("LLM explanation polling", () => {
     let callCount = 0;
     vi.mocked(chaosApi.fetchChaosExplanation).mockImplementation(() => {
       callCount++;
-      return Promise.resolve({ explanation: "Blunder.", llm_debug: "gemini-2.0-flash — OK\n\nBlunder." });
+      return Promise.resolve({
+        explanation: "Knight is hanging.",
+        llm_debug: "gemini-2.5-flash — OK\n\nKnight is hanging.",
+      });
     });
 
     act(() => { result.current.chaosMove("e2e4"); });
 
-    await waitFor(() => expect(result.current.chaosSession?.llmDebugMsg).toContain("OK"), { timeout: 5000 });
-
-    // Polling stopped promptly — should be a small number, not 12 (the old bug)
-    expect(callCount).toBeLessThan(3);
+    await waitFor(
+      () => expect(result.current.chaosSession?.llmDebugMsg).toContain("OK"),
+      { timeout: 5000 },
+    );
+    expect(result.current.chaosSession?.explanationPending).toBe(false);
+    // Critical: ONE request only — not the 8–12 loop that caused the rate limiting
+    expect(callCount).toBe(1);
   }, 10000);
 
-  it("does not poll for a good move", async () => {
+  it("clears explanationPending when the backend returns null (timeout)", async () => {
+    const { result } = await startWhiteSession();
+
+    vi.mocked(chaosApi.sendChaosMove).mockResolvedValue({
+      fen: AFTER_E4_FEN,
+      feedback: MISTAKE_FEEDBACK,
+      opening_name: null,
+      in_theory: false,
+      debug_msg: null,
+    });
+    vi.mocked(chaosApi.fetchChaosOpponentMove).mockReturnValue(new Promise(() => {}));
+
+    let callCount = 0;
+    vi.mocked(chaosApi.fetchChaosExplanation).mockImplementation(() => {
+      callCount++;
+      return Promise.resolve({ explanation: null, llm_debug: null });
+    });
+
+    act(() => { result.current.chaosMove("e2e4"); });
+
+    await waitFor(
+      () => expect(result.current.chaosSession?.explanationPending).toBe(false),
+      { timeout: 3000 },
+    );
+    // Single request even on timeout — no retry loop
+    expect(callCount).toBe(1);
+  });
+
+  it("does not fetch an explanation for a good move", async () => {
     const { result } = await startWhiteSession();
 
     vi.mocked(chaosApi.sendChaosMove).mockResolvedValue({
@@ -461,10 +467,25 @@ describe("LLM explanation polling", () => {
     expect(chaosApi.fetchChaosExplanation).not.toHaveBeenCalled();
   });
 
-  it("aborts previous poll when a second mistake is made", async () => {
+  it("concurrent chaosMove calls do not trigger duplicate API calls", async () => {
     const { result } = await startWhiteSession();
 
-    // Both moves return mistake feedback; opponent never moves
+    // Move never resolves — keeps the first call in-flight
+    vi.mocked(chaosApi.sendChaosMove).mockReturnValue(new Promise(() => {}));
+
+    // Fire two move calls without awaiting the first
+    act(() => { result.current.chaosMove("e2e4"); });
+    act(() => { result.current.chaosMove("e2e4"); });
+
+    // Only one network call should have gone out
+    expect(chaosApi.sendChaosMove).toHaveBeenCalledTimes(1);
+  });
+
+  it("two mistakes in a row produce exactly two explanation requests", async () => {
+    // Regression: previously a polling loop could leak across mistakes
+    // and accumulate >12 hits per move while waiting for the LLM.
+    const { result } = await startWhiteSession();
+
     vi.mocked(chaosApi.sendChaosMove).mockResolvedValue({
       fen: AFTER_E4_FEN,
       feedback: MISTAKE_FEEDBACK,
@@ -472,33 +493,25 @@ describe("LLM explanation polling", () => {
       in_theory: false,
       debug_msg: null,
     });
-    vi.mocked(chaosApi.fetchChaosOpponentMove).mockReturnValue(new Promise(() => {}));
+    // Opponent move resolves quickly so chaosMove() can return between attempts
+    vi.mocked(chaosApi.fetchChaosOpponentMove).mockResolvedValue(OPPONENT_MOVE_RESP_E5);
 
-    // First poll: never resolves (simulates slow LLM)
     let callCount = 0;
     vi.mocked(chaosApi.fetchChaosExplanation).mockImplementation(() => {
       callCount++;
-      return new Promise(() => {}); // never resolves
+      return Promise.resolve({
+        explanation: "Blunder.",
+        llm_debug: "gemini-2.5-flash — OK\n\nBlunder.",
+      });
     });
 
-    // Make first mistake
-    act(() => { result.current.chaosMove("e2e4"); });
-    await waitFor(() => expect(result.current.chaosSession?.explanationPending).toBe(true), { timeout: 2500 });
+    await act(async () => { await result.current.chaosMove("e2e4"); });
+    await waitFor(() => expect(callCount).toBe(1), { timeout: 3000 });
 
-    // Advance time to trigger first poll interval
-    const callsAfterFirst = callCount;
+    await act(async () => { await result.current.chaosMove("d2d4"); });
+    await waitFor(() => expect(callCount).toBe(2), { timeout: 3000 });
 
-    // Make second mistake — should abort the first poll
-    act(() => { result.current.chaosMove("d2d4"); });
-    await waitFor(() => expect(result.current.chaosSession?.explanationPending).toBe(true), { timeout: 2500 });
-
-    // Give some time — second poll starts fresh; first poll should stop accumulating calls
-    await new Promise((r) => setTimeout(r, 1200));
-    const callsAfterSecond = callCount;
-
-    // The aborted first loop should have stopped; only the second loop is running
-    // Both loops were pending — but the first should be aborted, so calls should be bounded
-    // (not 2x the rate of a single loop)
-    expect(callsAfterSecond - callsAfterFirst).toBeLessThanOrEqual(2);
+    // Exactly 2 — one per mistake — not 16+ from a polling loop
+    expect(callCount).toBe(2);
   });
 });
