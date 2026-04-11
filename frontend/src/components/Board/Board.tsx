@@ -147,7 +147,10 @@ export function Board({ fen, orientation, onMove, disabled, allowPreMove = false
   function handlePromotionSelect(piece: "q" | "r" | "b" | "n") {
     if (!pendingPromotion) return;
     const uci = `${pendingPromotion.from}${pendingPromotion.to}${piece}`;
-    if (pendingPromotion.isPreMove) {
+    // Check allowPreMove at pick-time, not at queue-time. If the opponent already
+    // finished moving while the picker was open, fire as a normal move instead of
+    // storing a pre-move that will never trigger.
+    if (pendingPromotion.isPreMove && allowPreMoveRef.current) {
       setPreMove(uci);
     } else {
       onMove(uci);
