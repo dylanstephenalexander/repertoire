@@ -1,6 +1,7 @@
 .wrapper {
   width: 100%;
   max-width: 700px;
+  position: relative;
 }
 
 @keyframes shake {
@@ -17,4 +18,69 @@
 
 .shake {
   animation: shake 0.15s ease-out;
+}
+
+/* Promotion picker */
+
+.promotionOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 4px;
+}
+
+.promotionModal {
+  background: #1e1e1e;
+  border-radius: 12px;
+  padding: 28px 20px 20px;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.promotionClose {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 3px 7px;
+  line-height: 1;
+  border-radius: 4px;
+}
+
+.promotionClose:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.promotionGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.promotionPieceBtn {
+  width: 90px;
+  height: 90px;
+  background: #2a2a2a;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  transition: border-color 0.1s, background 0.1s;
+}
+
+.promotionPieceBtn:hover {
+  border-color: rgba(100, 180, 255, 0.7);
+  background: #333;
 }
