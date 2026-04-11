@@ -21,12 +21,13 @@ type AppMode = "home" | "study" | "chaos" | "review";
 export function App() {
   const {
     session,
+    rejection,
     begin,
     move,
-    retry,
     continuePlay,
     restart,
     requestHint,
+    dismissRejection,
     clearSession,
     goToIndex,
     updatePositionEval,
@@ -160,7 +161,6 @@ export function App() {
 
   const isDisabled =
     currentStatus === "opponent_thinking" ||
-    currentStatus === "awaiting_decision" ||
     currentStatus === "complete" ||
     isReviewing;
 
@@ -315,8 +315,8 @@ export function App() {
                   {session!.hint ? (
                     <span className={styles.hintText}>{session!.hint.san}</span>
                   ) : (
-                    <button className={styles.guidedToggle} onClick={() => setGuided(true)}>
-                      Guided mode
+                    <button className={styles.hintButton} onClick={() => setGuided(true)}>
+                      Guided Mode
                     </button>
                   )}
                 </div>
@@ -332,13 +332,31 @@ export function App() {
             explanationPending={currentExplanationPending}
           />
 
+          {/* Rejection message — study only, while playing */}
+          {isStudy && !isReviewing && rejection && (
+            <div className={styles.rejectionPanel}>
+              <p className={styles.rejectionMsg}>{rejection.message}</p>
+              {rejection.showGuidedPrompt && (
+                <div className={styles.guidedPrompt}>
+                  <span>Turn on guided mode?</span>
+                  <button className={styles.toggleBtn} onClick={() => { setGuided(true); dismissRejection(); }}>
+                    Yes
+                  </button>
+                  <button className={styles.toggleBtn} onClick={dismissRejection}>
+                    No
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Feedback panel — live or historical */}
-          {!isReviewing && (
+          {!isReviewing && !rejection && (
             <Feedback
               feedback={displayFeedback}
-              awaitingDecision={currentStatus === "awaiting_decision"}
+              awaitingDecision={false}
               notationMode={notationMode}
-              onRetry={retry}
+              onRetry={async () => {}}
               onContinue={continuePlay}
               onRestart={async () => {
                 if (isStudy) await restart();

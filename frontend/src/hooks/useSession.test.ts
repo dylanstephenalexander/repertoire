@@ -13,7 +13,6 @@ vi.mock("../api/session", () => ({
   startSession: vi.fn(),
   sendMove: vi.fn(),
   fetchOpponentMove: vi.fn(),
-  undoMove: vi.fn(),
   fetchHint: vi.fn(),
   fetchExplanation: vi.fn().mockResolvedValue({ explanation: null, llm_debug: null }),
 }));
@@ -136,12 +135,24 @@ describe("move", () => {
     return hook;
   }
 
-  it("applies optimistic FEN update immediately", async () => {
+  it("applies optimistic FEN update immediately for accepted moves", async () => {
     const { result } = await startWhiteSession();
 
-    // Don't await the full move — check FEN update is optimistic
-    vi.mocked(sessionApi.sendMove).mockReturnValue(new Promise(() => {})); // never resolves
-    act(() => { result.current.move("e2e4"); });
+    // Mock sendMove to resolve with "correct" so the optimistic update isn't rolled back
+    vi.mocked(sessionApi.sendMove).mockResolvedValue({
+      result: "correct",
+      feedback: CORRECT_FEEDBACK,
+      fen: AFTER_E4_FEN,
+      eval_cp: null,
+      debug_msg: null,
+    });
+    vi.mocked(sessionApi.fetchOpponentMove).mockResolvedValue({
+      uci_move: "e7e5",
+      fen: AFTER_E5_FEN,
+      line_complete: false,
+    });
+
+    await act(async () => { await result.current.move("e2e4"); });
 
     expect(result.current.session?.fen).not.toBe(START_FEN);
   });
@@ -184,10 +195,10 @@ describe("move", () => {
     await act(async () => { await result.current.move("d2d4"); });
 
     expect(result.current.session?.score).toBe(0);
-    expect(result.current.session?.status).toBe("awaiting_decision");
+    expect(result.current.session?.status).toBe("playing");
   });
 
-  it("sets feedback and awaiting_decision on non-correct move", async () => {
+  it("sets feedback on mistake/blunder and stays in playing", async () => {
     const { result } = await startWhiteSession();
 
     const blunderFeedback = { ...MISTAKE_FEEDBACK, quality: "blunder" as const };
@@ -201,64 +212,96 @@ describe("move", () => {
 
     await act(async () => { await result.current.move("d2d4"); });
 
-    expect(result.current.session?.status).toBe("awaiting_decision");
+    expect(result.current.session?.status).toBe("playing");
     expect(result.current.session?.feedback?.quality).toBe("blunder");
   });
 
-  it("ignores move() calls when not in playing status", async () => {
+  it("sets rejection state on rejected move and does not change FEN", async () => {
     const { result } = await startWhiteSession();
 
     vi.mocked(sessionApi.sendMove).mockResolvedValue({
-      result: "mistake",
-      feedback: MISTAKE_FEEDBACK,
-      fen: AFTER_E4_FEN,
-      eval_cp: null,
-      debug_msg: null,
-    });
-
-    await act(async () => { await result.current.move("d2d4"); });
-    // Now in awaiting_decision — a second move should be ignored
-    vi.clearAllMocks();
-    await act(async () => { await result.current.move("e2e4"); });
-
-    expect(sessionApi.sendMove).not.toHaveBeenCalled();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// retry()
-// ---------------------------------------------------------------------------
-
-describe("retry", () => {
-  it("calls undoMove and restores fen + playing status", async () => {
-    vi.mocked(sessionApi.startSession).mockResolvedValue({
-      session_id: "abc",
+      result: "rejected",
+      feedback: null,
       fen: START_FEN,
-      to_move: "white",
-    });
-    vi.mocked(sessionApi.sendMove).mockResolvedValue({
-      result: "mistake",
-      feedback: MISTAKE_FEEDBACK,
-      fen: AFTER_E4_FEN,
       eval_cp: null,
       debug_msg: null,
     });
-    vi.mocked(sessionApi.undoMove).mockResolvedValue({ fen: START_FEN });
 
-    const { result } = renderHook(() => useSession());
-    await act(async () => { await result.current.begin(DEFAULT_START_PARAMS); });
     await act(async () => { await result.current.move("d2d4"); });
 
-    expect(result.current.session?.status).toBe("awaiting_decision");
-
-    await act(async () => { await result.current.retry(); });
-
-    expect(sessionApi.undoMove).toHaveBeenCalledWith("abc");
     expect(result.current.session?.fen).toBe(START_FEN);
     expect(result.current.session?.status).toBe("playing");
-    expect(result.current.session?.feedback).toBeNull();
+    expect(result.current.rejection).not.toBeNull();
+    expect(result.current.rejection?.count).toBe(1);
+  });
+
+  it("increments wrong attempt count on repeated rejections", async () => {
+    const { result } = await startWhiteSession();
+
+    vi.mocked(sessionApi.sendMove).mockResolvedValue({
+      result: "rejected",
+      feedback: null,
+      fen: START_FEN,
+      eval_cp: null,
+      debug_msg: null,
+    });
+
+    await act(async () => { await result.current.move("d2d4"); });
+    await act(async () => { await result.current.move("d2d4"); });
+
+    expect(result.current.rejection?.count).toBe(2);
+  });
+
+  it("shows guided prompt at count 3", async () => {
+    const { result } = await startWhiteSession();
+
+    vi.mocked(sessionApi.sendMove).mockResolvedValue({
+      result: "rejected",
+      feedback: null,
+      fen: START_FEN,
+      eval_cp: null,
+      debug_msg: null,
+    });
+
+    await act(async () => { await result.current.move("d2d4"); });
+    await act(async () => { await result.current.move("d2d4"); });
+    await act(async () => { await result.current.move("d2d4"); });
+
+    expect(result.current.rejection?.showGuidedPrompt).toBe(true);
+  });
+
+  it("clears rejection on correct move", async () => {
+    const { result } = await startWhiteSession();
+
+    vi.mocked(sessionApi.sendMove).mockResolvedValueOnce({
+      result: "rejected",
+      feedback: null,
+      fen: START_FEN,
+      eval_cp: null,
+      debug_msg: null,
+    });
+    vi.mocked(sessionApi.sendMove).mockResolvedValueOnce({
+      result: "correct",
+      feedback: CORRECT_FEEDBACK,
+      fen: AFTER_E4_FEN,
+      eval_cp: null,
+      debug_msg: null,
+    });
+    vi.mocked(sessionApi.fetchOpponentMove).mockResolvedValue({
+      uci_move: "e7e5",
+      fen: AFTER_E5_FEN,
+      line_complete: false,
+    });
+
+    await act(async () => { await result.current.move("d2d4"); });
+    expect(result.current.rejection).not.toBeNull();
+
+    await act(async () => { await result.current.move("e2e4"); });
+    expect(result.current.rejection).toBeNull();
+    expect(result.current.session?.wrongAttemptCount).toBe(0);
   });
 });
+
 
 // ---------------------------------------------------------------------------
 // continuePlay()

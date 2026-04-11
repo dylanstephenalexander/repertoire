@@ -40,12 +40,6 @@ export function fetchOpponentMove(
   });
 }
 
-export function undoMove(sessionId: string): Promise<{ fen: string }> {
-  return apiFetch<{ fen: string }>(`/session/${sessionId}/undo`, {
-    method: "POST",
-  });
-}
-
 export function fetchHint(sessionId: string): Promise<{ move_san: string; move_uci: string }> {
   return apiFetch(`/session/${sessionId}/hint`);
 }

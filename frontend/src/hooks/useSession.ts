@@ -1,8 +1,9 @@
 import { useCallback, useRef, useState } from "react";
 import { Chess } from "chess.js";
-import { fetchExplanation, fetchHint, fetchOpponentMove, sendMove, startSession, undoMove } from "../api/session";
+import { fetchExplanation, fetchHint, fetchOpponentMove, sendMove, startSession } from "../api/session";
 import type { SessionStartParams } from "../api/session";
 import type { Feedback, PositionEntry } from "../types";
+import { STUDY_REJECTION_MESSAGES, type RejectionMessageKey } from "../constants/studyMessages";
 
 async function fetchExplanationOnce(
   sessionId: string,
@@ -51,12 +52,21 @@ function terminalFeedback(fen: string, userColor: "white" | "black"): Feedback |
   }
 }
 
+function pickRandom<T>(arr: readonly T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 type SessionStatus =
   | "idle"
   | "opponent_thinking"
   | "playing"
-  | "awaiting_decision"
   | "complete";
+
+export interface RejectionState {
+  message: string;
+  count: number;
+  showGuidedPrompt: boolean;
+}
 
 interface SessionState {
   sessionId: string;
@@ -72,16 +82,20 @@ interface SessionState {
   hint: { san: string; uci: string } | null;
   positions: PositionEntry[];
   viewIndex: number | null; // null = live; 0 = start; n = after nth half-move
+  // Wrong-attempt tracking — reset on any successful in-tree move
+  wrongAttemptCount: number;
+  lastWrongUci: string | null;
 }
 
 interface UseSessionReturn {
   session: SessionState | null;
+  rejection: RejectionState | null;
   begin: (params: SessionStartParams) => Promise<void>;
   move: (uciMove: string) => Promise<void>;
-  retry: () => Promise<void>;
   continuePlay: () => Promise<void>;
   restart: () => Promise<void>;
   requestHint: () => Promise<void>;
+  dismissRejection: () => void;
   clearSession: () => void;
   goToIndex: (i: number | null) => void;
   updatePositionEval: (fen: string, cp: number) => void;
@@ -93,6 +107,7 @@ function thinkingDelay() { return _thinkingDelayOverride ?? (500 + Math.random()
 
 export function useSession(): UseSessionReturn {
   const [session, setSession] = useState<SessionState | null>(null);
+  const [rejection, setRejection] = useState<RejectionState | null>(null);
   const lastParams = useRef<SessionStartParams | null>(null);
   const abortExplanationPollRef = useRef<{ aborted: boolean } | null>(null);
   const movePendingRef = useRef(false);
@@ -111,7 +126,6 @@ export function useSession(): UseSessionReturn {
       if (resp) {
         setSession((s) => {
           if (!s) return s;
-          // Compute opponent SAN from pre-move FEN (s.fen) + UCI
           let opponentSan: string = resp.uci_move;
           try {
             const chess = new Chess(s.fen);
@@ -133,8 +147,13 @@ export function useSession(): UseSessionReturn {
             feedback: mate ?? s.feedback,
             score,
             moveCount,
+            // Reset attempt tracking on opponent move (successful in-tree progression)
+            wrongAttemptCount: 0,
+            lastWrongUci: null,
           };
         });
+        // Clear any lingering rejection message
+        setRejection(null);
       } else {
         setSession((s) =>
           s ? { ...s, status: "complete", score, moveCount } : s
@@ -162,8 +181,11 @@ export function useSession(): UseSessionReturn {
         hint: null,
         positions: [{ fen: resp.fen, san: null, feedback: null, evalCp: null }],
         viewIndex: null,
+        wrongAttemptCount: 0,
+        lastWrongUci: null,
       };
       setSession(initial);
+      setRejection(null);
 
       if (params.color === "black") {
         await triggerOpponentMove(resp.session_id, 0, 0);
@@ -179,118 +201,128 @@ export function useSession(): UseSessionReturn {
       movePendingRef.current = true;
 
       try {
-      // Capture the index this user move will occupy in positions[]
-      const userMovePositionIdx = session.positions.length;
+        const userMovePositionIdx = session.positions.length;
 
-      // Compute SAN and optimistic FEN before any state update
-      setSession((s) => (s ? { ...s, hint: null } : s));
-      const chess = new Chess(session.fen);
-      const from = uciMove.slice(0, 2);
-      const to = uciMove.slice(2, 4);
-      const promotion = uciMove.length === 5 ? uciMove[4] : undefined;
-      const moveResult = chess.move({ from, to, promotion });
-      const playedSan = moveResult?.san ?? uciMove;
-      const optimisticFen = chess.fen();
-      setSession((s) => (s ? { ...s, fen: optimisticFen } : s));
+        setSession((s) => (s ? { ...s, hint: null } : s));
+        const chess = new Chess(session.fen);
+        const from = uciMove.slice(0, 2);
+        const to = uciMove.slice(2, 4);
+        const promotion = uciMove.length === 5 ? uciMove[4] : undefined;
+        const moveResult = chess.move({ from, to, promotion });
+        const playedSan = moveResult?.san ?? uciMove;
+        const optimisticFen = chess.fen();
 
-      const resp = await sendMove(session.sessionId, uciMove);
-      const newScore =
-        resp.result === "correct" ? session.score + 1 : session.score;
-      const newMoveCount = session.moveCount + 1;
-      const mate = terminalFeedback(resp.fen, session.userColor);
+        const resp = await sendMove(session.sessionId, uciMove);
 
-      const isMistakeOrBlunder = resp.result === "mistake" || resp.result === "blunder";
-      const newPosition: PositionEntry = {
-        fen: resp.fen,
-        san: playedSan,
-        feedback: resp.feedback,
-        evalCp: null,
-      };
+        // Rejected: board stays, update attempt state, show message
+        if (resp.result === "rejected") {
+          const newCount = session.wrongAttemptCount + 1;
+          const sameMove = uciMove === session.lastWrongUci;
 
-      setSession((s) =>
-        s
-          ? {
-              ...s,
-              fen: resp.fen,
-              feedback: mate ?? resp.feedback,
-              debugMsg: resp.debug_msg ?? null,
-              llmDebugMsg: null,
-              explanationPending: !mate && isMistakeOrBlunder,
-              score: newScore,
-              moveCount: newMoveCount,
-              positions: [...s.positions, newPosition],
-              viewIndex: null,
-              ...(mate ? { status: "complete" as const } : {}),
-            }
-          : s
-      );
+          let key: RejectionMessageKey;
+          if (newCount === 1) {
+            key = "first_wrong_move";
+          } else if (sameMove) {
+            key = "same_wrong_move";
+          } else {
+            key = "distinct_wrong_move";
+          }
 
-      if (mate) {
-        // game over — don't trigger opponent move
-      } else if (resp.result === "correct") {
-        await triggerOpponentMove(session.sessionId, newScore, newMoveCount);
-      } else {
-        setSession((s) => (s ? { ...s, status: "awaiting_decision" } : s));
-      }
+          const message = pickRandom(STUDY_REJECTION_MESSAGES[key]);
+          const showGuidedPrompt = newCount >= 3;
 
-      if (!mate && isMistakeOrBlunder) {
-        const capturedSessionId = session.sessionId;
-        if (abortExplanationPollRef.current) abortExplanationPollRef.current.aborted = true;
-        const signal = { aborted: false };
-        abortExplanationPollRef.current = signal;
-        fetchExplanationOnce(
-          capturedSessionId,
-          signal,
-          (explanation, llmDebug) => {
-            setSession((s) => {
-              if (!s || s.sessionId !== capturedSessionId) return s;
-              const updatedPositions = explanation
-                ? s.positions.map((p, i) =>
-                    i === userMovePositionIdx && p.feedback
-                      ? { ...p, feedback: { ...p.feedback, explanation, llm_explanation: true } }
-                      : p
-                  )
-                : s.positions;
-              return {
+          setSession((s) =>
+            s ? { ...s, wrongAttemptCount: newCount, lastWrongUci: uciMove } : s
+          );
+          setRejection({ message, count: newCount, showGuidedPrompt });
+          return;
+        }
+
+        // Accepted move: clear rejection state
+        setRejection(null);
+        setSession((s) => (s ? { ...s, fen: optimisticFen } : s));
+
+        const newScore = resp.result === "correct" ? session.score + 1 : session.score;
+        const newMoveCount = session.moveCount + 1;
+        const mate = terminalFeedback(resp.fen, session.userColor);
+
+        const isMistakeOrBlunder = resp.result === "mistake" || resp.result === "blunder";
+        const newPosition: PositionEntry = {
+          fen: resp.fen,
+          san: playedSan,
+          feedback: resp.feedback,
+          evalCp: null,
+        };
+
+        setSession((s) =>
+          s
+            ? {
                 ...s,
-                explanationPending: false,
-                llmDebugMsg: llmDebug,
-                feedback: s.feedback && explanation
-                  ? { ...s.feedback, explanation, llm_explanation: true }
-                  : s.feedback,
-                positions: updatedPositions,
-              };
-            });
-          },
-          () => {
-            setSession((s) => {
-              if (!s || s.sessionId !== capturedSessionId) return s;
-              return { ...s, explanationPending: false };
-            });
-          },
+                fen: resp.fen,
+                feedback: mate ?? resp.feedback,
+                debugMsg: resp.debug_msg ?? null,
+                llmDebugMsg: null,
+                explanationPending: !mate && isMistakeOrBlunder,
+                score: newScore,
+                moveCount: newMoveCount,
+                positions: [...s.positions, newPosition],
+                viewIndex: null,
+                wrongAttemptCount: 0,
+                lastWrongUci: null,
+                ...(mate ? { status: "complete" as const } : {}),
+              }
+            : s
         );
-      }
+
+        if (mate) {
+          // game over — don't trigger opponent move
+        } else if (resp.result === "correct") {
+          await triggerOpponentMove(session.sessionId, newScore, newMoveCount);
+        }
+
+        if (!mate && isMistakeOrBlunder) {
+          const capturedSessionId = session.sessionId;
+          if (abortExplanationPollRef.current) abortExplanationPollRef.current.aborted = true;
+          const signal = { aborted: false };
+          abortExplanationPollRef.current = signal;
+          fetchExplanationOnce(
+            capturedSessionId,
+            signal,
+            (explanation, llmDebug) => {
+              setSession((s) => {
+                if (!s || s.sessionId !== capturedSessionId) return s;
+                const updatedPositions = explanation
+                  ? s.positions.map((p, i) =>
+                      i === userMovePositionIdx && p.feedback
+                        ? { ...p, feedback: { ...p.feedback, explanation, llm_explanation: true } }
+                        : p
+                    )
+                  : s.positions;
+                return {
+                  ...s,
+                  explanationPending: false,
+                  llmDebugMsg: llmDebug,
+                  feedback: s.feedback && explanation
+                    ? { ...s.feedback, explanation, llm_explanation: true }
+                    : s.feedback,
+                  positions: updatedPositions,
+                };
+              });
+            },
+            () => {
+              setSession((s) => {
+                if (!s || s.sessionId !== capturedSessionId) return s;
+                return { ...s, explanationPending: false };
+              });
+            },
+          );
+        }
       } finally {
         movePendingRef.current = false;
       }
     },
     [session, triggerOpponentMove]
   );
-
-  const retry = useCallback(async () => {
-    if (!session) return;
-    const { fen } = await undoMove(session.sessionId);
-    setSession((s) =>
-      s ? {
-        ...s,
-        fen,
-        status: "playing",
-        feedback: null,
-        positions: s.positions.slice(0, -1), // remove the off-tree move
-        viewIndex: null,
-      } : s
-    );
-  }, [session]);
 
   const continuePlay = useCallback(async () => {
     if (!session) return;
@@ -318,15 +350,19 @@ export function useSession(): UseSessionReturn {
     }
   }, [session]);
 
+  const dismissRejection = useCallback(() => {
+    setRejection(null);
+  }, []);
+
   const clearSession = useCallback(() => {
     setSession(null);
+    setRejection(null);
     lastParams.current = null;
   }, []);
 
   const goToIndex = useCallback((i: number | null) => {
     setSession((s) => {
       if (!s) return s;
-      // Last position == current position; treat as live so the board re-enables
       const normalized = i !== null && i >= s.positions.length - 1 ? null : i;
       return { ...s, viewIndex: normalized };
     });
@@ -344,12 +380,13 @@ export function useSession(): UseSessionReturn {
 
   return {
     session,
+    rejection,
     begin,
     move,
-    retry,
     continuePlay,
     restart,
     requestHint,
+    dismissRejection,
     clearSession,
     goToIndex,
     updatePositionEval,
