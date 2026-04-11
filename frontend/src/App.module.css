@@ -253,3 +253,44 @@
   border-color: #7faaff;
   color: #7faaff;
 }
+
+.rejectionPanel {
+  padding: 10px 14px;
+  border-left: 3px solid #555;
+  background: #1e1e1e;
+  border-radius: 4px;
+}
+
+.rejectionMsg {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: #bbb;
+}
+
+.rejectionMsg:last-child {
+  margin-bottom: 0;
+}
+
+.guidedPrompt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.guidedPromptBtn {
+  padding: 3px 10px;
+  background: transparent;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #aaa;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.guidedPromptBtn:hover {
+  border-color: #7faaff;
+  color: #7faaff;
+}

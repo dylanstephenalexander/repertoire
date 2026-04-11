@@ -75,7 +75,7 @@ def test_eval_best_move_matches_first_line(real_engine):
 # ---------------------------------------------------------------------------
 
 def test_off_tree_move_has_lines(real_engine):
-    """Off-tree move result should include top engine lines."""
+    """Off-tree move in a non-study session should include top engine lines."""
     session_svc.set_engine(real_engine)
     resp = client.post(
         "/session/start",
@@ -83,11 +83,10 @@ def test_off_tree_move_has_lines(real_engine):
             "opening_id": "italian",
             "variation_id": "giuoco_piano",
             "color": "white",
-            "mode": "study",
+            "mode": "freestyle",  # study mode rejects off-tree moves immediately
         },
     )
     sid = resp.json()["session_id"]
-    # d2d4 is off-tree for the Italian
     move_resp = client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
     assert move_resp.status_code == 200
     data = move_resp.json()
@@ -106,12 +105,12 @@ def test_off_tree_lines_are_legal_moves(real_engine):
             "opening_id": "italian",
             "variation_id": "giuoco_piano",
             "color": "white",
-            "mode": "study",
+            "mode": "freestyle",
         },
     )
     sid = resp.json()["session_id"]
     move_resp = client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
-    board = chess.Board()  # starting position — d2d4 is from here
+    board = chess.Board()
     for line in move_resp.json()["feedback"]["lines"]:
         move = chess.Move.from_uci(line["move_uci"])
         assert move in board.legal_moves, f"{line['move_uci']} is not legal"

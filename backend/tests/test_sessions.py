@@ -83,61 +83,49 @@ def test_off_tree_move_does_not_increment_score():
 
 
 # ---------------------------------------------------------------------------
-# Off-tree move classification via mocked engine
+# Off-tree move in Study Mode — rejected immediately, no engine call
 # ---------------------------------------------------------------------------
 
-def test_off_tree_no_engine_returns_mistake():
+def test_off_tree_study_mode_returns_rejected():
+    """In Study Mode, off-tree moves are rejected immediately without engine evaluation."""
     sid = _start_session()["session_id"]
     resp = client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
-    assert resp.json()["result"] in ("alternative", "mistake", "blunder")
+    assert resp.status_code == 200
+    assert resp.json()["result"] == "rejected"
+    assert resp.json()["feedback"] is None
 
 
-def test_off_tree_low_cp_loss_is_alternative(engine_fine):
-    session_svc.set_engine(engine_fine)
+def test_off_tree_study_mode_does_not_advance_fen():
+    """Rejected move must not change the board state."""
     sid = _start_session()["session_id"]
-    resp = client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
-    assert resp.json()["result"] == "alternative"
+    original_fen = client.get(f"/session/{sid}/state").json()["current_fen"]
+    client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
+    assert client.get(f"/session/{sid}/state").json()["current_fen"] == original_fen
 
 
-def test_off_tree_high_cp_loss_is_mistake(engine_mistake):
-    session_svc.set_engine(engine_mistake)
+def test_off_tree_study_mode_no_engine_call():
+    """Rejected move must not trigger any engine call — engine absence has no effect."""
+    call_log: list = []
+
+    class TrackingEngine:
+        def analyse(self, fen, moves=None, multipv=None, depth=None):
+            call_log.append(fen)
+            return {"eval_cp": 0, "best_move": "e2e4", "lines": [], "depth": 10}
+        def set_elo(self, elo): pass
+        def clear_elo(self): pass
+
+    session_svc.set_engine(TrackingEngine())
     sid = _start_session()["session_id"]
-    resp = client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
-    assert resp.json()["result"] == "mistake"
+    client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
+    assert call_log == [], f"Engine should not be called for rejected move, got: {call_log}"
 
 
-def test_off_tree_blunder_cp_loss(engine_blunder):
-    session_svc.set_engine(engine_blunder)
+def test_correct_move_after_rejected_still_works():
+    """Board state is intact after rejection — correct move is still accepted."""
     sid = _start_session()["session_id"]
-    resp = client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
-    assert resp.json()["result"] == "blunder"
-
-
-# ---------------------------------------------------------------------------
-# Off-tree feedback lines (mock engine)
-# ---------------------------------------------------------------------------
-
-def test_off_tree_with_engine_feedback_has_lines(engine_fine):
-    """Mock engine lines are converted to AnalysisLine objects and attached to feedback."""
-    session_svc.set_engine(engine_fine)
-    sid = _start_session()["session_id"]
-    resp = client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
-    lines = resp.json()["feedback"]["lines"]
-    assert lines is not None
-    assert len(lines) > 0
-
-
-def test_off_tree_feedback_lines_have_san(engine_fine):
-    """Lines attached to feedback must carry SAN notation, not raw UCI strings."""
-    import re
-    session_svc.set_engine(engine_fine)
-    sid = _start_session()["session_id"]
-    resp = client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
-    uci_pattern = re.compile(r'^[a-h][1-8][a-h][1-8][qrbn]?$')
-    for line in resp.json()["feedback"]["lines"]:
-        assert "move_san" in line
-        assert not uci_pattern.match(line["move_san"]), \
-            f"move_san looks like raw UCI: {line['move_san']}"
+    client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})  # rejected
+    resp = client.post(f"/session/{sid}/move", json={"uci_move": "e2e4"})  # correct
+    assert resp.json()["result"] == "correct"
 
 
 # ---------------------------------------------------------------------------
@@ -217,98 +205,6 @@ def test_najdorf_variation_session():
 
 
 # ---------------------------------------------------------------------------
-# Undo
-# ---------------------------------------------------------------------------
-
-def test_undo_restores_fen_and_allows_retry(engine_fine):
-    """After an off-tree move, undo should restore the previous FEN."""
-    session_svc.set_engine(engine_fine)
-    sid = _start_session()["session_id"]
-    original_fen = client.get(f"/session/{sid}/state").json()["current_fen"]
-
-    client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
-    after_fen = client.get(f"/session/{sid}/state").json()["current_fen"]
-    assert after_fen != original_fen
-
-    resp = client.post(f"/session/{sid}/undo")
-    assert resp.status_code == 200
-    assert resp.json()["fen"] == original_fen
-
-    restored_fen = client.get(f"/session/{sid}/state").json()["current_fen"]
-    assert restored_fen == original_fen
-
-
-def test_undo_with_nothing_to_undo_returns_400():
-    sid = _start_session()["session_id"]
-    resp = client.post(f"/session/{sid}/undo")
-    assert resp.status_code == 400
-
-
-def test_undo_restores_tree_cursor_so_correct_move_is_accepted(engine_fine):
-    """After undo, the tree cursor should be reset so the mainline move is accepted."""
-    session_svc.set_engine(engine_fine)
-    sid = _start_session()["session_id"]
-
-    client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})  # off-tree
-    client.post(f"/session/{sid}/undo")
-    resp = client.post(f"/session/{sid}/move", json={"uci_move": "e2e4"})  # back on tree
-    assert resp.json()["result"] == "correct"
-
-
-# ---------------------------------------------------------------------------
-# Elo application
-# ---------------------------------------------------------------------------
-
-def test_elo_set_on_engine_for_off_tree_move():
-    """When a session has an elo, set_elo should be called before engine analysis."""
-    call_log: list[int | None] = []
-
-    class TrackingEngine:
-        def analyse(self, fen, moves=None, multipv=None, depth=None):
-            return {"eval_cp": 20, "best_move": "e2e4", "lines": [], "depth": 15}
-
-        def set_elo(self, elo: int) -> None:
-            call_log.append(elo)
-
-        def clear_elo(self) -> None:
-            call_log.append(None)
-
-        def start(self) -> None: pass
-        def stop(self) -> None: pass
-
-    session_svc.set_engine(TrackingEngine())
-    resp = client.post(
-        "/session/start",
-        json={
-            "opening_id": "italian",
-            "variation_id": "giuoco_piano",
-            "color": "white",
-            "mode": "study",
-            "elo": 1500,
-        },
-    )
-    sid = resp.json()["session_id"]
-    client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})  # off-tree → triggers engine
-
-    assert 1500 in call_log, "set_elo(1500) was never called"
-    assert None in call_log, "clear_elo() was never called"
-
-
-def test_elo_not_set_when_absent(engine_fine):
-    """When session has no elo, set_elo should never be called."""
-    call_log: list = []
-    original_set_elo = engine_fine.set_elo
-    engine_fine.set_elo = lambda elo: call_log.append(elo)
-
-    session_svc.set_engine(engine_fine)
-    sid = _start_session()["session_id"]  # no elo
-    client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
-
-    assert call_log == [], f"set_elo should not be called without elo, but got: {call_log}"
-    engine_fine.set_elo = original_set_elo
-
-
-# ---------------------------------------------------------------------------
 # Test isolation
 # ---------------------------------------------------------------------------
 
@@ -320,8 +216,23 @@ def test_sessions_isolated_between_tests():
 
 
 # ---------------------------------------------------------------------------
-# Pre-eval cache paths
+# Pre-eval cache paths (use mode="freestyle" to bypass study rejection)
 # ---------------------------------------------------------------------------
+
+def _start_freestyle_session():
+    """Start a non-study session so off-tree moves reach the eval path."""
+    resp = client.post(
+        "/session/start",
+        json={
+            "opening_id": "italian",
+            "variation_id": "giuoco_piano",
+            "color": "white",
+            "mode": "freestyle",
+        },
+    )
+    assert resp.status_code == 200
+    return resp.json()
+
 
 def test_pre_eval_cache_hit_uses_line_cp_no_extra_calls():
     """
@@ -333,7 +244,6 @@ def test_pre_eval_cache_hit_uses_line_cp_no_extra_calls():
     class TrackingEngine:
         def analyse(self, fen, moves=None, multipv=None, depth=None):
             call_log.append(fen)
-            # Return a line for d2d4 with cp=15 (pre_cp=20 → cp_loss=5, alternative)
             return {
                 "eval_cp": 20,
                 "best_move": "e2e4",
@@ -348,20 +258,18 @@ def test_pre_eval_cache_hit_uses_line_cp_no_extra_calls():
     session_svc.set_engine(engine)
     session_svc.set_analysis_engine(engine)
 
-    sid = _start_session()["session_id"]
+    sid = _start_freestyle_session()["session_id"]
 
-    # Inject a completed pre_eval future for this session (simulates opponent move having fired it)
     from concurrent.futures import Future
     f: Future = Future()
-    f.set_result((engine.analyse("ignored"), 0.1))  # (result, elapsed)
-    call_log.clear()  # reset after the seeding call above
+    f.set_result((engine.analyse("ignored"), 0.1))
+    call_log.clear()
     session_svc._pre_eval_futures[sid] = f
     session_svc._pre_eval_submit_times[sid] = 0.0
 
     resp = client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
     assert resp.status_code == 200
     assert resp.json()["result"] == "alternative"
-    # One shallow engine call on the post-move FEN to get the opponent's response
     assert len(call_log) == 1, f"Expected one engine call (opponent response), got: {call_log}"
 
 
@@ -381,11 +289,10 @@ def test_pre_eval_cache_hit_move_outside_lines_fires_post_eval():
     session_svc.set_engine(engine)
     session_svc.set_analysis_engine(engine)
 
-    sid = _start_session()["session_id"]
+    sid = _start_freestyle_session()["session_id"]
 
     from concurrent.futures import Future
     f: Future = Future()
-    # Pre_eval has no line for g1h3
     f.set_result(({"eval_cp": 20, "best_move": "e2e4", "lines": [{"move_uci": "e2e4", "cp": 20}], "depth": 12}, 0.1))
     call_log.clear()
     session_svc._pre_eval_futures[sid] = f
@@ -394,7 +301,6 @@ def test_pre_eval_cache_hit_move_outside_lines_fires_post_eval():
     resp = client.post(f"/session/{sid}/move", json={"uci_move": "g1h3"})
     assert resp.status_code == 200
     assert resp.json()["result"] in ("mistake", "blunder")
-    # Exactly one post_eval call should have been made
     assert len(call_log) == 1, f"Expected exactly 1 engine call, got: {call_log}"
 
 
@@ -418,10 +324,9 @@ def test_pre_eval_cache_miss_falls_back_to_serial():
 
     engine = TrackingEngine()
     session_svc.set_engine(engine)
-    # No analysis engine — forces serial path
     session_svc.set_analysis_engine(None)
 
-    sid = _start_session()["session_id"]
+    sid = _start_freestyle_session()["session_id"]
     resp = client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
     assert resp.status_code == 200
     assert resp.json()["result"] in ("alternative", "mistake", "blunder")

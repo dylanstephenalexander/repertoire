@@ -57,17 +57,6 @@ def hint(session_id: str) -> dict:
         raise HTTPException(status_code=400, detail=str(exc))
 
 
-@router.post("/{session_id}/undo")
-def undo_move(session_id: str) -> dict:
-    try:
-        fen = session_svc.undo_move(session_id)
-        return {"fen": fen}
-    except KeyError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
-
-
 @router.get("/{session_id}/explanation")
 async def get_explanation(session_id: str) -> dict:
     """Long-poll: blocks server-side until the LLM result is ready, or returns

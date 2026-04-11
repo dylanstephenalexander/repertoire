@@ -16,8 +16,8 @@ class Feedback(BaseModel):
 
 
 class MoveResult(BaseModel):
-    result: str  # "correct" | "alternative" | "mistake" | "blunder" | "end"
-    feedback: Feedback
+    result: str  # "correct" | "alternative" | "mistake" | "blunder" | "rejected"
+    feedback: Feedback | None = None
     fen: str
     eval_cp: int | None = None
     debug_msg: str | None = None

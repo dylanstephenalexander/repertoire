@@ -38,8 +38,8 @@ export interface SessionStartResponse {
 }
 
 export interface MoveResponse {
-  result: "correct" | "alternative" | "mistake" | "blunder";
-  feedback: Feedback;
+  result: "correct" | "alternative" | "mistake" | "blunder" | "rejected";
+  feedback: Feedback | null;
   fen: string;
   eval_cp: number | null;
   debug_msg: string | null;
