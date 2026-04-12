@@ -2,6 +2,7 @@ import { useEffect, useCallback, useRef, useState } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import styles from "./Board.module.css";
+import { PromotionPicker } from "./PromotionPicker";
 
 interface BoardProps {
   fen: string;
@@ -24,7 +25,7 @@ export function resolveMove(
   // Direct match
   const direct = legalMoves.find((m) => m.from === from && m.to === to);
   if (direct) {
-    // Always promote to queen — no promotion-picker UI in this app
+    // Always promote to queen as fallback — caller should intercept before this for picker
     return direct.promotion ? `${from}${to}q` : `${from}${to}`;
   }
 
@@ -36,7 +37,6 @@ export function resolveMove(
     target?.type === "r" &&
     target.color === piece.color
   ) {
-    // Determine castle destination from rook file
     const rookFile = to[0];
     const rank = from[1];
     const castleTo = rookFile > "e" ? `g${rank}` : `c${rank}`;
@@ -45,6 +45,18 @@ export function resolveMove(
   }
 
   return null;
+}
+
+/** Returns true if moving from→to in the given FEN is a pawn promotion. */
+export function isPromotionMove(fen: string, from: string, to: string): boolean {
+  try {
+    const chess = new Chess(fen);
+    return chess.moves({ verbose: true }).some(
+      (m) => m.from === from && m.to === to && !!m.promotion
+    );
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -63,10 +75,30 @@ export function resolvePreMove(fen: string, from: string, to: string): string | 
   }
 }
 
+/** Returns true if from→to is a promotion move for the pre-moving side. */
+export function isPromotionPreMove(fen: string, from: string, to: string): boolean {
+  const parts = fen.split(" ");
+  parts[1] = parts[1] === "w" ? "b" : "w";
+  parts[3] = "-";
+  try {
+    return isPromotionMove(parts.join(" "), from, to);
+  } catch {
+    return false;
+  }
+}
+
+type PendingPromotion = {
+  from: string;
+  to: string;
+  color: "w" | "b";
+  isPreMove: boolean;
+};
+
 export function Board({ fen, orientation, onMove, disabled, allowPreMove = false, hintMove }: BoardProps) {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [shaking, setShaking] = useState(false);
   const [preMoveDisplay, setPreMoveDisplay] = useState<string | null>(null);
+  const [pendingPromotion, setPendingPromotion] = useState<PendingPromotion | null>(null);
   const preMoveRef = useRef<string | null>(null);
   const shakeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevAllowPreMoveRef = useRef(allowPreMove);
@@ -90,25 +122,45 @@ export function Board({ fen, orientation, onMove, disabled, allowPreMove = false
   }, []);
 
   // Fire or cancel pre-move when allowPreMove transitions true→false (opponent just moved).
-  // Using allowPreMove as the trigger avoids the race where disabled and allowPreMove change
-  // in the same render and a pre-move queued just before the transition gets dropped.
   useEffect(() => {
     const wasAllowed = prevAllowPreMoveRef.current;
     prevAllowPreMoveRef.current = allowPreMove;
 
     if (wasAllowed && !allowPreMove) {
-      // Opponent's turn just ended — either fire or discard the queued pre-move.
       const pm = preMoveRef.current;
       setPreMove(null);
       if (pm && !disabled) {
-        // Re-validate against the new FEN (opponent's move may have made it illegal).
-        const uci = resolveMove(fen, pm.slice(0, 2), pm.slice(2, 4));
-        if (uci) onMoveRef.current(uci);
+        if (pm.length === 5) {
+          // Promotion pre-move: verify the base move is still legal, preserve user's piece choice
+          const base = resolveMove(fen, pm.slice(0, 2), pm.slice(2, 4));
+          if (base) onMoveRef.current(pm);
+        } else {
+          const uci = resolveMove(fen, pm.slice(0, 2), pm.slice(2, 4));
+          if (uci) onMoveRef.current(uci);
+        }
       }
     }
   }, [allowPreMove, disabled, fen]);
 
   const userColor = orientation === "white" ? "w" : "b";
+
+  function handlePromotionSelect(piece: "q" | "r" | "b" | "n") {
+    if (!pendingPromotion) return;
+    const uci = `${pendingPromotion.from}${pendingPromotion.to}${piece}`;
+    // Check allowPreMove at pick-time, not at queue-time. If the opponent already
+    // finished moving while the picker was open, fire as a normal move instead of
+    // storing a pre-move that will never trigger.
+    if (pendingPromotion.isPreMove && allowPreMoveRef.current) {
+      setPreMove(uci);
+    } else {
+      onMove(uci);
+    }
+    setPendingPromotion(null);
+  }
+
+  function handlePromotionCancel() {
+    setPendingPromotion(null);
+  }
 
   function handleSquareClick({ square }: { square: string }) {
     const disabled = disabledRef.current;
@@ -120,7 +172,13 @@ export function Board({ fen, orientation, onMove, disabled, allowPreMove = false
           setSelectedSquare(null);
           return;
         }
-        // Validate pseudo-legality before accepting the pre-move
+        if (isPromotionPreMove(fen, selectedSquare, square)) {
+          const chess = new Chess(fen);
+          const piece = chess.get(selectedSquare as Parameters<typeof chess.get>[0]);
+          setPendingPromotion({ from: selectedSquare, to: square, color: piece!.color, isPreMove: true });
+          setSelectedSquare(null);
+          return;
+        }
         const uci = resolvePreMove(fen, selectedSquare, square);
         if (uci) {
           setPreMove(uci);
@@ -149,6 +207,13 @@ export function Board({ fen, orientation, onMove, disabled, allowPreMove = false
     }
 
     if (selectedSquare) {
+      if (isPromotionMove(fen, selectedSquare, square)) {
+        const chess = new Chess(fen);
+        const piece = chess.get(selectedSquare as Parameters<typeof chess.get>[0]);
+        setPendingPromotion({ from: selectedSquare, to: square, color: piece!.color, isPreMove: false });
+        setSelectedSquare(null);
+        return;
+      }
       const uci = resolveMove(fen, selectedSquare, square);
       if (uci) {
         setSelectedSquare(null);
@@ -187,6 +252,13 @@ export function Board({ fen, orientation, onMove, disabled, allowPreMove = false
 
     // Pre-move mode: validate pseudo-legality before accepting
     if (disabled && allowPreMove) {
+      if (isPromotionPreMove(fen, sourceSquare, targetSquare)) {
+        const chess = new Chess(fen);
+        const piece = chess.get(sourceSquare as Parameters<typeof chess.get>[0]);
+        setPendingPromotion({ from: sourceSquare, to: targetSquare, color: piece!.color, isPreMove: true });
+        setSelectedSquare(null);
+        return true;
+      }
       const uci = resolvePreMove(fen, sourceSquare, targetSquare);
       if (uci) {
         setPreMove(uci);
@@ -201,6 +273,14 @@ export function Board({ fen, orientation, onMove, disabled, allowPreMove = false
       return false;
     }
     setSelectedSquare(null);
+
+    if (isPromotionMove(fen, sourceSquare, targetSquare)) {
+      const chess = new Chess(fen);
+      const piece = chess.get(sourceSquare as Parameters<typeof chess.get>[0]);
+      setPendingPromotion({ from: sourceSquare, to: targetSquare, color: piece!.color, isPreMove: false });
+      return true;
+    }
+
     const uci = resolveMove(fen, sourceSquare, targetSquare);
     if (!uci) {
       triggerShake();
@@ -213,6 +293,7 @@ export function Board({ fen, orientation, onMove, disabled, allowPreMove = false
   function handleRightClick() {
     setPreMove(null);
     setSelectedSquare(null);
+    setPendingPromotion(null);
   }
 
   // Build square highlights
@@ -264,6 +345,13 @@ export function Board({ fen, orientation, onMove, disabled, allowPreMove = false
           animationDurationInMs: 150,
         }}
       />
+      {pendingPromotion && (
+        <PromotionPicker
+          color={pendingPromotion.color}
+          onSelect={handlePromotionSelect}
+          onCancel={handlePromotionCancel}
+        />
+      )}
     </div>
   );
 }

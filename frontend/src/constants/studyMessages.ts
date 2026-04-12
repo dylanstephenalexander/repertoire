@@ -7,7 +7,7 @@ export const STUDY_REJECTION_MESSAGES = {
   same_wrong_move: [
     "Nope. You tried that last time, remember?",
     "Still not that one.",
-    "You played that already — it won't work.",
+    "You played that already, it won't work.",
   ],
   distinct_wrong_move: [
     "Not that one either.",
