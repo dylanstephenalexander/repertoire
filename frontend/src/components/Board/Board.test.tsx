@@ -1,7 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, act, fireEvent } from "@testing-library/react";
 import { Board, resolveMove, resolvePreMove, isPromotionMove, isPromotionPreMove } from "./Board";
+import { THEMES } from "../../themes";
 import { useState } from "react";
+
+const DEFAULT_BOARD_STYLE = THEMES.obsidian.board;
 
 // react-chessboard uses ResizeObserver which jsdom doesn't provide
 class MockResizeObserver {
@@ -129,6 +132,7 @@ describe("Pre-move (component)", () => {
           onMove={onMove}
           disabled={disabled}
           allowPreMove={allowPreMove}
+          boardStyle={DEFAULT_BOARD_STYLE}
         />
       </>
     );
@@ -232,7 +236,7 @@ describe("Promotion picker (normal move)", () => {
   it("shows picker when pawn is dragged to back rank", () => {
     const onMove = vi.fn();
     const { getByLabelText } = render(
-      <Board fen={PROMO_FEN} orientation="white" onMove={onMove} disabled={false} />
+      <Board fen={PROMO_FEN} orientation="white" onMove={onMove} disabled={false} boardStyle={DEFAULT_BOARD_STYLE} />
     );
     // Simulate drop — Board's onPieceDrop fires with sourceSquare/targetSquare
     // We can't easily drive react-chessboard drag, but we can test the picker
@@ -244,7 +248,7 @@ describe("Promotion picker (normal move)", () => {
   it("calls onMove with correct 5-char UCI when a piece is selected from picker", () => {
     // Render the picker directly to verify piece selection
     const { getByLabelText } = render(
-      <Board fen={PROMO_FEN} orientation="white" onMove={vi.fn()} disabled={false} />
+      <Board fen={PROMO_FEN} orientation="white" onMove={vi.fn()} disabled={false} boardStyle={DEFAULT_BOARD_STYLE} />
     );
     // The picker is hidden until a promotion drop — tested via unit helper above.
     // Verify cancel button does not exist before promotion is triggered.

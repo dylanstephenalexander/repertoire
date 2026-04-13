@@ -3,6 +3,7 @@ import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import styles from "./Board.module.css";
 import { PromotionPicker } from "./PromotionPicker";
+import { type BoardStyle } from "../../themes";
 
 interface BoardProps {
   fen: string;
@@ -11,6 +12,7 @@ interface BoardProps {
   disabled: boolean;
   allowPreMove?: boolean;
   hintMove?: string; // UCI move to highlight (from + to squares) when a hint is active
+  boardStyle: BoardStyle;
 }
 
 /** Return the UCI move string if the drop is legal, or null. */
@@ -94,7 +96,7 @@ type PendingPromotion = {
   isPreMove: boolean;
 };
 
-export function Board({ fen, orientation, onMove, disabled, allowPreMove = false, hintMove }: BoardProps) {
+export function Board({ fen, orientation, onMove, disabled, allowPreMove = false, hintMove, boardStyle }: BoardProps) {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [shaking, setShaking] = useState(false);
   const [preMoveDisplay, setPreMoveDisplay] = useState<string | null>(null);
@@ -296,25 +298,25 @@ export function Board({ fen, orientation, onMove, disabled, allowPreMove = false
     setPendingPromotion(null);
   }
 
-  // Build square highlights
+  // Build square highlights from theme board style
   const customSquareStyles: Record<string, React.CSSProperties> = {};
   if (hintMove) {
-    const hintStyle = { backgroundColor: "rgba(100, 180, 255, 0.55)" };
+    const hintStyle = { backgroundColor: boardStyle.hint };
     customSquareStyles[hintMove.slice(0, 2)] = hintStyle;
     customSquareStyles[hintMove.slice(2, 4)] = hintStyle;
   }
   if (preMoveDisplay) {
-    const preMoveStyle = { backgroundColor: "rgba(220, 50, 50, 0.65)" };
+    const preMoveStyle = { backgroundColor: boardStyle.premove };
     customSquareStyles[preMoveDisplay.slice(0, 2)] = preMoveStyle;
     customSquareStyles[preMoveDisplay.slice(2, 4)] = preMoveStyle;
   }
   if (selectedSquare) {
-    customSquareStyles[selectedSquare] = { backgroundColor: "rgba(255, 255, 0, 0.4)" };
+    customSquareStyles[selectedSquare] = { backgroundColor: boardStyle.selected };
     if (!disabled) {
       // Normal mode: show legal destinations
       const chess = new Chess(fen);
       chess.moves({ verbose: true, square: selectedSquare as Parameters<typeof chess.moves>[0]["square"] }).forEach((m) => {
-        customSquareStyles[m.to] = { backgroundColor: "rgba(0, 200, 0, 0.25)" };
+        customSquareStyles[m.to] = { backgroundColor: boardStyle.legalDest };
       });
     } else if (allowPreMove) {
       // Pre-move mode: show pseudo-legal destinations (flipped color)
@@ -324,7 +326,7 @@ export function Board({ fen, orientation, onMove, disabled, allowPreMove = false
       try {
         const chess = new Chess(parts.join(" "));
         chess.moves({ verbose: true, square: selectedSquare as Parameters<typeof chess.moves>[0]["square"] }).forEach((m) => {
-          customSquareStyles[m.to] = { backgroundColor: "rgba(0, 200, 0, 0.25)" };
+          customSquareStyles[m.to] = { backgroundColor: boardStyle.legalDest };
         });
       } catch { /* ignore invalid FEN */ }
     }
@@ -337,11 +339,13 @@ export function Board({ fen, orientation, onMove, disabled, allowPreMove = false
           position: fen,
           boardOrientation: orientation,
           boardStyle: { borderRadius: "4px" },
+          darkSquareStyle: { backgroundColor: boardStyle.darkSquare },
+          lightSquareStyle: { backgroundColor: boardStyle.lightSquare },
           onPieceDrop: handleDrop,
           onSquareClick: handleSquareClick,
           onSquareRightClick: handleRightClick,
           squareStyles: customSquareStyles,
-          dropSquareStyle: { boxShadow: "inset 0 0 0 3px rgba(100, 180, 255, 0.8)" },
+          dropSquareStyle: { boxShadow: `inset 0 0 0 3px ${boardStyle.dropTarget}` },
           animationDurationInMs: 150,
         }}
       />

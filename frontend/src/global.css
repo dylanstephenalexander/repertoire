@@ -7,12 +7,69 @@
 body {
   margin: 0;
   padding: 0;
-  background: #121212;
-  color: #e0e0e0;
+  background: var(--bg-page);
+  color: var(--text-primary);
   font-family: system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 button {
   font-family: inherit;
+}
+
+/*
+ * Obsidian defaults — applied as a no-JS / pre-hydration fallback.
+ * All theme values are authoritatively defined in src/themes.ts and written
+ * to document.documentElement.style by useSettings on mount.
+ */
+:root {
+  --bg-page:           #121212;
+  --bg-surface:        #1e1e1e;
+  --bg-surface-deep:   #111111;
+  --bg-raised:         #2a2a2a;
+  --bg-raised-hover:   #333333;
+  --bg-raised-active:  #383838;
+
+  --border-subtle:     #2a2a2a;
+  --border-default:    #333333;
+  --border-moderate:   #444444;
+  --border-muted:      #555555;
+
+  --text-primary:      #e0e0e0;
+  --text-secondary:    #cccccc;
+  --text-muted:        #aaaaaa;
+  --text-dim:          #888888;
+  --text-dimmer:       #666666;
+  --text-dimmest:      #555555;
+
+  --accent:              #7faaff;
+  --accent-hover:        #aac8ff;
+  --accent-bg:           #1c2d40;
+  --accent-button:       #2a5298;
+  --accent-button-hover: #3a6bc0;
+  --accent-text:         #64b4ff;
+
+  --quality-correct-border:     #2d6a2d;
+  --quality-correct-label:      #6abf6a;
+  --quality-alternative-border: #4a6fa5;
+  --quality-alternative-label:  #7aaae0;
+  --quality-mistake-border:     #8a6000;
+  --quality-mistake-label:      #f0b030;
+  --quality-blunder-border:     #7a1a1a;
+  --quality-blunder-label:      #e05555;
+  --quality-draw-border:        #555555;
+  --quality-draw-label:         #aaaaaa;
+  --quality-checkmate-border:   #4a2080;
+  --quality-checkmate-label:    #b07fff;
+
+  --quality-inaccuracy-bg:   rgba(220, 180, 0,   0.15);
+  --quality-inaccuracy-line: #dcb400;
+  --quality-mistake-bg:      rgba(220, 100, 0,   0.20);
+  --quality-mistake-line:    #e06400;
+  --quality-blunder-bg:      rgba(200, 40,  40,  0.25);
+  --quality-blunder-line:    #c82828;
+
+  --quality-mistake-badge:     #e08040;
+  --quality-blunder-badge:     #e05050;
+  --quality-alternative-badge: #80c080;
 }

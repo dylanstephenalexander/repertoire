@@ -9,11 +9,12 @@ import { Feedback } from "./components/Feedback/Feedback";
 import { GameReview } from "./components/GameReview/GameReview";
 import { OpeningSelector } from "./components/OpeningSelector/OpeningSelector";
 import { SessionMoveList } from "./components/SessionMoveList/SessionMoveList";
+import { Settings } from "./components/Settings/Settings";
 import { useChaos } from "./hooks/useChaos";
 import { useChessSound } from "./hooks/useChessSound";
 import { useEval } from "./hooks/useEval";
 import { useSession } from "./hooks/useSession";
-import { type NotationMode } from "./utils/notation";
+import { useSettingsContext } from "./contexts/SettingsContext";
 import styles from "./App.module.css";
 
 type AppMode = "home" | "study" | "chaos" | "review";
@@ -46,6 +47,9 @@ export function App() {
     updateChaosPositionEval,
   } = useChaos();
 
+  const { settings, update: updateSetting, boardStyle } = useSettingsContext();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
   const [mode, setMode] = useState<AppMode>(() => {
     return (history.state?.mode as AppMode) ?? "home";
   });
@@ -70,7 +74,6 @@ export function App() {
   }, [clearSession, clearChaosSession]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [guided, setGuided] = useState(false);
-  const notationMode: NotationMode = "readable";
   const { playMoveSound } = useChessSound();
 
   // Play a sound whenever a new position is pushed (user or opponent move)
@@ -164,11 +167,32 @@ export function App() {
     currentStatus === "complete" ||
     isReviewing;
 
+  // ── Gear button (always visible) ─────────────────────────────────────────
+  const gearButton = (
+    <button
+      className={styles.gearBtn}
+      onClick={() => setSettingsOpen((o) => !o)}
+      aria-label="Open settings"
+    >
+      ⚙
+    </button>
+  );
+
+  const settingsPanel = settingsOpen && (
+    <Settings
+      settings={settings}
+      onUpdate={updateSetting}
+      onClose={() => setSettingsOpen(false)}
+    />
+  );
+
   // ── Review mode ──────────────────────────────────────────────────────────
   if (mode === "review") {
     return (
       <div className={styles.root}>
         <GameReview onBack={() => navigate("home")} />
+        {gearButton}
+        {settingsPanel}
       </div>
     );
   }
@@ -191,6 +215,8 @@ export function App() {
             </button>
           </div>
         </div>
+        {gearButton}
+        {settingsPanel}
       </div>
     );
   }
@@ -203,6 +229,8 @@ export function App() {
           onStart={async (params) => { await begin(params); }}
           onBack={() => navigate("home")}
         />
+        {gearButton}
+        {settingsPanel}
       </div>
     );
   }
@@ -217,6 +245,8 @@ export function App() {
           lc0Available={engineStatus?.lc0 ?? false}
           availableModels={engineStatus?.maiaModels ?? []}
         />
+        {gearButton}
+        {settingsPanel}
       </div>
     );
   }
@@ -227,9 +257,11 @@ export function App() {
   return (
     <div className={styles.root}>
       <div className={styles.layout}>
-        <aside className={styles.evalBarWrapper}>
-          <EvalBar evalCp={whitePovCp} orientation={currentColor} />
-        </aside>
+        {settings.evalBarVisible && (
+          <aside className={styles.evalBarWrapper}>
+            <EvalBar evalCp={whitePovCp} orientation={currentColor} />
+          </aside>
+        )}
 
         <main className={styles.boardWrapper}>
           <CapturedPieces
@@ -243,6 +275,7 @@ export function App() {
             disabled={isDisabled}
             allowPreMove={currentStatus === "opponent_thinking"}
             hintMove={isStudy && !isReviewing ? (session!.hint?.uci || undefined) : undefined}
+            boardStyle={boardStyle}
           />
           <CapturedPieces
             fen={displayFen ?? currentFen}
@@ -355,7 +388,7 @@ export function App() {
             <Feedback
               feedback={displayFeedback}
               awaitingDecision={false}
-              notationMode={notationMode}
+              notationMode={settings.notationMode}
               onRetry={async () => {}}
               onContinue={continuePlay}
               onRestart={async () => {
@@ -368,7 +401,7 @@ export function App() {
             <Feedback
               feedback={displayFeedback}
               awaitingDecision={false}
-              notationMode={notationMode}
+              notationMode={settings.notationMode}
               onRetry={async () => {}}
               onContinue={async () => {}}
               onRestart={async () => {}}
@@ -424,6 +457,9 @@ export function App() {
           )}
         </aside>
       </div>
+
+      {gearButton}
+      {settingsPanel}
     </div>
   );
 }

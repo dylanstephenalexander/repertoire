@@ -33,7 +33,7 @@
 .adv {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #aaa;
+  color: var(--text-muted);
   font-family: monospace;
   margin-left: 6px;
   flex-shrink: 0;

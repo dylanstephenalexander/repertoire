@@ -34,7 +34,7 @@
 }
 
 .promotionModal {
-  background: #1e1e1e;
+  background: var(--bg-surface);
   border-radius: 12px;
   padding: 28px 20px 20px;
   position: relative;
@@ -47,7 +47,7 @@
   right: 10px;
   background: none;
   border: none;
-  color: #888;
+  color: var(--text-dim);
   font-size: 15px;
   cursor: pointer;
   padding: 3px 7px;
@@ -56,7 +56,7 @@
 }
 
 .promotionClose:hover {
-  color: #fff;
+  color: var(--text-primary);
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -69,7 +69,7 @@
 .promotionPieceBtn {
   width: 90px;
   height: 90px;
-  background: #2a2a2a;
+  background: var(--bg-raised);
   border: 2px solid transparent;
   border-radius: 8px;
   cursor: pointer;
@@ -81,6 +81,6 @@
 }
 
 .promotionPieceBtn:hover {
-  border-color: rgba(100, 180, 255, 0.7);
-  background: #333;
+  border-color: var(--accent);
+  background: var(--bg-raised-hover);
 }

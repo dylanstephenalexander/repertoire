@@ -1,8 +1,8 @@
 .panel {
   padding: 10px 14px;
   border-radius: 6px;
-  background: #111;
-  border: 1px solid #2a2a2a;
+  background: var(--bg-surface-deep);
+  border: 1px solid var(--border-subtle);
 }
 
 .label {
@@ -11,7 +11,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #555;
+  color: var(--text-dimmest);
   margin-bottom: 6px;
 }
 
@@ -19,7 +19,7 @@
   margin: 0;
   font-size: 0.78rem;
   font-family: monospace;
-  color: #777;
+  color: var(--text-dim);
   line-height: 1.6;
   white-space: pre-wrap;
 }
@@ -28,6 +28,6 @@
   margin: 0;
   font-size: 0.78rem;
   font-family: monospace;
-  color: #555;
+  color: var(--text-dimmest);
   font-style: italic;
 }

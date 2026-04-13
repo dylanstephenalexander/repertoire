@@ -2,8 +2,8 @@
   min-height: 80px;
   padding: 12px 16px;
   border-radius: 6px;
-  background: #1e1e1e;
-  border: 1px solid #333;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
 }
 
 .label {
@@ -19,57 +19,57 @@
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.5;
-  color: #ccc;
+  color: var(--text-secondary);
 }
 
 .thinking {
   margin: 0;
-  color: #888;
+  color: var(--text-dim);
   font-style: italic;
   font-size: 0.9rem;
 }
 
 /* Quality tints */
 .correct {
-  border-color: #2d6a2d;
+  border-color: var(--quality-correct-border);
 }
 .correct .label {
-  color: #6abf6a;
+  color: var(--quality-correct-label);
 }
 
 .alternative {
-  border-color: #4a6fa5;
+  border-color: var(--quality-alternative-border);
 }
 .alternative .label {
-  color: #7aaae0;
+  color: var(--quality-alternative-label);
 }
 
 .mistake {
-  border-color: #8a6000;
+  border-color: var(--quality-mistake-border);
 }
 .mistake .label {
-  color: #f0b030;
+  color: var(--quality-mistake-label);
 }
 
 .blunder {
-  border-color: #7a1a1a;
+  border-color: var(--quality-blunder-border);
 }
 .blunder .label {
-  color: #e05555;
+  color: var(--quality-blunder-label);
 }
 
 .checkmate {
-  border-color: #4a2080;
+  border-color: var(--quality-checkmate-border);
 }
 .checkmate .label {
-  color: #b07fff;
+  color: var(--quality-checkmate-label);
 }
 
 .draw {
-  border-color: #555;
+  border-color: var(--quality-draw-border);
 }
 .draw .label {
-  color: #aaa;
+  color: var(--quality-draw-label);
 }
 
 .actions {
@@ -81,10 +81,10 @@
 .actionBtn {
   flex: 1;
   padding: 7px 0;
-  background: #2a2a2a;
-  border: 1px solid #555;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-muted);
   border-radius: 5px;
-  color: #ccc;
+  color: var(--text-secondary);
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
@@ -92,16 +92,16 @@
 }
 
 .actionBtn:hover {
-  background: #383838;
-  border-color: #888;
-  color: #fff;
+  background: var(--bg-raised-active);
+  border-color: var(--text-dim);
+  color: var(--text-primary);
 }
 
 .restartBtn {
   flex: 0 0 auto;
-  color: #888;
+  color: var(--text-dim);
 }
 
 .restartBtn:hover {
-  color: #ccc;
+  color: var(--text-secondary);
 }
