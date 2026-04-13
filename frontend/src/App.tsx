@@ -47,7 +47,7 @@ export function App() {
     updateChaosPositionEval,
   } = useChaos();
 
-  const { settings, update: updateSetting, boardStyle } = useSettingsContext();
+  const { settings, update: updateSetting } = useSettingsContext();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const [mode, setMode] = useState<AppMode>(() => {
@@ -275,7 +275,6 @@ export function App() {
             disabled={isDisabled}
             allowPreMove={currentStatus === "opponent_thinking"}
             hintMove={isStudy && !isReviewing ? (session!.hint?.uci || undefined) : undefined}
-            boardStyle={boardStyle}
           />
           <CapturedPieces
             fen={displayFen ?? currentFen}
