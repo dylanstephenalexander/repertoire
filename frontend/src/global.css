@@ -20,7 +20,7 @@ button {
 /*
  * Obsidian defaults — applied as a no-JS / pre-hydration fallback.
  * All theme values are authoritatively defined in src/themes.ts and written
- * to document.documentElement.style by useSettings on mount.
+ * to document.documentElement.style by SettingsProvider on mount.
  */
 :root {
   --bg-page:           #121212;
