@@ -3,7 +3,7 @@ import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import styles from "./Board.module.css";
 import { PromotionPicker } from "./PromotionPicker";
-import { type BoardStyle } from "../../themes";
+import { useSettingsContext } from "../../contexts/SettingsContext";
 
 interface BoardProps {
   fen: string;
@@ -12,7 +12,6 @@ interface BoardProps {
   disabled: boolean;
   allowPreMove?: boolean;
   hintMove?: string; // UCI move to highlight (from + to squares) when a hint is active
-  boardStyle: BoardStyle;
 }
 
 /** Return the UCI move string if the drop is legal, or null. */
@@ -96,7 +95,8 @@ type PendingPromotion = {
   isPreMove: boolean;
 };
 
-export function Board({ fen, orientation, onMove, disabled, allowPreMove = false, hintMove, boardStyle }: BoardProps) {
+export function Board({ fen, orientation, onMove, disabled, allowPreMove = false, hintMove }: BoardProps) {
+  const { boardStyle } = useSettingsContext();
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [shaking, setShaking] = useState(false);
   const [preMoveDisplay, setPreMoveDisplay] = useState<string | null>(null);
