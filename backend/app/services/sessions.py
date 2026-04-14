@@ -189,6 +189,7 @@ async def await_explanation(
     try:
         result = await asyncio.wait_for(asyncio.shield(fut), timeout=timeout)
     except asyncio.TimeoutError:
+        _llm_futures.pop(session_id, None)
         return None
     _llm_futures.pop(session_id, None)
     return result

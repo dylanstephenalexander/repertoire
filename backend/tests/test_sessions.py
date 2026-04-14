@@ -359,6 +359,55 @@ def test_explanation_endpoint_returns_data_from_resolved_future(monkeypatch):
     assert "OK" in resp.json()["llm_debug"]
 
 
+@pytest.mark.asyncio
+async def test_explanation_future_evicted_on_timeout():
+    """
+    A future that never resolves within the timeout must be removed from
+    _llm_futures. Without this, every slow/failed LLM call leaves a dead
+    entry that accumulates for the life of the process.
+    """
+    import asyncio
+
+    sid = "timeout-test-session"
+    loop = asyncio.get_running_loop()
+
+    # A future that will never resolve during this test
+    never_resolving: asyncio.Future = loop.create_future()
+    session_svc._llm_futures[sid] = never_resolving
+
+    result = await session_svc.await_explanation(sid, timeout=0.01)
+
+    assert result is None
+    assert sid not in session_svc._llm_futures, (
+        "_llm_futures entry must be removed after timeout — it was not"
+    )
+
+
+@pytest.mark.asyncio
+async def test_explanation_future_late_resolve_does_not_resurrect_entry():
+    """
+    If the LLM task completes after the client already timed out, the result
+    must be silently discarded — it must NOT re-appear in _llm_futures.
+    """
+    import asyncio
+
+    sid = "late-resolve-session"
+    loop = asyncio.get_running_loop()
+
+    fut: asyncio.Future = loop.create_future()
+    session_svc._llm_futures[sid] = fut
+
+    # Client times out
+    await session_svc.await_explanation(sid, timeout=0.01)
+    assert sid not in session_svc._llm_futures
+
+    # LLM finishes late — sets result on the now-orphaned future
+    fut.set_result(("Knight is hanging.", "gemini — OK"))
+
+    # Entry must still be absent — late resolve must not re-add it
+    assert sid not in session_svc._llm_futures
+
+
 def test_explanation_endpoint_consumes_future(monkeypatch):
     """One Future per mistake — a second call (no new mistake) returns null.
     This is the architecture that prevents the rate-limit polling loop."""
