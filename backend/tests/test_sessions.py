@@ -553,6 +553,61 @@ def test_state_cp_loss_improvement_is_zero():
 
 
 # ---------------------------------------------------------------------------
+# Session lifecycle — DELETE endpoint and TTL eviction
+# ---------------------------------------------------------------------------
+
+def test_delete_session_removes_it():
+    sid = _start_session()["session_id"]
+    resp = client.delete(f"/session/{sid}")
+    assert resp.status_code == 204
+    assert client.get(f"/session/{sid}/state").status_code == 404
+
+
+def test_delete_session_idempotent():
+    """Deleting a non-existent session must not error."""
+    resp = client.delete("/session/does-not-exist")
+    assert resp.status_code == 204
+
+
+def test_delete_cleans_up_aux_state():
+    """pre_eval futures and LLM futures must be gone after delete."""
+    from concurrent.futures import Future as ConcurrentFuture
+    sid = _start_session()["session_id"]
+
+    # Manually plant stale aux state to confirm cleanup
+    f: ConcurrentFuture = ConcurrentFuture()
+    session_svc._pre_eval_futures[sid] = f
+    session_svc._pre_eval_submit_times[sid] = 0.0
+
+    client.delete(f"/session/{sid}")
+
+    assert sid not in session_svc._pre_eval_futures
+    assert sid not in session_svc._pre_eval_submit_times
+    assert sid not in session_svc._session_locks
+
+
+@pytest.mark.asyncio
+async def test_evict_stale_sessions_removes_old_sessions():
+    """Sessions older than TTL must be evicted; recent ones must survive."""
+    import time
+
+    result = session_svc.create_session("italian", "giuoco_piano", "white", "study", None)
+    old_sid = result.session_id
+
+    result2 = session_svc.create_session("italian", "giuoco_piano", "white", "study", None)
+    new_sid = result2.session_id
+
+    # Back-date the old session's activity beyond the TTL
+    session_svc._session_last_activity[old_sid] = time.time() - session_svc.SESSION_TTL - 1
+
+    evicted = session_svc.evict_stale_sessions()
+
+    assert evicted == 1
+    assert session_svc.get_session(old_sid) is None
+    assert session_svc.get_session(new_sid) is not None
+
+
+# ---------------------------------------------------------------------------
 # Concurrent move serialisation — process_move must hold a per-session lock
 # ---------------------------------------------------------------------------
 

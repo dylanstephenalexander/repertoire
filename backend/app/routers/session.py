@@ -68,6 +68,11 @@ async def get_explanation(session_id: str) -> dict:
     return {"explanation": explanation, "llm_debug": llm_debug}
 
 
+@router.delete("/{session_id}", status_code=204)
+def delete_session(session_id: str) -> None:
+    session_svc.delete_session(session_id)
+
+
 @router.get("/{session_id}/state", response_model=SessionState)
 def get_state(session_id: str) -> SessionState:
     state = session_svc.get_session(session_id)

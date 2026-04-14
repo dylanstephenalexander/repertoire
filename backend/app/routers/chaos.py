@@ -62,6 +62,11 @@ async def make_chaos_move(session_id: str, body: ChaosMoveRequest) -> ChaosMoveR
         raise HTTPException(status_code=400, detail=str(exc))
 
 
+@router.delete("/{session_id}", status_code=204)
+def delete_chaos_session(session_id: str) -> None:
+    chaos_svc.delete_chaos_session(session_id)
+
+
 @router.post("/{session_id}/opponent_move", response_model=ChaosOpponentMoveResponse)
 def chaos_opponent_move(session_id: str) -> ChaosOpponentMoveResponse:
     try:

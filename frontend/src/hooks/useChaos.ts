@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { Chess } from "chess.js";
 import {
+  deleteChaosSession,
   fetchChaosExplanation,
   fetchChaosOpponentMove,
   fetchEngineStatus,
@@ -175,6 +176,7 @@ export function useChaos(): UseChaosReturn {
 
   const beginChaos = useCallback(
     async (params: ChaosStartParams) => {
+      if (chaosSession) deleteChaosSession(chaosSession.sessionId);
       lastParams.current = params;
       const resp = await startChaos(params);
       const initial: ChaosState = {
@@ -316,9 +318,10 @@ export function useChaos(): UseChaosReturn {
   }, []);
 
   const clearChaosSession = useCallback(() => {
+    if (chaosSession) deleteChaosSession(chaosSession.sessionId);
     setChaosSession(null);
     lastParams.current = null;
-  }, []);
+  }, [chaosSession]);
 
   const restartChaos = useCallback(async () => {
     if (!lastParams.current) return;

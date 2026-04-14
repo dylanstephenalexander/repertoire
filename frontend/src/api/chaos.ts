@@ -45,3 +45,7 @@ export function fetchChaosOpponentMove(sessionId: string): Promise<ChaosOpponent
 export function fetchChaosExplanation(sessionId: string): Promise<ExplanationResponse> {
   return apiFetch<ExplanationResponse>(`/chaos/${sessionId}/explanation`);
 }
+
+export function deleteChaosSession(sessionId: string): void {
+  apiFetch(`/chaos/${sessionId}`, { method: "DELETE" }).catch(() => {});
+}

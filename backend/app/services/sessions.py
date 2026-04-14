@@ -52,6 +52,13 @@ _llm_futures: dict[str, "asyncio.Future[tuple[str | None, str]]"] = {}
 # corrupting move_history, score, and current_fen.
 _session_locks: dict[str, asyncio.Lock] = {}
 
+# Wall-clock timestamp of the most recent activity for each session.
+# Used by the TTL sweep to identify abandoned sessions.
+_session_last_activity: dict[str, float] = {}
+
+# Sessions idle longer than this (seconds) are eligible for TTL eviction.
+SESSION_TTL = 7200  # 2 hours
+
 # Long-poll wait cap. Should exceed the LLM timeout (8s in llm.py) so the
 # Future has time to resolve naturally even on slow LLM responses.
 LLM_EXPLANATION_TIMEOUT = 12.0
@@ -144,6 +151,51 @@ def _get_session_lock(session_id: str) -> asyncio.Lock:
     return _session_locks[session_id]
 
 
+def _touch(session_id: str) -> None:
+    """Record activity for a session, resetting its TTL clock."""
+    _session_last_activity[session_id] = time.time()
+
+
+def cleanup_session_state(session_id: str) -> None:
+    """
+    Remove all shared infrastructure state for a session ID.
+    Called by both delete_session (study) and delete_chaos_session (chaos) so
+    that the pre_eval futures, LLM futures, and lock are always cleaned up
+    regardless of which mode created the session.
+    """
+    _session_locks.pop(session_id, None)
+    future = _pre_eval_futures.pop(session_id, None)
+    if future is not None:
+        future.cancel()
+    _pre_eval_submit_times.pop(session_id, None)
+    _llm_futures.pop(session_id, None)
+    _session_last_activity.pop(session_id, None)
+
+
+def delete_session(session_id: str) -> bool:
+    """
+    Explicitly remove a study session and all associated state.
+    Returns True if the session existed, False if it was already gone.
+    """
+    existed = session_id in _sessions
+    _sessions.pop(session_id, None)
+    cleanup_session_state(session_id)
+    return existed
+
+
+def evict_stale_sessions() -> int:
+    """
+    Remove study sessions that have been inactive longer than SESSION_TTL.
+    Called periodically by the background sweep task in main.py.
+    Returns the number of sessions evicted.
+    """
+    cutoff = time.time() - SESSION_TTL
+    stale = [sid for sid, t in list(_session_last_activity.items()) if t < cutoff]
+    for sid in stale:
+        delete_session(sid)
+    return len(stale)
+
+
 def clear_sessions() -> None:
     """Clear all in-memory sessions. For testing only."""
     _sessions.clear()
@@ -151,6 +203,7 @@ def clear_sessions() -> None:
     _pre_eval_submit_times.clear()
     _llm_futures.clear()
     _session_locks.clear()
+    _session_last_activity.clear()
 
 
 def start_explanation_task(
@@ -395,6 +448,7 @@ def create_session(
         tree_cursor=tree.moves,
     )
     _sessions[session.session_id] = session
+    _touch(session.session_id)
     to_move = "white" if board.turn == chess.WHITE else "black"
     return SessionStartResponse(
         session_id=session.session_id,
@@ -416,6 +470,7 @@ async def _process_move_locked(session_id: str, uci_move: str) -> MoveResult:
     session = _sessions.get(session_id)
     if session is None:
         raise KeyError(f"Session not found: {session_id}")
+    _touch(session_id)
 
     board = chess.Board(session.current_fen)
 
@@ -507,6 +562,7 @@ def get_opponent_move(session_id: str) -> OpponentMoveResponse:
     session = _sessions.get(session_id)
     if session is None:
         raise KeyError(f"Session not found: {session_id}")
+    _touch(session_id)
 
     uci_move = _first_tree_move(session.tree_cursor)
 
