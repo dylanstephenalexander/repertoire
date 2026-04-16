@@ -1,7 +1,7 @@
 .root {
   min-height: 100vh;
-  background: #121212;
-  color: #e0e0e0;
+  background: var(--bg-page);
+  color: var(--text-primary);
   font-family: system-ui, sans-serif;
   display: flex;
   align-items: center;
@@ -38,7 +38,7 @@
 .score {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #aaa;
+  color: var(--text-muted);
 }
 
 .hintArea {
@@ -63,37 +63,37 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #64b4ff;
+  color: var(--accent-text);
 }
 
 .guidedToggle {
   padding: 0;
   background: none;
   border: none;
-  color: #555;
+  color: var(--text-dimmest);
   font-size: 0.8rem;
   cursor: pointer;
   transition: color 0.15s;
 }
 
 .guidedToggle:hover {
-  color: #888;
+  color: var(--text-dim);
 }
 
 .hintButton {
   padding: 6px 14px;
   background: transparent;
-  border: 1px solid #444;
+  border: 1px solid var(--border-moderate);
   border-radius: 5px;
-  color: #aaa;
+  color: var(--text-muted);
   font-size: 0.85rem;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
 }
 
 .hintButton:hover:not(:disabled) {
-  border-color: #7faaff;
-  color: #7faaff;
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .hintButton:disabled {
@@ -104,7 +104,7 @@
 .hintText {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #64b4ff;
+  color: var(--accent-text);
   font-family: monospace;
 }
 
@@ -112,9 +112,9 @@
   align-self: flex-start;
   padding: 2px 8px;
   background: transparent;
-  border: 1px solid #333;
+  border: 1px solid var(--border-default);
   border-radius: 4px;
-  color: #555;
+  color: var(--text-dimmest);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -123,8 +123,8 @@
 }
 
 .notationToggle:hover {
-  border-color: #555;
-  color: #888;
+  border-color: var(--border-muted);
+  color: var(--text-dim);
 }
 
 .completeActions {
@@ -136,28 +136,28 @@
 .gameOverMsg {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #ccc;
+  color: var(--text-secondary);
   padding: 4px 0;
 }
 
 .openingName {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #ccc;
+  color: var(--text-secondary);
 }
 
 .openingNameFaded {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #555;
+  color: var(--text-dimmest);
 }
 
 .toggleBtn {
   padding: 6px 14px;
   background: transparent;
-  border: 1px solid #444;
+  border: 1px solid var(--border-moderate);
   border-radius: 5px;
-  color: #aaa;
+  color: var(--text-muted);
   font-size: 0.8rem;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
@@ -165,25 +165,27 @@
 }
 
 .toggleBtn:hover {
-  border-color: #7faaff;
-  color: #7faaff;
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .resignBtn {
   padding: 6px 14px;
   background: transparent;
-  border: 1px solid #5a2020;
+  border: 1px solid var(--quality-blunder-border);
   border-radius: 5px;
-  color: #a05050;
+  color: var(--quality-blunder-label);
   font-size: 0.85rem;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
   margin-top: auto;
+  opacity: 0.6;
 }
 
 .resignBtn:hover {
-  border-color: #e05555;
-  color: #e05555;
+  border-color: var(--quality-blunder-label);
+  color: var(--quality-blunder-label);
+  opacity: 1;
 }
 
 .home {
@@ -199,7 +201,7 @@
 .homeTitle {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #e0e0e0;
+  color: var(--text-primary);
   margin: 0;
   letter-spacing: -0.5px;
 }
@@ -213,7 +215,7 @@
 
 .primaryBtn {
   padding: 12px 20px;
-  background: #2a5298;
+  background: var(--accent-button);
   border: none;
   border-radius: 6px;
   color: #fff;
@@ -224,52 +226,52 @@
 }
 
 .primaryBtn:hover {
-  background: #3a6bc0;
+  background: var(--accent-button-hover);
 }
 
 .secondaryBtn {
   padding: 12px 20px;
   background: transparent;
-  border: 1px solid #444;
+  border: 1px solid var(--border-moderate);
   border-radius: 6px;
-  color: #aaa;
+  color: var(--text-muted);
   font-size: 1rem;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
 }
 
 .secondaryBtn:hover {
-  border-color: #7faaff;
-  color: #7faaff;
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .reviewButton {
   padding: 10px 16px;
   background: transparent;
-  border: 1px solid #444;
+  border: 1px solid var(--border-moderate);
   border-radius: 6px;
-  color: #aaa;
+  color: var(--text-muted);
   font-size: 0.9rem;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
 }
 
 .reviewButton:hover {
-  border-color: #7faaff;
-  color: #7faaff;
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .rejectionPanel {
   padding: 10px 14px;
-  border-left: 3px solid #555;
-  background: #1e1e1e;
+  border-left: 3px solid var(--border-muted);
+  background: var(--bg-surface);
   border-radius: 4px;
 }
 
 .rejectionMsg {
   margin: 0 0 8px;
   font-size: 0.9rem;
-  color: #bbb;
+  color: var(--text-secondary);
 }
 
 .rejectionMsg:last-child {
@@ -281,5 +283,32 @@
   align-items: center;
   gap: 8px;
   font-size: 0.85rem;
-  color: #999;
+  color: var(--text-dim);
+}
+
+/* ── Floating gear button ────────────────────────────────────────────────── */
+
+.gearBtn {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-moderate);
+  color: var(--text-dim);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  z-index: 200;
+}
+
+.gearBtn:hover {
+  background: var(--bg-raised-hover);
+  border-color: var(--accent);
+  color: var(--accent);
 }

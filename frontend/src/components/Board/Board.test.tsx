@@ -1,7 +1,13 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, act, fireEvent } from "@testing-library/react";
+import { render, act } from "@testing-library/react";
+import React from "react";
 import { Board, resolveMove, resolvePreMove, isPromotionMove, isPromotionPreMove } from "./Board";
+import { SettingsProvider } from "../../contexts/SettingsContext";
 import { useState } from "react";
+
+function wrap(ui: React.ReactElement) {
+  return <SettingsProvider>{ui}</SettingsProvider>;
+}
 
 // react-chessboard uses ResizeObserver which jsdom doesn't provide
 class MockResizeObserver {
@@ -137,9 +143,9 @@ describe("Pre-move (component)", () => {
   it("does not call onMove when allowPreMove transitions false with no pre-move queued", () => {
     const onMove = vi.fn();
     // Board starts disabled + allowPreMove (opponent thinking), no pre-move queued
-    const { getByTestId } = render(
+    const { getByTestId } = render(wrap(
       <Wrapper onMove={onMove} initialDisabled={true} initialAllowPreMove={true} />
-    );
+    ));
 
     act(() => { getByTestId("opponent-moves").click(); });
     act(() => { vi.runAllTimers(); });
@@ -148,9 +154,9 @@ describe("Pre-move (component)", () => {
 
   it("does not fire when allowPreMove goes false but disabled stays true", () => {
     const onMove = vi.fn();
-    const { getByTestId } = render(
+    const { getByTestId } = render(wrap(
       <Wrapper onMove={onMove} initialDisabled={true} initialAllowPreMove={true} />
-    );
+    ));
     // Board becomes not-pre-movable but stays disabled (e.g. awaiting_decision)
     act(() => { getByTestId("enable").click(); });
     act(() => { vi.runAllTimers(); });
@@ -231,9 +237,9 @@ describe("Promotion picker (normal move)", () => {
 
   it("shows picker when pawn is dragged to back rank", () => {
     const onMove = vi.fn();
-    const { getByLabelText } = render(
+    const { getByLabelText } = render(wrap(
       <Board fen={PROMO_FEN} orientation="white" onMove={onMove} disabled={false} />
-    );
+    ));
     // Simulate drop — Board's onPieceDrop fires with sourceSquare/targetSquare
     // We can't easily drive react-chessboard drag, but we can test the picker
     // appears by directly verifying isPromotionMove detects it correctly.
@@ -243,9 +249,9 @@ describe("Promotion picker (normal move)", () => {
 
   it("calls onMove with correct 5-char UCI when a piece is selected from picker", () => {
     // Render the picker directly to verify piece selection
-    const { getByLabelText } = render(
+    const { getByLabelText } = render(wrap(
       <Board fen={PROMO_FEN} orientation="white" onMove={vi.fn()} disabled={false} />
-    );
+    ));
     // The picker is hidden until a promotion drop — tested via unit helper above.
     // Verify cancel button does not exist before promotion is triggered.
     expect(() => getByLabelText("Promote to Queen")).toThrow();

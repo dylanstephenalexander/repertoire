@@ -5,11 +5,11 @@
   flex-direction: column;
   border-radius: 4px;
   overflow: hidden;
-  border: 1px solid #555;
+  border: 1px solid var(--border-muted);
 }
 
 .black {
-  background-color: #1a1a1a;
+  background-color: var(--bg-surface-deep);
   transition: height 0.4s ease;
 }
 
