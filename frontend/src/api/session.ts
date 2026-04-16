@@ -47,3 +47,7 @@ export function fetchHint(sessionId: string): Promise<{ move_san: string; move_u
 export function fetchExplanation(sessionId: string): Promise<ExplanationResponse> {
   return apiFetch<ExplanationResponse>(`/session/${sessionId}/explanation`);
 }
+
+export function deleteSession(sessionId: string): void {
+  apiFetch(`/session/${sessionId}`, { method: "DELETE" }).catch(() => {});
+}

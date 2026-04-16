@@ -1,7 +1,15 @@
+import asyncio
+import logging
 import os
 import shutil
 from contextlib import asynccontextmanager
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
+# How often the sweep runs and the idle threshold for eviction.
+_SWEEP_INTERVAL = 600   # 10 minutes
+_SESSION_TTL    = 7200  # 2 hours (must match sessions.py / chaos.py)
 
 from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv(usecwd=False))
@@ -11,9 +19,21 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.engine.stockfish import StockfishEngine
 from app.routers import analysis, chaos, openings, review, session
+from app.services import chaos as chaos_svc
+from app.services import sessions as session_svc
 from app.services.chaos import stop_all_maia_engines
 from app.services.llm import init_provider
 from app.services.sessions import set_analysis_engine, set_engine
+
+
+async def _session_sweep() -> None:
+    """Background task: evict abandoned sessions every _SWEEP_INTERVAL seconds."""
+    while True:
+        await asyncio.sleep(_SWEEP_INTERVAL)
+        n_study = session_svc.evict_stale_sessions()
+        n_chaos = chaos_svc.evict_stale_chaos_sessions()
+        if n_study or n_chaos:
+            logger.info("Session sweep: evicted %d study, %d chaos", n_study, n_chaos)
 
 _engine: StockfishEngine | None = None
 _analysis_engine: StockfishEngine | None = None
@@ -42,7 +62,10 @@ async def lifespan(app: FastAPI):
         _analysis_engine = StockfishEngine(path=path)
         _analysis_engine.start()
         set_analysis_engine(_analysis_engine)
+
+    sweep_task = asyncio.create_task(_session_sweep())
     yield
+    sweep_task.cancel()
     if _engine:
         _engine.stop()
     if _analysis_engine:

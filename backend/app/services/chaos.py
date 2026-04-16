@@ -1,5 +1,6 @@
 import asyncio
 import random
+import time
 import uuid
 from dataclasses import dataclass, field
 
@@ -21,6 +22,7 @@ from app.services.opening_detect import detect_opening
 from app.services.sessions import (  # shared Stockfish + pre_eval machinery
     _derive_tactical_facts,
     await_explanation,
+    cleanup_session_state,
     evaluate_off_tree_eval,
     get_engine,
     start_explanation_task,
@@ -36,6 +38,12 @@ _maia_engines: dict[int, MaiaEngine] = {}
 
 # Sentinel value for "use full-strength Stockfish"
 STOCKFISH_BAND = 2000
+
+# Wall-clock timestamp of the most recent activity for each chaos session.
+_chaos_last_activity: dict[str, float] = {}
+
+# Sessions idle longer than this (seconds) are eligible for TTL eviction.
+CHAOS_SESSION_TTL = 7200  # 2 hours
 
 
 @dataclass
@@ -69,6 +77,7 @@ def create_chaos_session(
         current_fen=chess.Board().fen(),
     )
     _chaos_sessions[session.session_id] = session
+    _touch_chaos(session.session_id)
     return ChaosStartResponse(
         session_id=session.session_id,
         fen=session.current_fen,
@@ -84,6 +93,7 @@ async def process_chaos_move(
     session = _chaos_sessions.get(session_id)
     if session is None:
         raise KeyError(f"Chaos session not found: {session_id}")
+    _touch_chaos(session_id)
 
     board = chess.Board(session.current_fen)
     try:
@@ -125,6 +135,7 @@ def get_chaos_opponent_move(session_id: str) -> ChaosOpponentMoveResponse:
     session = _chaos_sessions.get(session_id)
     if session is None:
         raise KeyError(f"Chaos session not found: {session_id}")
+    _touch_chaos(session_id)
 
     t0 = time.perf_counter()
     uci_move = _get_engine_move(session.current_fen, session.elo_band)
@@ -159,9 +170,40 @@ def get_chaos_opponent_move(session_id: str) -> ChaosOpponentMoveResponse:
     )
 
 
+def _touch_chaos(session_id: str) -> None:
+    """Record activity for a chaos session, resetting its TTL clock."""
+    _chaos_last_activity[session_id] = time.time()
+
+
+def delete_chaos_session(session_id: str) -> bool:
+    """
+    Explicitly remove a chaos session and all associated state.
+    Returns True if the session existed, False if it was already gone.
+    """
+    existed = session_id in _chaos_sessions
+    _chaos_sessions.pop(session_id, None)
+    _chaos_last_activity.pop(session_id, None)
+    cleanup_session_state(session_id)
+    return existed
+
+
+def evict_stale_chaos_sessions() -> int:
+    """
+    Remove chaos sessions that have been inactive longer than CHAOS_SESSION_TTL.
+    Called periodically by the background sweep task in main.py.
+    Returns the number of sessions evicted.
+    """
+    cutoff = time.time() - CHAOS_SESSION_TTL
+    stale = [sid for sid, t in list(_chaos_last_activity.items()) if t < cutoff]
+    for sid in stale:
+        delete_chaos_session(sid)
+    return len(stale)
+
+
 def clear_chaos_sessions() -> None:
     """For testing only."""
     _chaos_sessions.clear()
+    _chaos_last_activity.clear()
 
 
 def stop_all_maia_engines() -> None:

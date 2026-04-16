@@ -1,6 +1,8 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.models.feedback import MoveResult
 from app.services import sessions as session_svc
 
 client = TestClient(app)
@@ -357,6 +359,55 @@ def test_explanation_endpoint_returns_data_from_resolved_future(monkeypatch):
     assert "OK" in resp.json()["llm_debug"]
 
 
+@pytest.mark.asyncio
+async def test_explanation_future_evicted_on_timeout():
+    """
+    A future that never resolves within the timeout must be removed from
+    _llm_futures. Without this, every slow/failed LLM call leaves a dead
+    entry that accumulates for the life of the process.
+    """
+    import asyncio
+
+    sid = "timeout-test-session"
+    loop = asyncio.get_running_loop()
+
+    # A future that will never resolve during this test
+    never_resolving: asyncio.Future = loop.create_future()
+    session_svc._llm_futures[sid] = never_resolving
+
+    result = await session_svc.await_explanation(sid, timeout=0.01)
+
+    assert result is None
+    assert sid not in session_svc._llm_futures, (
+        "_llm_futures entry must be removed after timeout — it was not"
+    )
+
+
+@pytest.mark.asyncio
+async def test_explanation_future_late_resolve_does_not_resurrect_entry():
+    """
+    If the LLM task completes after the client already timed out, the result
+    must be silently discarded — it must NOT re-appear in _llm_futures.
+    """
+    import asyncio
+
+    sid = "late-resolve-session"
+    loop = asyncio.get_running_loop()
+
+    fut: asyncio.Future = loop.create_future()
+    session_svc._llm_futures[sid] = fut
+
+    # Client times out
+    await session_svc.await_explanation(sid, timeout=0.01)
+    assert sid not in session_svc._llm_futures
+
+    # LLM finishes late — sets result on the now-orphaned future
+    fut.set_result(("Knight is hanging.", "gemini — OK"))
+
+    # Entry must still be absent — late resolve must not re-add it
+    assert sid not in session_svc._llm_futures
+
+
 def test_explanation_endpoint_consumes_future(monkeypatch):
     """One Future per mistake — a second call (no new mistake) returns null.
     This is the architecture that prevents the rate-limit polling loop."""
@@ -499,3 +550,117 @@ def test_state_cp_loss_threw_away_mate_is_blunder():
 def test_state_cp_loss_improvement_is_zero():
     """Gaining a state produces zero, not negative, loss."""
     assert _state_cp_loss(0, 300) == 0  # EQUAL → WINNING (position improved)
+
+
+# ---------------------------------------------------------------------------
+# Session lifecycle — DELETE endpoint and TTL eviction
+# ---------------------------------------------------------------------------
+
+def test_delete_session_removes_it():
+    sid = _start_session()["session_id"]
+    resp = client.delete(f"/session/{sid}")
+    assert resp.status_code == 204
+    assert client.get(f"/session/{sid}/state").status_code == 404
+
+
+def test_delete_session_idempotent():
+    """Deleting a non-existent session must not error."""
+    resp = client.delete("/session/does-not-exist")
+    assert resp.status_code == 204
+
+
+def test_delete_cleans_up_aux_state():
+    """pre_eval futures and LLM futures must be gone after delete."""
+    from concurrent.futures import Future as ConcurrentFuture
+    sid = _start_session()["session_id"]
+
+    # Manually plant stale aux state to confirm cleanup
+    f: ConcurrentFuture = ConcurrentFuture()
+    session_svc._pre_eval_futures[sid] = f
+    session_svc._pre_eval_submit_times[sid] = 0.0
+
+    client.delete(f"/session/{sid}")
+
+    assert sid not in session_svc._pre_eval_futures
+    assert sid not in session_svc._pre_eval_submit_times
+    assert sid not in session_svc._session_locks
+
+
+@pytest.mark.asyncio
+async def test_evict_stale_sessions_removes_old_sessions():
+    """Sessions older than TTL must be evicted; recent ones must survive."""
+    import time
+
+    result = session_svc.create_session("italian", "giuoco_piano", "white", "study", None)
+    old_sid = result.session_id
+
+    result2 = session_svc.create_session("italian", "giuoco_piano", "white", "study", None)
+    new_sid = result2.session_id
+
+    # Back-date the old session's activity beyond the TTL
+    session_svc._session_last_activity[old_sid] = time.time() - session_svc.SESSION_TTL - 1
+
+    evicted = session_svc.evict_stale_sessions()
+
+    assert evicted == 1
+    assert session_svc.get_session(old_sid) is None
+    assert session_svc.get_session(new_sid) is not None
+
+
+# ---------------------------------------------------------------------------
+# Concurrent move serialisation — process_move must hold a per-session lock
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_concurrent_off_tree_moves_do_not_corrupt_state():
+    """
+    Two simultaneous off-tree process_move calls on the same session must be
+    serialised. Without the per-session lock the race is:
+      1. Coroutine A reads current_fen = FEN0, enters asyncio.to_thread (yields).
+      2. Coroutine B reads current_fen = FEN0 (same — A hasn't written back).
+      3. Both threads run analysis on FEN0 in parallel.
+      4. Both write back: move_history gets two entries, score doubles.
+
+    With the lock, B waits until A completes and advances the FEN. B then reads
+    FEN1 (after d2d4 it is Black's turn) and raises ValueError for the illegal
+    move — exactly one entry in move_history and score untouched at 0.
+    """
+    import asyncio
+
+    class SlowEngine:
+        """Sleeps briefly in analyse() to open the race window between coroutines."""
+        def analyse(self, fen, moves=None, multipv=None, depth=None):
+            import time
+            time.sleep(0.02)
+            return {
+                "eval_cp": 200,
+                "best_move": "e2e4",
+                "lines": [{"move_uci": "e2e4", "cp": 200}],
+                "depth": 12,
+            }
+        def set_elo(self, elo): pass
+        def clear_elo(self): pass
+
+    session_svc.set_engine(SlowEngine())
+    session_svc.set_analysis_engine(None)
+
+    result = session_svc.create_session("italian", "giuoco_piano", "white", "freestyle", None)
+    sid = result.session_id
+
+    # Fire two off-tree moves concurrently; collect exceptions rather than raising.
+    outcomes = await asyncio.gather(
+        session_svc.process_move(sid, "d2d4"),
+        session_svc.process_move(sid, "d2d4"),
+        return_exceptions=True,
+    )
+
+    state = session_svc.get_session(sid)
+    assert len(state.move_history) == 1, (
+        f"Expected exactly 1 move in history after concurrent requests, "
+        f"got {len(state.move_history)}: {state.move_history}"
+    )
+    # Exactly one call should succeed; the other should be an error (illegal move on updated FEN)
+    successes = [o for o in outcomes if isinstance(o, MoveResult)]
+    errors = [o for o in outcomes if isinstance(o, Exception)]
+    assert len(successes) == 1, f"Expected 1 success, got {len(successes)}"
+    assert len(errors) == 1, f"Expected 1 error (illegal move on updated FEN), got {len(errors)}"

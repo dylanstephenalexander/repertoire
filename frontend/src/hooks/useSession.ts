@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { Chess } from "chess.js";
-import { fetchExplanation, fetchHint, fetchOpponentMove, sendMove, startSession } from "../api/session";
+import { deleteSession, fetchExplanation, fetchHint, fetchOpponentMove, sendMove, startSession } from "../api/session";
 import type { SessionStartParams } from "../api/session";
 import type { Feedback, PositionEntry } from "../types";
 import { STUDY_REJECTION_MESSAGES, type RejectionMessageKey } from "../constants/studyMessages";
@@ -165,6 +165,7 @@ export function useSession(): UseSessionReturn {
 
   const begin = useCallback(
     async (params: SessionStartParams) => {
+      if (session) deleteSession(session.sessionId);
       lastParams.current = params;
       const resp = await startSession(params);
       const initial: SessionState = {
@@ -355,10 +356,11 @@ export function useSession(): UseSessionReturn {
   }, []);
 
   const clearSession = useCallback(() => {
+    if (session) deleteSession(session.sessionId);
     setSession(null);
     setRejection(null);
     lastParams.current = null;
-  }, []);
+  }, [session]);
 
   const goToIndex = useCallback((i: number | null) => {
     setSession((s) => {

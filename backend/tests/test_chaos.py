@@ -377,3 +377,39 @@ def test_chaos_explanation_endpoint_consumes_future(monkeypatch):
     assert resp1.json()["explanation"] == "Blunder."
     assert resp2.json()["explanation"] is None
     assert resp2.json()["llm_debug"] is None
+
+
+# ---------------------------------------------------------------------------
+# Chaos session lifecycle — DELETE endpoint and TTL eviction
+# ---------------------------------------------------------------------------
+
+def test_delete_chaos_session_removes_it():
+    sid = _start()
+    resp = client.delete(f"/chaos/{sid}")
+    assert resp.status_code == 204
+    # Session gone — any subsequent move should 404
+    resp = client.post(f"/chaos/{sid}/opponent_move")
+    assert resp.status_code == 404
+
+
+def test_delete_chaos_session_idempotent():
+    """Deleting a non-existent chaos session must not error."""
+    resp = client.delete("/chaos/does-not-exist")
+    assert resp.status_code == 204
+
+
+def test_evict_stale_chaos_sessions():
+    """Sessions older than TTL must be evicted; recent ones must survive."""
+    import time
+
+    old = chaos_svc.create_chaos_session("white", 1500)
+    new = chaos_svc.create_chaos_session("white", 1500)
+
+    # Back-date the old session beyond the TTL
+    chaos_svc._chaos_last_activity[old.session_id] = time.time() - chaos_svc.CHAOS_SESSION_TTL - 1
+
+    evicted = chaos_svc.evict_stale_chaos_sessions()
+
+    assert evicted == 1
+    assert chaos_svc._chaos_sessions.get(old.session_id) is None
+    assert chaos_svc._chaos_sessions.get(new.session_id) is not None
