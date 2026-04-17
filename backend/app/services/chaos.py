@@ -20,6 +20,7 @@ from app.services.feedback import (
 )
 from app.services.opening_detect import detect_opening
 from app.services.sessions import (  # shared Stockfish + pre_eval machinery
+    SessionLimitError,
     _derive_tactical_facts,
     await_explanation,
     cleanup_session_state,
@@ -29,6 +30,8 @@ from app.services.sessions import (  # shared Stockfish + pre_eval machinery
     submit_pre_eval,
     to_analysis_lines,
 )
+
+_MAX_CHAOS_SESSIONS = 500
 
 # In-memory chaos session store
 _chaos_sessions: dict[str, "_ChaosSession"] = {}
@@ -67,6 +70,8 @@ def create_chaos_session(
     color: str,
     elo_band: int,
 ) -> ChaosStartResponse:
+    if len(_chaos_sessions) >= _MAX_CHAOS_SESSIONS:
+        raise SessionLimitError("Server session limit reached, try again later")
     if color == "random":
         color = random.choice(["white", "black"])
 

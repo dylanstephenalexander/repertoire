@@ -1,5 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
+from unittest.mock import patch
 
 from app.main import app
 from app.models.feedback import MoveResult
@@ -664,3 +665,26 @@ async def test_concurrent_off_tree_moves_do_not_corrupt_state():
     errors = [o for o in outcomes if isinstance(o, Exception)]
     assert len(successes) == 1, f"Expected 1 success, got {len(successes)}"
     assert len(errors) == 1, f"Expected 1 error (illegal move on updated FEN), got {len(errors)}"
+
+
+# ---------------------------------------------------------------------------
+# Session cap
+# ---------------------------------------------------------------------------
+
+def test_session_cap_returns_503():
+    """When the session store is full, POST /session/start returns 503."""
+    with patch("app.services.sessions._MAX_SESSIONS", 0):
+        resp = client.post(
+            "/session/start",
+            json={"opening_id": "italian", "variation_id": "giuoco_piano", "color": "white", "mode": "study"},
+        )
+    assert resp.status_code == 503
+
+
+def test_session_cap_allows_creation_when_under_limit():
+    """Session creation succeeds when under the cap."""
+    resp = client.post(
+        "/session/start",
+        json={"opening_id": "italian", "variation_id": "giuoco_piano", "color": "white", "mode": "study"},
+    )
+    assert resp.status_code == 200

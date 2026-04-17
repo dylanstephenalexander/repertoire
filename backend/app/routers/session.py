@@ -10,6 +10,7 @@ from app.models.session import (
     SessionState,
 )
 from app.services import sessions as session_svc
+from app.services.sessions import SessionLimitError
 
 router = APIRouter(prefix="/session", tags=["session"])
 
@@ -25,6 +26,8 @@ async def start_session(request: Request, body: SessionStartRequest) -> SessionS
             mode=body.mode,
             elo=body.elo,
         )
+    except SessionLimitError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 

@@ -10,7 +10,7 @@ from app.models.chaos import (
     EngineStatusResponse,
 )
 from app.services import chaos as chaos_svc
-from app.services.sessions import await_explanation
+from app.services.sessions import SessionLimitError, await_explanation
 
 router = APIRouter(prefix="/chaos", tags=["chaos"])
 
@@ -36,6 +36,8 @@ async def start_chaos(request: Request, body: ChaosStartRequest) -> ChaosStartRe
             color=body.color,
             elo_band=body.elo_band,
         )
+    except SessionLimitError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
