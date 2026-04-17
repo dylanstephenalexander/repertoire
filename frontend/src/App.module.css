@@ -26,6 +26,7 @@
 .boardWrapper {
   width: 700px;
   flex-shrink: 0;
+  position: relative;
 }
 
 .sidebar {
@@ -127,18 +128,6 @@
   color: var(--text-dim);
 }
 
-.completeActions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.gameOverMsg {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  padding: 4px 0;
-}
 
 .openingName {
   font-size: 0.85rem;
@@ -170,22 +159,89 @@
 }
 
 .resignBtn {
-  padding: 6px 14px;
+  padding: 12px 20px;
   background: transparent;
   border: 1px solid var(--quality-blunder-border);
-  border-radius: 5px;
+  border-radius: 6px;
   color: var(--quality-blunder-label);
-  font-size: 0.85rem;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s;
   margin-top: auto;
-  opacity: 0.6;
+  opacity: 0.7;
+  width: 100%;
 }
 
 .resignBtn:hover {
-  border-color: var(--quality-blunder-label);
-  color: var(--quality-blunder-label);
+  background: var(--quality-blunder-border);
+  color: #fff;
   opacity: 1;
+}
+
+.resignConfirmBtn {
+  padding: 12px 20px;
+  background: var(--quality-blunder-label);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  flex: 1;
+}
+
+.resignConfirmBtn:hover {
+  opacity: 0.85;
+}
+
+.modalOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  border-radius: 8px;
+}
+
+.modalBox {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-moderate);
+  border-radius: 10px;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 280px;
+}
+
+.modalText {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+}
+
+.modalActionsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .home {

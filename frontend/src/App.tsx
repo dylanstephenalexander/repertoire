@@ -49,6 +49,8 @@ export function App() {
 
   const { settings, update: updateSetting } = useSettingsContext();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [resignModalOpen, setResignModalOpen] = useState(false);
+  const [gameOverModalOpen, setGameOverModalOpen] = useState(false);
 
   const [mode, setMode] = useState<AppMode>(() => {
     return (history.state?.mode as AppMode) ?? "home";
@@ -57,6 +59,8 @@ export function App() {
   function navigate(next: AppMode) {
     history.pushState({ mode: next }, "");
     setMode(next);
+    setGameOverModalOpen(false);
+    setResignModalOpen(false);
   }
 
   useEffect(() => {
@@ -155,6 +159,11 @@ export function App() {
   // ── Derived display values ───────────────────────────────────────────────
   const currentColor = isStudy ? session!.userColor : isChaos ? chaosSession!.userColor : "white";
   const currentStatus = isStudy ? session!.status : isChaos ? chaosSession!.status : "idle";
+
+  // Open game-over modal automatically when status reaches complete
+  useEffect(() => {
+    if (currentStatus === "complete") setGameOverModalOpen(true);
+  }, [currentStatus]);
   const currentDebugMsg = isStudy ? (session!.debugMsg ?? null) : isChaos ? (chaosSession!.debugMsg ?? null) : null;
   const currentLlmDebugMsg = isStudy ? (session!.llmDebugMsg ?? null) : isChaos ? (chaosSession!.llmDebugMsg ?? null) : null;
   const currentOpponentMoveDebug = isChaos ? (chaosSession!.opponentMoveDebug ?? null) : null;
@@ -280,6 +289,72 @@ export function App() {
             fen={displayFen ?? currentFen}
             color={currentColor}
           />
+
+          {/* Resign confirmation modal — anchored to board */}
+          {resignModalOpen && (
+            <div className={styles.modalOverlay} onClick={() => setResignModalOpen(false)}>
+              <div className={styles.modalBox} onClick={e => e.stopPropagation()}>
+                <p className={styles.modalText}>Are you sure you want to resign?</p>
+                <div className={styles.modalActions}>
+                  <button className={styles.resignConfirmBtn} onClick={() => { resign(); setResignModalOpen(false); }}>
+                    Resign
+                  </button>
+                  <button className={styles.secondaryBtn} onClick={() => setResignModalOpen(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Game over modal — anchored to board */}
+          {gameOverModalOpen && (
+            <div className={styles.modalOverlay}>
+              <div className={styles.modalBox} onClick={e => e.stopPropagation()}>
+                <p className={styles.modalTitle}>
+                  {(() => {
+                    if (currentStatus !== "complete") return isStudy ? "End game?" : "Game over";
+                    try {
+                      const chess = new Chess(currentFen);
+                      if (chess.isCheckmate()) {
+                        const winner = chess.turn() === "w" ? "Black" : "White";
+                        return `${winner} wins by checkmate`;
+                      }
+                      if (chess.isStalemate()) return "Draw — stalemate";
+                      if (chess.isDraw()) return "Draw";
+                    } catch { /* ignore */ }
+                    return isStudy ? "Opening complete" : "Game over";
+                  })()}
+                </p>
+                <div className={styles.modalActionsColumn}>
+                  <button className={styles.primaryBtn} onClick={async () => {
+                    setGameOverModalOpen(false);
+                    if (isStudy) await restart();
+                    else await restartChaos();
+                  }}>
+                    Play again
+                  </button>
+                  <button className={styles.secondaryBtn} onClick={() => {
+                    setGameOverModalOpen(false);
+                    if (isStudy) clearSession();
+                    else clearChaosSession();
+                    setGuided(false);
+                  }}>
+                    New game
+                  </button>
+                  <button className={styles.secondaryBtn} onClick={() => {
+                    setGameOverModalOpen(false);
+                    clearSession();
+                    clearChaosSession();
+                    setGuided(false);
+                    navigate("home");
+                  }}>
+                    Home
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
 
         <aside className={styles.sidebar}>
@@ -407,53 +482,20 @@ export function App() {
             />
           )}
 
-          {/* End-of-game actions */}
-          {currentStatus === "complete" && !isReviewing && (
-            <div className={styles.completeActions}>
-              <div className={styles.gameOverMsg}>
-                {(() => {
-                  try {
-                    const chess = new Chess(currentFen);
-                    if (chess.isCheckmate()) {
-                      const winner = chess.turn() === "w" ? "Black" : "White";
-                      return `${winner} wins by checkmate`;
-                    }
-                    if (chess.isStalemate()) return "Draw — stalemate";
-                    if (chess.isDraw()) return "Draw";
-                  } catch { /* ignore */ }
-                  return isStudy ? "Opening complete" : "Game over";
-                })()}
-              </div>
-              <button className={styles.primaryBtn} onClick={async () => {
-                if (isStudy) await restart();
-                else await restartChaos();
-              }}>
-                Play again
-              </button>
-              <button className={styles.secondaryBtn} onClick={() => {
-                if (isStudy) clearSession();
-                else clearChaosSession();
-                setGuided(false);
-              }}>
-                New game
-              </button>
-              <button className={styles.secondaryBtn} onClick={() => {
-                clearSession();
-                clearChaosSession();
-                setGuided(false);
-                navigate("home");
-              }}>
-                Home
-              </button>
-            </div>
-          )}
-
           {/* Resign — chaos only, while playing */}
-          {isChaos && currentStatus === "playing" && !isReviewing && (
-            <button className={styles.resignBtn} onClick={resign}>
+          {isChaos && (currentStatus === "playing" || currentStatus === "opponent_thinking") && !isReviewing && (
+            <button className={styles.resignBtn} onClick={() => setResignModalOpen(true)}>
               Resign
             </button>
           )}
+
+          {/* End Game — study only, while playing */}
+          {isStudy && currentStatus === "playing" && !isReviewing && (
+            <button className={styles.resignBtn} onClick={() => setGameOverModalOpen(true)}>
+              End Game
+            </button>
+          )}
+
         </aside>
       </div>
 
