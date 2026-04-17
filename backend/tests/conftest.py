@@ -3,6 +3,7 @@ import os
 import pytest
 
 from app.engine.stockfish import StockfishEngine
+from app.main import limiter
 from app.services import sessions as session_svc
 
 STOCKFISH_PATH = os.environ.get("STOCKFISH_PATH", "")
@@ -44,6 +45,13 @@ class MockStockfishEngine:
     def stop(self) -> None: pass
     def set_elo(self, elo: int) -> None: pass
     def clear_elo(self) -> None: pass
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limits():
+    """Reset rate limit counters between every test."""
+    yield
+    limiter._storage.reset()
 
 
 @pytest.fixture(autouse=True)

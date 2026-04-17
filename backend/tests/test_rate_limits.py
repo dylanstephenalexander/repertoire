@@ -7,16 +7,9 @@ The limiter storage is reset between tests so counters don't bleed.
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app, limiter
+from app.main import app
 
 client = TestClient(app, raise_server_exceptions=False)
-
-
-@pytest.fixture(autouse=True)
-def reset_limiter():
-    """Clear all rate limit counters between tests."""
-    yield
-    limiter._storage.reset()
 
 
 def _post(path: str, json: dict | None = None) -> int:
