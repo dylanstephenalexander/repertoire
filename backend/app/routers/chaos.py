@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
+from app.main import limiter
 
 from app.models.chaos import (
     ChaosOpponentMoveResponse,
@@ -17,13 +18,15 @@ VALID_ELO_BANDS = {1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000}
 
 
 @router.get("/engine_status", response_model=EngineStatusResponse)
-def engine_status() -> EngineStatusResponse:
+@limiter.limit("30/minute")
+async def engine_status(request: Request) -> EngineStatusResponse:
     status = chaos_svc.engine_status()
     return EngineStatusResponse(**status)
 
 
 @router.post("/start", response_model=ChaosStartResponse)
-def start_chaos(body: ChaosStartRequest) -> ChaosStartResponse:
+@limiter.limit("10/minute")
+async def start_chaos(request: Request, body: ChaosStartRequest) -> ChaosStartResponse:
     if body.elo_band not in VALID_ELO_BANDS:
         raise HTTPException(status_code=400, detail=f"Invalid elo_band: {body.elo_band}")
     if body.color not in ("white", "black", "random"):
@@ -38,7 +41,8 @@ def start_chaos(body: ChaosStartRequest) -> ChaosStartResponse:
 
 
 @router.get("/{session_id}/explanation")
-async def get_chaos_explanation(session_id: str) -> dict:
+@limiter.limit("20/minute")
+async def get_chaos_explanation(request: Request, session_id: str) -> dict:
     """Long-poll: blocks server-side until the LLM result is ready, or returns
     null on timeout. Clients should make ONE request per mistake — no loop."""
     result = await await_explanation(session_id)
@@ -49,7 +53,8 @@ async def get_chaos_explanation(session_id: str) -> dict:
 
 
 @router.post("/{session_id}/move", response_model=ChaosMoveResponse)
-async def make_chaos_move(session_id: str, body: ChaosMoveRequest) -> ChaosMoveResponse:
+@limiter.limit("120/minute")
+async def make_chaos_move(request: Request, session_id: str, body: ChaosMoveRequest) -> ChaosMoveResponse:
     try:
         return await chaos_svc.process_chaos_move(
             session_id=session_id,
@@ -63,12 +68,14 @@ async def make_chaos_move(session_id: str, body: ChaosMoveRequest) -> ChaosMoveR
 
 
 @router.delete("/{session_id}", status_code=204)
-def delete_chaos_session(session_id: str) -> None:
+@limiter.limit("30/minute")
+async def delete_chaos_session(request: Request, session_id: str) -> None:
     chaos_svc.delete_chaos_session(session_id)
 
 
 @router.post("/{session_id}/opponent_move", response_model=ChaosOpponentMoveResponse)
-def chaos_opponent_move(session_id: str) -> ChaosOpponentMoveResponse:
+@limiter.limit("60/minute")
+async def chaos_opponent_move(request: Request, session_id: str) -> ChaosOpponentMoveResponse:
     try:
         return chaos_svc.get_chaos_opponent_move(session_id)
     except KeyError as exc:
