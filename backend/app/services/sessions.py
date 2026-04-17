@@ -19,6 +19,12 @@ from app.services.feedback import (
 from app.services.llm import get_explanation
 from app.services.openings import get_variation_tree
 
+class SessionLimitError(Exception):
+    pass
+
+
+_MAX_SESSIONS = 500
+
 # In-memory session store
 _sessions: dict[str, SessionState] = {}
 
@@ -430,6 +436,8 @@ def create_session(
     mode: str,
     elo: int | None,
 ) -> SessionStartResponse:
+    if len(_sessions) >= _MAX_SESSIONS:
+        raise SessionLimitError("Server session limit reached, try again later")
     tree = get_variation_tree(opening_id, variation_id)
     if tree is None:
         raise ValueError(f"Unknown opening/variation: {opening_id}/{variation_id}")

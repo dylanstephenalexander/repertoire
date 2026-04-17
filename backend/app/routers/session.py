@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
+from app.main import limiter
 
 from app.models.feedback import MoveResult
 from app.models.session import (
@@ -9,12 +10,14 @@ from app.models.session import (
     SessionState,
 )
 from app.services import sessions as session_svc
+from app.services.sessions import SessionLimitError
 
 router = APIRouter(prefix="/session", tags=["session"])
 
 
 @router.post("/start", response_model=SessionStartResponse)
-def start_session(body: SessionStartRequest) -> SessionStartResponse:
+@limiter.limit("10/minute")
+async def start_session(request: Request, body: SessionStartRequest) -> SessionStartResponse:
     try:
         return session_svc.create_session(
             opening_id=body.opening_id,
@@ -23,12 +26,15 @@ def start_session(body: SessionStartRequest) -> SessionStartResponse:
             mode=body.mode,
             elo=body.elo,
         )
+    except SessionLimitError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
 
 @router.post("/{session_id}/move", response_model=MoveResult)
-async def make_move(session_id: str, body: MoveRequest) -> MoveResult:
+@limiter.limit("120/minute")
+async def make_move(request: Request, session_id: str, body: MoveRequest) -> MoveResult:
     try:
         return await session_svc.process_move(session_id, body.uci_move)
     except KeyError as exc:
@@ -38,7 +44,8 @@ async def make_move(session_id: str, body: MoveRequest) -> MoveResult:
 
 
 @router.post("/{session_id}/opponent_move", response_model=OpponentMoveResponse)
-def opponent_move(session_id: str) -> OpponentMoveResponse:
+@limiter.limit("60/minute")
+async def opponent_move(request: Request, session_id: str) -> OpponentMoveResponse:
     try:
         return session_svc.get_opponent_move(session_id)
     except KeyError as exc:
@@ -48,7 +55,8 @@ def opponent_move(session_id: str) -> OpponentMoveResponse:
 
 
 @router.get("/{session_id}/hint")
-def hint(session_id: str) -> dict:
+@limiter.limit("30/minute")
+async def hint(request: Request, session_id: str) -> dict:
     try:
         return session_svc.get_hint(session_id)
     except KeyError as exc:
@@ -58,7 +66,8 @@ def hint(session_id: str) -> dict:
 
 
 @router.get("/{session_id}/explanation")
-async def get_explanation(session_id: str) -> dict:
+@limiter.limit("20/minute")
+async def get_explanation(request: Request, session_id: str) -> dict:
     """Long-poll: blocks server-side until the LLM result is ready, or returns
     null on timeout. Clients should make ONE request per mistake — no loop."""
     result = await session_svc.await_explanation(session_id)
@@ -69,12 +78,14 @@ async def get_explanation(session_id: str) -> dict:
 
 
 @router.delete("/{session_id}", status_code=204)
-def delete_session(session_id: str) -> None:
+@limiter.limit("30/minute")
+async def delete_session(request: Request, session_id: str) -> None:
     session_svc.delete_session(session_id)
 
 
 @router.get("/{session_id}/state", response_model=SessionState)
-def get_state(session_id: str) -> SessionState:
+@limiter.limit("120/minute")
+async def get_state(request: Request, session_id: str) -> SessionState:
     state = session_svc.get_session(session_id)
     if state is None:
         raise HTTPException(status_code=404, detail=f"Session '{session_id}' not found")

@@ -10,10 +10,10 @@
 
 .black {
   background-color: var(--bg-surface-deep);
-  transition: height 0.4s ease;
+  transition: height 4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .white {
   background-color: #f0f0f0;
-  transition: height 0.4s ease;
+  transition: height 4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }

@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 
+from app.main import limiter
 from app.models.review import GameSummary, ReviewRequest, ReviewResponse
 from app.services import review as review_svc
 from app.services.sessions import get_engine
@@ -8,7 +9,9 @@ router = APIRouter(prefix="/review", tags=["review"])
 
 
 @router.get("/games", response_model=list[GameSummary])
+@limiter.limit("10/minute")
 async def get_games(
+    request: Request,
     username: str = Query(...),
     source: str = Query(..., pattern="^(chess.com|lichess)$"),
     year: int | None = Query(None),
@@ -31,7 +34,8 @@ async def get_games(
 
 
 @router.post("/analyse", response_model=ReviewResponse)
-def analyse_game(body: ReviewRequest) -> ReviewResponse:
+@limiter.limit("5/minute")
+async def analyse_game(request: Request, body: ReviewRequest) -> ReviewResponse:
     engine = get_engine()
     if engine is None:
         raise HTTPException(status_code=503, detail="Engine not available")

@@ -1,5 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
+from unittest.mock import patch
 
 from app.main import app
 from app.models.feedback import MoveResult
@@ -218,29 +219,18 @@ def test_sessions_isolated_between_tests():
 
 
 # ---------------------------------------------------------------------------
-# Pre-eval cache paths (use mode="freestyle" to bypass study rejection)
+# Pre-eval cache paths
 # ---------------------------------------------------------------------------
 
-def _start_freestyle_session():
-    """Start a non-study session so off-tree moves reach the eval path."""
-    resp = client.post(
-        "/session/start",
-        json={
-            "opening_id": "italian",
-            "variation_id": "giuoco_piano",
-            "color": "white",
-            "mode": "freestyle",
-        },
-    )
-    assert resp.status_code == 200
-    return resp.json()
+def _start_session_bypass_study(opening_id="italian", variation_id="giuoco_piano"):
+    """Create a study session, then set mode='chaos' so off-tree moves reach the engine."""
+    result = session_svc.create_session(opening_id, variation_id, "white", "study", None)
+    session_svc._sessions[result.session_id].mode = "chaos"
+    return result.session_id
 
 
 def test_pre_eval_cache_hit_uses_line_cp_no_extra_calls():
-    """
-    Case 1: pre_eval done, user's move is in the top-N lines.
-    Only one engine call (the pre_eval itself) — no post_eval needed.
-    """
+    """pre_eval done, user's move is in the top-N lines — no extra engine call needed."""
     call_log: list[str] = []
 
     class TrackingEngine:
@@ -249,18 +239,14 @@ def test_pre_eval_cache_hit_uses_line_cp_no_extra_calls():
             return {
                 "eval_cp": 20,
                 "best_move": "e2e4",
-                "lines": [
-                    {"move_uci": "e2e4", "cp": 20},
-                    {"move_uci": "d2d4", "cp": 15},
-                ],
+                "lines": [{"move_uci": "e2e4", "cp": 20}, {"move_uci": "d2d4", "cp": 15}],
                 "depth": 12,
             }
 
     engine = TrackingEngine()
     session_svc.set_engine(engine)
     session_svc.set_analysis_engine(engine)
-
-    sid = _start_freestyle_session()["session_id"]
+    sid = _start_session_bypass_study()
 
     from concurrent.futures import Future
     f: Future = Future()
@@ -276,10 +262,7 @@ def test_pre_eval_cache_hit_uses_line_cp_no_extra_calls():
 
 
 def test_pre_eval_cache_hit_move_outside_lines_fires_post_eval():
-    """
-    Case 2: pre_eval done, but user's move is not in the top-N lines.
-    One post_eval call should fire on the main engine.
-    """
+    """pre_eval done but user's move is not in the cached lines — one fresh engine call fires."""
     call_log: list[str] = []
 
     class TrackingEngine:
@@ -290,8 +273,7 @@ def test_pre_eval_cache_hit_move_outside_lines_fires_post_eval():
     engine = TrackingEngine()
     session_svc.set_engine(engine)
     session_svc.set_analysis_engine(engine)
-
-    sid = _start_freestyle_session()["session_id"]
+    sid = _start_session_bypass_study()
 
     from concurrent.futures import Future
     f: Future = Future()
@@ -307,10 +289,7 @@ def test_pre_eval_cache_hit_move_outside_lines_fires_post_eval():
 
 
 def test_pre_eval_cache_miss_falls_back_to_serial():
-    """
-    Case: no pre_eval future present (analysis engine absent / cleared).
-    Falls back to the original two-call serial path.
-    """
+    """No pre_eval future present — falls back to two serial engine calls."""
     call_log: list[str] = []
 
     class TrackingEngine:
@@ -327,8 +306,8 @@ def test_pre_eval_cache_miss_falls_back_to_serial():
     engine = TrackingEngine()
     session_svc.set_engine(engine)
     session_svc.set_analysis_engine(None)
+    sid = _start_session_bypass_study()
 
-    sid = _start_freestyle_session()["session_id"]
     resp = client.post(f"/session/{sid}/move", json={"uci_move": "d2d4"})
     assert resp.status_code == 200
     assert resp.json()["result"] in ("alternative", "mistake", "blunder")
@@ -644,7 +623,7 @@ async def test_concurrent_off_tree_moves_do_not_corrupt_state():
     session_svc.set_engine(SlowEngine())
     session_svc.set_analysis_engine(None)
 
-    result = session_svc.create_session("italian", "giuoco_piano", "white", "freestyle", None)
+    result = session_svc.create_session("italian", "giuoco_piano", "white", "chaos", None)
     sid = result.session_id
 
     # Fire two off-tree moves concurrently; collect exceptions rather than raising.
@@ -664,3 +643,78 @@ async def test_concurrent_off_tree_moves_do_not_corrupt_state():
     errors = [o for o in outcomes if isinstance(o, Exception)]
     assert len(successes) == 1, f"Expected 1 success, got {len(successes)}"
     assert len(errors) == 1, f"Expected 1 error (illegal move on updated FEN), got {len(errors)}"
+
+
+# ---------------------------------------------------------------------------
+# Session cap
+# ---------------------------------------------------------------------------
+
+def test_session_cap_returns_503():
+    """When the session store is full, POST /session/start returns 503."""
+    with patch("app.services.sessions._MAX_SESSIONS", 0):
+        resp = client.post(
+            "/session/start",
+            json={"opening_id": "italian", "variation_id": "giuoco_piano", "color": "white", "mode": "study"},
+        )
+    assert resp.status_code == 503
+
+
+def test_session_cap_allows_creation_when_under_limit():
+    """Session creation succeeds when under the cap."""
+    resp = client.post(
+        "/session/start",
+        json={"opening_id": "italian", "variation_id": "giuoco_piano", "color": "white", "mode": "study"},
+    )
+    assert resp.status_code == 200
+
+
+# ---------------------------------------------------------------------------
+# Input validation (Pydantic constraints)
+# ---------------------------------------------------------------------------
+
+def test_invalid_color_rejected():
+    resp = client.post(
+        "/session/start",
+        json={"opening_id": "italian", "variation_id": "giuoco_piano", "color": "admin", "mode": "study"},
+    )
+    assert resp.status_code == 422
+
+
+def test_invalid_mode_rejected():
+    resp = client.post(
+        "/session/start",
+        json={"opening_id": "italian", "variation_id": "giuoco_piano", "color": "white", "mode": "exploit"},
+    )
+    assert resp.status_code == 422
+
+
+def test_elo_too_low_rejected():
+    resp = client.post(
+        "/session/start",
+        json={"opening_id": "italian", "variation_id": "giuoco_piano", "color": "white", "mode": "study", "elo": 100},
+    )
+    assert resp.status_code == 422
+
+
+def test_elo_too_high_rejected():
+    resp = client.post(
+        "/session/start",
+        json={"opening_id": "italian", "variation_id": "giuoco_piano", "color": "white", "mode": "study", "elo": 9999},
+    )
+    assert resp.status_code == 422
+
+
+def test_invalid_uci_move_rejected():
+    resp = client.post("/session/fake-id/move", json={"uci_move": "not-a-move"})
+    assert resp.status_code == 422
+
+
+def test_uci_move_too_long_rejected():
+    resp = client.post("/session/fake-id/move", json={"uci_move": "e2e4e5e6"})
+    assert resp.status_code == 422
+
+
+def test_valid_promotion_move_accepted_by_schema():
+    """e7e8q is a valid 5-char promotion UCI — should pass schema validation (404 on unknown session)."""
+    resp = client.post("/session/fake-id/move", json={"uci_move": "e7e8q"})
+    assert resp.status_code != 422

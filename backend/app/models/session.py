@@ -1,13 +1,14 @@
-from pydantic import BaseModel
-from typing import Any
+from typing import Any, Literal
+
+from pydantic import BaseModel, Field
 
 
 class SessionStartRequest(BaseModel):
     opening_id: str
     variation_id: str
-    color: str  # "white" | "black"
-    mode: str  # "study" | "chaos"
-    elo: int | None = None
+    color: Literal["white", "black"]
+    mode: Literal["study", "chaos"]
+    elo: int | None = Field(default=None, ge=600, le=3200)
 
 
 class SessionStartResponse(BaseModel):
@@ -30,7 +31,7 @@ class SessionState(BaseModel):
 
 
 class MoveRequest(BaseModel):
-    uci_move: str
+    uci_move: str = Field(..., min_length=4, max_length=5, pattern=r"^[a-h][1-8][a-h][1-8][qrbn]?$")
 
 
 class OpponentMoveResponse(BaseModel):

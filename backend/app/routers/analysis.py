@@ -1,8 +1,8 @@
 import chess
-from fastapi import APIRouter, HTTPException
-
+from fastapi import APIRouter, HTTPException, Request
 
 from app.engine.stockfish import EVAL_BAR_DEPTH
+from app.main import limiter
 from app.models.analysis import EvalRequest, EvalResponse
 from app.models.feedback import AnalysisLine
 from app.services.sessions import get_engine
@@ -15,7 +15,8 @@ _eval_cache: dict[str, EvalResponse] = {}
 
 
 @router.post("/eval", response_model=EvalResponse)
-def eval_position(body: EvalRequest) -> EvalResponse:
+@limiter.limit("60/minute")
+async def eval_position(request: Request, body: EvalRequest) -> EvalResponse:
     try:
         board = chess.Board(body.fen)
     except ValueError:

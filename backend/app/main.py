@@ -17,6 +17,12 @@ load_dotenv(find_dotenv(usecwd=False))
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
+limiter = Limiter(key_func=get_remote_address)
+
 from app.engine.stockfish import StockfishEngine
 from app.routers import analysis, chaos, openings, review, session
 from app.services import chaos as chaos_svc
@@ -74,6 +80,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Repertoire", lifespan=lifespan)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
