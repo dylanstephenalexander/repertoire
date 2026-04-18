@@ -1,3 +1,19 @@
+@keyframes fadeScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 .root {
   min-height: 100vh;
   background: var(--bg-page);
@@ -14,6 +30,7 @@
   justify-content: center;
   gap: 16px;
   padding: 32px 16px;
+  animation: fadeScaleIn 0.35s ease-out;
 }
 
 .evalBarWrapper {
@@ -205,6 +222,7 @@
   justify-content: center;
   z-index: 100;
   border-radius: 8px;
+  animation: fadeIn 0.4s ease;
 }
 
 .modalBox {
@@ -216,6 +234,7 @@
   flex-direction: column;
   gap: 20px;
   min-width: 280px;
+  animation: fadeScaleIn 0.3s ease-out;
 }
 
 .modalText {
@@ -252,6 +271,7 @@
   width: 100%;
   min-height: 100vh;
   gap: 32px;
+  animation: fadeScaleIn 0.35s ease-out;
 }
 
 .homeTitle {
@@ -340,6 +360,35 @@
   gap: 8px;
   font-size: 0.85rem;
   color: var(--text-dim);
+}
+
+/* ── History nav bar (study / chaos) ────────────────────────────────────── */
+
+.navBar {
+  display: flex;
+  gap: 6px;
+}
+
+.navBtn {
+  flex: 1;
+  padding: 11px 8px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-moderate);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.navBtn:hover:not(:disabled) {
+  background: var(--bg-raised-hover);
+  border-color: var(--border-muted);
+}
+
+.navBtn:disabled {
+  opacity: 0.3;
+  cursor: default;
 }
 
 /* ── Floating gear button ────────────────────────────────────────────────── */

@@ -19,7 +19,7 @@ function nextMonth(year: number, month: number) {
 const MONTH_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
 export function GameReview({ onBack }: GameReviewProps) {
-  const { state, loadGames, analyse, goToMove, nextMove, prevMove, reset, currentFen, currentEvalCp, currentAnnotation } = useReview();
+  const { state, loadGames, analyse, cancelAnalysis, goToMove, nextMove, prevMove, reset, currentFen, currentEvalCp, currentAnnotation } = useReview();
 
   const [source, setSource] = useState<"chess.com" | "lichess">("chess.com");
   const [username, setUsername] = useState(() => localStorage.getItem("review_username") ?? "");
@@ -56,12 +56,6 @@ export function GameReview({ onBack }: GameReviewProps) {
         </aside>
         <main className={styles.boardWrapper}>
           <Board fen={currentFen} orientation="white" onMove={() => {}} disabled />
-          <div className={styles.navBar}>
-            <button className={styles.navBtn} onClick={() => goToMove(-1)}>|◀</button>
-            <button className={styles.navBtn} onClick={prevMove}>◀</button>
-            <button className={styles.navBtn} onClick={nextMove}>▶</button>
-            <button className={styles.navBtn} onClick={() => goToMove(review.moves.length - 1)}>▶|</button>
-          </div>
           {currentAnnotation?.explanation && (
             <div className={`${styles.annotation} ${styles[`quality_${currentAnnotation.quality}`] ?? ""}`}>
               <strong>{currentAnnotation.quality.charAt(0).toUpperCase() + currentAnnotation.quality.slice(1)}</strong>
@@ -75,6 +69,12 @@ export function GameReview({ onBack }: GameReviewProps) {
             <span className={styles.result}>{review.result}</span>
           </div>
           <MoveList moves={review.moves} currentIndex={state.currentMoveIndex} onSelect={goToMove} />
+          <div className={styles.navBar}>
+            <button className={styles.navBtn} onClick={() => goToMove(-1)}>|◀</button>
+            <button className={styles.navBtn} onClick={prevMove}>◀</button>
+            <button className={styles.navBtn} onClick={nextMove}>▶</button>
+            <button className={styles.navBtn} onClick={() => goToMove(review.moves.length - 1)}>▶|</button>
+          </div>
           <button className={styles.backBtn} onClick={handleBack}>← Back to menu</button>
         </aside>
       </div>
@@ -89,6 +89,7 @@ export function GameReview({ onBack }: GameReviewProps) {
           <div className={styles.spinner} />
           <p className={styles.spinnerLabel}>Analysing with Stockfish…</p>
           <p className={styles.spinnerHint}>This may take a minute for longer games.</p>
+          <button className={styles.cancelBtn} onClick={cancelAnalysis}>Cancel</button>
         </div>
       </div>
     );
@@ -107,15 +108,16 @@ export function GameReview({ onBack }: GameReviewProps) {
           <div className={styles.formSections}>
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>Source</h2>
-              <div className={styles.chipRow}>
-                {(["chess.com", "lichess"] as const).map((s) => (
-                  <button key={s} type="button"
-                    className={`${styles.chip} ${styles.chipCenter} ${source === s ? styles.selected : ""}`}
-                    onClick={() => setSource(s)}
-                  >
-                    {s === "chess.com" ? "Chess.com" : "Lichess"}
-                  </button>
-                ))}
+              <div className={styles.segmented}>
+                <div className={`${styles.segmentedPill} ${source === "lichess" ? styles.pillRight : ""}`} />
+                <button type="button"
+                  className={`${styles.segmentedBtn} ${source === "chess.com" ? styles.segmentedActive : ""}`}
+                  onClick={() => setSource("chess.com")}
+                >Chess.com</button>
+                <button type="button"
+                  className={`${styles.segmentedBtn} ${source === "lichess" ? styles.segmentedActive : ""}`}
+                  onClick={() => setSource("lichess")}
+                >Lichess</button>
               </div>
             </section>
 

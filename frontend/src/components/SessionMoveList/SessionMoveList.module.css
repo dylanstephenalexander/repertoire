@@ -38,6 +38,7 @@
 
 .moveList {
   overflow-y: auto;
+  min-height: 48px;
   max-height: 180px;
   font-size: 0.82rem;
   font-family: monospace;

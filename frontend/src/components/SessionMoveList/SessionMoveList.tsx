@@ -37,52 +37,8 @@ export function SessionMoveList({ positions, viewIndex, onSelect }: Props) {
     });
   }
 
-  function handleBack() {
-    if (isLive) onSelect(positions.length - 2);
-    else if (viewIndex! > 0) onSelect(viewIndex! - 1);
-  }
-
-  function handleForward() {
-    if (!isLive) {
-      if (viewIndex! >= positions.length - 1) onSelect(null);
-      else onSelect(viewIndex! + 1);
-    }
-  }
-
-  const canGoBack = isLive ? positions.length > 1 : activeIdx > 0;
-  const canGoForward = !isLive;
-
-  if (positions.length <= 1) return null; // nothing to show yet
-
   return (
     <div className={styles.container}>
-      <div className={styles.navBar}>
-        <button
-          className={styles.navBtn}
-          onClick={() => onSelect(0)}
-          disabled={activeIdx === 0}
-          title="Start"
-        >⏮</button>
-        <button
-          className={styles.navBtn}
-          onClick={handleBack}
-          disabled={!canGoBack}
-          title="Previous move"
-        >◀</button>
-        <button
-          className={styles.navBtn}
-          onClick={handleForward}
-          disabled={!canGoForward}
-          title="Next move"
-        >▶</button>
-        <button
-          className={styles.navBtn}
-          onClick={() => onSelect(null)}
-          disabled={isLive}
-          title="Current position"
-        >⏭</button>
-      </div>
-
       <div className={styles.moveList} ref={listRef}>
         {rows.map(({ moveNum, wIdx, bIdx }) => (
           <div key={moveNum} className={styles.moveRow}>

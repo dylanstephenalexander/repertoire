@@ -32,11 +32,13 @@ const POSITIONS: PositionEntry[] = [
 // ---------------------------------------------------------------------------
 
 describe("SessionMoveList rendering", () => {
-  it("returns null when only the starting position exists", () => {
+  it("renders an empty move list when only the starting position exists", () => {
     const { container } = render(
       <SessionMoveList positions={[makePosition(null)]} viewIndex={null} onSelect={vi.fn()} />
     );
-    expect(container.firstChild).toBeNull();
+    // Component always renders — no moves shown, but container is present
+    expect(container.firstChild).not.toBeNull();
+    expect(screen.queryByText("1.")).toBeNull();
   });
 
   it("renders move numbers and SAN notation", () => {
@@ -75,7 +77,6 @@ describe("SessionMoveList rendering", () => {
 describe("SessionMoveList active state", () => {
   it("highlights the last move when live (viewIndex=null)", () => {
     render(<SessionMoveList positions={POSITIONS} viewIndex={null} onSelect={vi.fn()} />);
-    // Nc6 is position index 4, the last move — should be active
     const nc6 = screen.getByText("Nc6");
     expect(nc6.getAttribute("data-active")).toBe("true");
   });
@@ -90,42 +91,7 @@ describe("SessionMoveList active state", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Navigation button states
-// ---------------------------------------------------------------------------
-
-describe("SessionMoveList nav button states", () => {
-  it("⏮ is disabled when at the start (viewIndex=0)", () => {
-    render(<SessionMoveList positions={POSITIONS} viewIndex={0} onSelect={vi.fn()} />);
-    expect(screen.getByTitle("Start")).toBeDisabled();
-  });
-
-  it("⏮ is not disabled when not at the start", () => {
-    render(<SessionMoveList positions={POSITIONS} viewIndex={2} onSelect={vi.fn()} />);
-    expect(screen.getByTitle("Start")).not.toBeDisabled();
-  });
-
-  it("⏭ is disabled when live (viewIndex=null)", () => {
-    render(<SessionMoveList positions={POSITIONS} viewIndex={null} onSelect={vi.fn()} />);
-    expect(screen.getByTitle("Current position")).toBeDisabled();
-  });
-
-  it("⏭ is not disabled when reviewing a historical position", () => {
-    render(<SessionMoveList positions={POSITIONS} viewIndex={2} onSelect={vi.fn()} />);
-    expect(screen.getByTitle("Current position")).not.toBeDisabled();
-  });
-
-  it("◀ is disabled when live and only one move exists", () => {
-    const positions = [makePosition(null), makePosition("e4")];
-    render(<SessionMoveList positions={positions} viewIndex={null} onSelect={vi.fn()} />);
-    // Live with 1 move — back would go to start which is position 0; canGoBack = positions.length > 1 = true
-    // Actually canGoBack is true here. Let's check at index 0.
-    render(<SessionMoveList positions={positions} viewIndex={0} onSelect={vi.fn()} />);
-    expect(screen.getAllByTitle("Previous move")[1]).toBeDisabled();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Click interactions
+// Click interactions (move cells only — nav buttons live in App.tsx sidebar)
 // ---------------------------------------------------------------------------
 
 describe("SessionMoveList click interactions", () => {
@@ -136,39 +102,10 @@ describe("SessionMoveList click interactions", () => {
     expect(onSelect).toHaveBeenCalledWith(1);
   });
 
-  it("clicking ⏮ calls onSelect(0)", async () => {
-    const onSelect = vi.fn();
-    render(<SessionMoveList positions={POSITIONS} viewIndex={2} onSelect={onSelect} />);
-    await userEvent.click(screen.getByTitle("Start"));
-    expect(onSelect).toHaveBeenCalledWith(0);
-  });
-
-  it("clicking ⏭ calls onSelect(null)", async () => {
-    const onSelect = vi.fn();
-    render(<SessionMoveList positions={POSITIONS} viewIndex={2} onSelect={onSelect} />);
-    await userEvent.click(screen.getByTitle("Current position"));
-    expect(onSelect).toHaveBeenCalledWith(null);
-  });
-
-  it("clicking ▶ from a historical position advances by one", async () => {
-    const onSelect = vi.fn();
-    render(<SessionMoveList positions={POSITIONS} viewIndex={2} onSelect={onSelect} />);
-    await userEvent.click(screen.getByTitle("Next move"));
-    expect(onSelect).toHaveBeenCalledWith(3);
-  });
-
-  it("clicking ◀ from a historical position goes back by one", async () => {
-    const onSelect = vi.fn();
-    render(<SessionMoveList positions={POSITIONS} viewIndex={3} onSelect={onSelect} />);
-    await userEvent.click(screen.getByTitle("Previous move"));
-    expect(onSelect).toHaveBeenCalledWith(2);
-  });
-
-  it("clicking ◀ from live state (viewIndex=null) goes to second-to-last position", async () => {
+  it("clicking the live (last) move while in live mode calls onSelect(null)", async () => {
     const onSelect = vi.fn();
     render(<SessionMoveList positions={POSITIONS} viewIndex={null} onSelect={onSelect} />);
-    await userEvent.click(screen.getByTitle("Previous move"));
-    // POSITIONS has 5 entries (indices 0–4); live back should go to index 3
-    expect(onSelect).toHaveBeenCalledWith(3);
+    await userEvent.click(screen.getByText("Nc6"));
+    expect(onSelect).toHaveBeenCalledWith(null);
   });
 });
