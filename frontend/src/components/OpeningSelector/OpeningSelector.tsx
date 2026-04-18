@@ -48,7 +48,7 @@ export function OpeningSelector({ onStart, onBack }: OpeningSelectorProps) {
 
         {error && <p className={styles.error}>{error}</p>}
 
-        <section className={styles.section}>
+        <section key="openings" className={styles.section}>
           <h2 className={styles.sectionTitle}>Opening</h2>
           <ul className={styles.list}>
             {openings.map((o) => (
@@ -68,7 +68,7 @@ export function OpeningSelector({ onStart, onBack }: OpeningSelectorProps) {
         </section>
 
         {selectedOpening && (
-          <section className={styles.section}>
+          <section key={selectedOpening.id} className={styles.section}>
             <h2 className={styles.sectionTitle}>Variation</h2>
             <ul className={styles.list}>
               {selectedOpening.variations.map((v) => (

@@ -74,6 +74,26 @@ Explanations must match the user's skill level.
 
 3. **Customization**: use https://coolors.co to generate a few themes and test those out. Do the same with board, pieces. Give a more human and artistic feel.
 
+## UX Vision — Making It Feel Alive
+
+Priority order. These are the highest-impact changes for making the app feel like a chess experience, not a tool.
+
+1. **Sound**: Curate a satisfying piece clack, a sharper sound for captures, a low thud for check. Sound creates most of the physical feeling. A quiet room with a sharp piece landing is tension.
+
+2. **Pacing / Stagger**: Stop showing everything simultaneously. Feedback fades in 200ms after the move lands. A beat passes between the move landing and the eval bar moving. Score ticks up with a slight delay. Silence before information creates weight.
+
+3. **Screen Transitions**: Opening selector to board is a hard DOM swap. Use crossfades or subtle slides for continuity. Game-over modal: board dims slowly behind the overlay, not an instant rgba snap.
+
+4. **Board Physicality**: Dragged piece gets a subtle drop shadow that grows on lift. Brief scale pulse on landing (1.0 to 1.05 to 1.0, 150ms). Legal move indicators fade in, not pop.
+
+5. **Move List as Narrative**: New moves slide into the list. Current move gets a subtle glow or left-border accent. Mistakes visually interrupt — red flash on entry, not just a colored dot.
+
+6. **Eval Bar Drama**: Big eval swings (>200cp) trigger a brief pulse or edge glow. Quiet games have a bar that barely moves. Volatile positions should feel volatile.
+
+7. **Typography / Negative Space**: Score and eval should feel like a scoreboard, not a label. Opening name gets real presence. More vertical spacing in sidebar — density feels like a tool, space feels like an experience.
+
+8. **Color Temperature**: Subtle warm tint on the board area background (#1a1816 instead of #1e1e1e) for subconscious warmth/wood. Keep sidebar cool. Warm board + cool controls = visual hierarchy.
+
 ## Future Ideas
 
 - **Promotion Picker UI**: currently `resolveMove` in `Board.tsx` always promotes to queen (hardcoded). A real picker should appear when a pawn reaches the back rank — show the four piece options (Q/R/B/N), let the user click one, then send the 5-char UCI. `react-chessboard` has a built-in `promotionDialogVariant` option; alternatively render a custom overlay. The seam is already clean: `useSession.move()` already handles 5-char UCI strings.

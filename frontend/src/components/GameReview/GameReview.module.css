@@ -1,5 +1,15 @@
 /* ─── Overlay + modal — mirrors OpeningSelector exactly ──────────────────── */
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeScaleIn {
+  from { opacity: 0; transform: scale(1.02); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -8,6 +18,7 @@
   align-items: center;
   justify-content: center;
   z-index: 100;
+  animation: fadeIn 0.3s ease;
 }
 
 .modal {
@@ -21,6 +32,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  animation: fadeScaleIn 0.35s ease-out;
 }
 
 .modalHeader {
@@ -58,6 +70,55 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-dim);
+}
+
+/* ─── Segmented control (source toggle) ─────────────────────────────────── */
+
+.segmented {
+  position: relative;
+  display: flex;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-moderate);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 0;
+}
+
+.segmentedPill {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  transition: transform 0.22s cubic-bezier(0.34, 1.3, 0.64, 1);
+  pointer-events: none;
+}
+
+.pillRight {
+  transform: translateX(calc(100% + 3px));
+}
+
+.segmentedBtn {
+  flex: 1;
+  padding: 9px 14px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 5px;
+  position: relative;
+  z-index: 1;
+  transition: color 0.18s;
+}
+
+.segmentedActive {
+  color: var(--text-primary);
 }
 
 /* ─── Chips — identical to OpeningSelector ───────────────────────────────── */
@@ -291,6 +352,23 @@
   text-align: center;
 }
 
+.cancelBtn {
+  align-self: center;
+  padding: 8px 24px;
+  background: none;
+  border: 1px solid var(--border-moderate);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.cancelBtn:hover {
+  border-color: var(--border-muted);
+  color: var(--text-primary);
+}
+
 /* ─── Review board layout ────────────────────────────────────────────────── */
 
 .reviewLayout {
@@ -300,6 +378,7 @@
   gap: 16px;
   padding: 32px 16px;
   min-height: 100vh;
+  animation: fadeScaleIn 0.35s ease-out;
 }
 
 .evalBarWrapper {
@@ -348,17 +427,18 @@
 .navBar {
   display: flex;
   gap: 6px;
-  justify-content: center;
 }
 
 .navBtn {
-  padding: 6px 14px;
+  flex: 1;
+  padding: 11px 8px;
   background: var(--bg-raised);
   border: 1px solid var(--border-moderate);
-  border-radius: 4px;
+  border-radius: 6px;
   color: var(--text-primary);
-  font-size: 0.85rem;
+  font-size: 1.1rem;
   cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
 }
 
 .navBtn:hover {

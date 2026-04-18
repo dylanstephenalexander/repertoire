@@ -482,6 +482,36 @@ export function App() {
             />
           )}
 
+          {/* History nav bar */}
+          {(isStudy || isChaos) && (() => {
+            const positions = isStudy ? session!.positions : chaosSession!.positions;
+            const viewIndex = isStudy ? session!.viewIndex : chaosSession!.viewIndex;
+            const goTo = isStudy ? goToIndex : goToChaosIndex;
+            const count = positions.length;
+            const activeIdx = viewIndex ?? (count - 1);
+            const isLive = viewIndex === null;
+            const canGoBack = isLive ? count > 1 : activeIdx > 0;
+            const canGoForward = !isLive;
+            function handleBack() {
+              if (isLive) goTo(count - 2);
+              else if (viewIndex! > 0) goTo(viewIndex! - 1);
+            }
+            function handleForward() {
+              if (!isLive) {
+                if (viewIndex! >= count - 1) goTo(null);
+                else goTo(viewIndex! + 1);
+              }
+            }
+            return (
+              <div className={styles.navBar}>
+                <button className={styles.navBtn} disabled={activeIdx === 0} onClick={() => goTo(0)}>|◀</button>
+                <button className={styles.navBtn} disabled={!canGoBack} onClick={handleBack}>◀</button>
+                <button className={styles.navBtn} disabled={!canGoForward} onClick={handleForward}>▶</button>
+                <button className={styles.navBtn} disabled={isLive} onClick={() => goTo(null)}>▶|</button>
+              </div>
+            );
+          })()}
+
           {/* Resign — chaos only, while playing */}
           {isChaos && (currentStatus === "playing" || currentStatus === "opponent_thinking") && !isReviewing && (
             <button className={styles.resignBtn} onClick={() => setResignModalOpen(true)}>

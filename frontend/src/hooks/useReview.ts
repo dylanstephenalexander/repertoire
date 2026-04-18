@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Chess } from "chess.js";
 import { analyseGame, fetchGames } from "../api/review";
 import type { FetchGamesParams } from "../api/review";
@@ -18,6 +18,7 @@ export interface UseReviewReturn {
   state: ReviewState;
   loadGames: (params: FetchGamesParams) => Promise<void>;
   analyse: (pgn: string) => Promise<void>;
+  cancelAnalysis: () => void;
   goToMove: (index: number) => void;
   nextMove: () => void;
   prevMove: () => void;
@@ -51,6 +52,7 @@ const INITIAL_STATE: ReviewState = {
 
 export function useReview(): UseReviewReturn {
   const [state, setState] = useState<ReviewState>(INITIAL_STATE);
+  const abortRef = useRef<AbortController | null>(null);
 
   const loadGames = useCallback(async (params: FetchGamesParams) => {
     setState((s) => ({ ...s, phase: "fetching", error: null }));
@@ -67,17 +69,27 @@ export function useReview(): UseReviewReturn {
   }, []);
 
   const analyse = useCallback(async (pgn: string) => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     setState((s) => ({ ...s, phase: "analysing", error: null }));
     try {
-      const review = await analyseGame(pgn);
+      const review = await analyseGame(pgn, controller.signal);
       setState((s) => ({ ...s, phase: "reviewing", review, currentMoveIndex: -1 }));
     } catch (err) {
+      if ((err as Error).name === "AbortError") return; // cancelled — state already set by cancelAnalysis
       setState((s) => ({
         ...s,
         phase: "selecting",
         error: err instanceof Error ? err.message : "Analysis failed",
       }));
     }
+  }, []);
+
+  const cancelAnalysis = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setState((s) => ({ ...s, phase: "selecting", error: null }));
   }, []);
 
   const goToMove = useCallback((index: number) => {
@@ -119,6 +131,7 @@ export function useReview(): UseReviewReturn {
     state,
     loadGames,
     analyse,
+    cancelAnalysis,
     goToMove,
     nextMove,
     prevMove,
